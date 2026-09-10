@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>exotic beauty — institut de beauté en Martinique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noir: #1B1512;
+    --noir-2: #241C17;
+    --creme: #F3ECDE;
+    --creme-2: #EAE1CD;
+    --or: #B8934A;
+    --or-clair: #D4B673;
+    --brun: #4E3A28;
+    --brun-clair: #8A6F52;
+    --blanc-casse: #FAF6EE;
+    --line: rgba(184,147,74,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost', sans-serif;
+    background:var(--creme);
+    color:var(--brun);
+    font-weight:300;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.script{ font-family:'Fraunces', serif; font-weight:500; color:inherit; }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block; width:100%; height:100%; object-fit:cover;}
+  .wrap{max-width:1160px; margin:0 auto; padding:0 32px;}
+  @media(max-width:640px){ .wrap{padding:0 22px;} }
+  .lc{ text-transform:lowercase; }
+
+  .ticker{
+    background:var(--noir); color:var(--or-clair); font-size:0.78rem;
+    text-align:center; padding:9px 14px; letter-spacing:0.02em;
+  }
+
+  nav{
+    position:fixed; top:31px; left:0; right:0; z-index:50;
+    background:rgba(27,21,18,0.88);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(212,182,115,0.15);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; height:72px;}
+  .logo{font-family:'Fraunces', serif; font-style:italic; font-size:1.4rem; color:var(--or-clair);}
+  .navlinks{display:flex; align-items:center; gap:32px;}
+  .navlinks a{font-size:0.9rem; color:var(--blanc-casse); opacity:0.85; transition:opacity 0.25s;}
+  .navlinks a:hover{opacity:1; color:var(--or-clair);}
+  .navlinks a.cta{ border:1px solid var(--or-clair); padding:9px 20px; border-radius:2px; opacity:1;}
+  .navlinks a.cta:hover{background:var(--or-clair); color:var(--noir);}
+  @media(max-width:800px){ .navlinks{display:none;} }
+
+  header.hero{
+    min-height:100svh; position:relative; overflow:hidden;
+    display:flex; align-items:flex-end;
+    padding-top:103px;
+  }
+  header.hero .bg{ position:absolute; inset:0; z-index:0; }
+  header.hero .bg::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(27,21,18,0.15) 0%, rgba(27,21,18,0.15) 40%, rgba(27,21,18,0.88) 100%);
+  }
+  .hero-inner{max-width:620px; padding:0 0 90px; position:relative; z-index:2; color:var(--blanc-casse);}
+  .hero-eyebrow{font-size:0.85rem; color:var(--or-clair); margin-bottom:20px;}
+  .hero-inner h1{
+    font-size:clamp(2.6rem, 6.4vw, 4.2rem); font-style:italic; font-weight:500;
+    line-height:1.06; margin-bottom:24px;
+  }
+  .hero-inner p.lead{ font-size:1.08rem; font-weight:300; color:var(--creme-2); max-width:460px; margin-bottom:38px; }
+  .hero-cta{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn{ display:inline-block; padding:15px 30px; font-size:0.92rem; border-radius:2px; transition:all 0.25s ease; border:1px solid transparent; cursor:pointer;}
+  .btn-gold{background:var(--or); color:var(--noir); font-weight:500;}
+  .btn-gold:hover{background:var(--or-clair);}
+  .btn-outline{border-color:rgba(250,246,238,0.4); color:var(--blanc-casse);}
+  .btn-outline:hover{border-color:var(--or-clair); color:var(--or-clair);}
+
+  .intro{ padding:100px 0 40px; text-align:center;}
+  .intro .eyebrow{color:var(--or); font-size:0.85rem; margin-bottom:16px;}
+  .intro h2{font-size:clamp(1.7rem,3.4vw,2.3rem); font-style:italic; max-width:680px; margin:0 auto 22px; line-height:1.3;}
+  .intro p{color:var(--brun-clair); max-width:520px; margin:0 auto; font-size:1.02rem;}
+
+  .editorial{ padding:60px 0; }
+  .ed-row{
+    display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center;
+    padding:70px 0; border-top:1px solid var(--line);
+  }
+  .ed-row:last-child{border-bottom:1px solid var(--line);}
+  .ed-row.rev .ed-img{order:2;} .ed-row.rev .ed-text{order:1;}
+  .ed-img{ aspect-ratio:4/5; overflow:hidden; border-radius:2px;}
+  .ed-text .eyebrow{color:var(--or); font-size:0.85rem; margin-bottom:14px;}
+  .ed-text h3{font-size:clamp(1.5rem,2.6vw,2rem); font-style:italic; margin-bottom:18px; line-height:1.25;}
+  .ed-text p{color:var(--brun-clair); font-size:1rem; max-width:400px;}
+  @media(max-width:760px){
+    .ed-row, .ed-row.rev{grid-template-columns:1fr; gap:26px; padding:44px 0;}
+    .ed-row.rev .ed-img{order:1;} .ed-row.rev .ed-text{order:2;}
+  }
+
+  .section{padding:100px 0;}
+  .section-head{max-width:560px; margin-bottom:56px;}
+  .section-head .eyebrow{color:var(--or); font-size:0.85rem; margin-bottom:14px;}
+  .section-head h2{font-size:clamp(2rem, 4vw, 2.6rem); font-style:italic; line-height:1.15; color:var(--brun);}
+  .section-head p{margin-top:16px; color:var(--brun-clair); font-size:1.02rem; max-width:480px;}
+  .on-dark .section-head h2, .on-dark .section-head p{color:var(--blanc-casse);}
+  .on-dark .section-head p{color:var(--creme-2);}
+
+  .prestations{background:var(--creme);}
+  .service-row{ display:grid; grid-template-columns:60px 1fr auto; gap:26px; align-items:start; padding:32px 0; border-top:1px solid var(--line);}
+  .service-row:last-child{border-bottom:1px solid var(--line);}
+  .service-icon{width:42px; height:42px; color:var(--or); margin-top:4px;}
+  .service-row h3{font-size:1.3rem; font-style:italic; margin-bottom:8px;}
+  .service-row p{color:var(--brun-clair); max-width:440px; font-size:0.97rem;}
+  .service-link{ align-self:center; font-size:0.87rem; color:var(--or); border-bottom:1px solid var(--or); padding-bottom:2px; white-space:nowrap;}
+  .service-link:hover{opacity:0.65;}
+  @media(max-width:640px){
+    .service-row{grid-template-columns:42px 1fr;}
+    .service-link{grid-column:2; margin-top:6px;}
+  }
+
+  .galerie{background:var(--noir); color:var(--blanc-casse);}
+  .gal-grid{ display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:120px; gap:12px;}
+  .gal-grid > div{ overflow:hidden; border-radius:2px; }
+  .g1{grid-column:span 3; grid-row:span 3;}
+  .g2{grid-column:span 3; grid-row:span 2;}
+  .g3{grid-column:span 2; grid-row:span 2;}
+  .g4{grid-column:span 2; grid-row:span 2;}
+  .g5{grid-column:span 2; grid-row:span 2;}
+  .g6{grid-column:span 3; grid-row:span 2;}
+  @media(max-width:760px){
+    .gal-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:150px;}
+    .g1,.g2,.g3,.g4,.g5,.g6{grid-column:span 1; grid-row:span 2;}
+  }
+
+  .pourquoi{background:var(--creme-2);}
+  .pq-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:44px 36px;}
+  @media(max-width:760px){.pq-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:480px){.pq-grid{grid-template-columns:1fr;}}
+  .pq-item .num{font-family:'Fraunces',serif; font-style:italic; color:var(--or); font-size:1.6rem; margin-bottom:10px; display:block;}
+  .pq-item h4{font-size:1.08rem; font-style:italic; margin-bottom:8px; font-family:'Fraunces',serif; font-weight:500;}
+  .pq-item p{font-size:0.92rem; color:var(--brun-clair);}
+
+  .avis{background:var(--creme);}
+  .avis-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:32px;}
+  @media(max-width:800px){.avis-grid{grid-template-columns:1fr;}}
+  .avis-card{ background:var(--blanc-casse); padding:34px 28px; border-radius:2px; border:1px solid var(--line);}
+  .avis-quote{font-size:2.4rem; font-family:'Fraunces',serif; color:var(--or); line-height:0.4; display:block; margin-bottom:16px;}
+  .avis-card p.txt{font-size:0.97rem; color:var(--brun); margin-bottom:20px; font-style:italic;}
+  .avis-card .who{font-size:0.84rem; color:var(--brun-clair);}
+  .avis-disclaimer{margin-top:26px; font-size:0.82rem; color:var(--brun-clair); font-style:italic;}
+
+  .apropos .wrap{display:grid; grid-template-columns:0.85fr 1.15fr; gap:64px; align-items:center;}
+  @media(max-width:800px){.apropos .wrap{grid-template-columns:1fr;}}
+  .apropos-frame{aspect-ratio:3/4; overflow:hidden; border-radius:2px;}
+  .apropos-text .eyebrow{color:var(--or); font-size:0.85rem; margin-bottom:14px;}
+  .apropos-text h2{font-size:clamp(1.9rem,3.4vw,2.4rem); font-style:italic; margin-bottom:22px;}
+  .apropos-text p{color:var(--brun-clair); margin-bottom:16px; max-width:480px;}
+
+  .reservation{ background:var(--noir); color:var(--blanc-casse); text-align:center;}
+  .reservation .wrap{max-width:640px;}
+  .reservation h2{font-size:clamp(2.1rem,4.5vw,3rem); font-style:italic; margin-bottom:22px;}
+  .reservation p.lead{color:var(--creme-2); margin-bottom:36px; font-size:1.05rem;}
+  .reservation .hero-cta{justify-content:center;}
+  .infos{ margin-top:60px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px; border-top:1px solid rgba(212,182,115,0.18); padding-top:42px; text-align:left;}
+  @media(max-width:700px){.infos{grid-template-columns:1fr; text-align:center;}}
+  .infos .label{font-size:0.78rem; color:var(--or-clair); margin-bottom:10px;}
+  .infos .val{font-size:0.95rem; color:var(--creme-2);}
+
+  footer{background:var(--noir-2); color:rgba(250,246,238,0.55); padding:56px 0 30px;}
+  .foot-grid{display:grid; grid-template-columns:1.4fr repeat(3,1fr); gap:30px; padding-bottom:40px; border-bottom:1px solid rgba(212,182,115,0.14);}
+  @media(max-width:700px){.foot-grid{grid-template-columns:1fr 1fr;}}
+  footer .logo{font-size:1.2rem; margin-bottom:14px; display:block; color:var(--or-clair);}
+  footer h5{font-size:0.8rem; color:var(--or-clair); margin-bottom:14px;}
+  footer ul{list-style:none;}
+  footer li{margin-bottom:9px; font-size:0.86rem;}
+  footer li a:hover{color:var(--or-clair);}
+  .foot-bottom{padding-top:22px; text-align:center; font-size:0.8rem;}
+
+  .booking{ text-align:left; margin-top:50px; background:var(--noir-2); border:1px solid rgba(212,182,115,0.18); border-radius:3px; padding:34px 30px;}
+  .bk-label{font-size:0.8rem; color:var(--or-clair); margin-bottom:12px;}
+  .bk-services{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px;}
+  .bk-chip{ padding:10px 16px; border:1px solid rgba(212,182,115,0.3); border-radius:20px; font-size:0.86rem; color:var(--creme-2); cursor:pointer; transition:all 0.2s;}
+  .bk-chip.active{ background:var(--or); color:var(--noir); border-color:var(--or);}
+  .bk-dates{ display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:30px;}
+  .bk-date{ flex:0 0 auto; padding:12px 16px; border:1px solid rgba(212,182,115,0.3); border-radius:4px; font-size:0.82rem; color:var(--creme-2); cursor:pointer; text-align:center; min-width:64px;}
+  .bk-date span{display:block;}
+  .bk-date .d{font-size:1.15rem; font-family:'Fraunces',serif; font-style:italic; margin-top:2px;}
+  .bk-date.active{ background:var(--or); color:var(--noir); border-color:var(--or);}
+  .bk-slots{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:30px;}
+  @media(max-width:520px){.bk-slots{grid-template-columns:repeat(3,1fr);}}
+  .bk-slot{ padding:12px 6px; border:1px solid rgba(212,182,115,0.3); border-radius:4px; font-size:0.86rem; color:var(--creme-2); cursor:pointer; text-align:center; background:transparent;}
+  .bk-slot.active{ background:var(--or); color:var(--noir); border-color:var(--or);}
+  .bk-slot.taken{ opacity:0.3; text-decoration:line-through; cursor:not-allowed;}
+  .bk-form{ display:grid; gap:14px; margin-bottom:22px;}
+  .bk-form input{ width:100%; padding:13px 14px; background:rgba(250,246,238,0.06); border:1px solid rgba(212,182,115,0.3); border-radius:4px; color:var(--blanc-casse); font-family:'Jost',sans-serif; font-size:0.95rem;}
+  .bk-form input::placeholder{color:rgba(250,246,238,0.4);}
+  .bk-msg{ font-size:0.88rem; margin-top:10px; min-height:1.2em;}
+  .bk-msg.ok{color:#9FC98A;}
+  .bk-msg.err{color:#E39A9A;}
+  .bk-recap{ font-size:0.86rem; color:var(--creme-2); margin-bottom:18px; padding:14px 16px; border-left:2px solid var(--or); background:rgba(184,147,74,0.08);}
+  .admin-link{ display:block; text-align:center; margin-top:26px; font-size:0.78rem; color:rgba(250,246,238,0.35);}
+  .admin-link:hover{color:var(--or-clair);}
+</style>
+</head>
+<body>
+
+<div class="ticker lc">réservation en ligne · studio privé, une cliente à la fois · Ducos, Martinique</div>
+
+<nav>
+  <div class="wrap">
+    <a href="#" class="logo">exotic beauty</a>
+    <div class="navlinks lc">
+      <a href="#prestations">prestations</a>
+      <a href="#galerie">galerie</a>
+      <a href="#avis">avis</a>
+      <a href="#apropos">à propos</a>
+      <a href="#reservation" class="cta">réserver</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="bg"><img src="images/hero.jpg" alt="Cliente Exotic Beauty souriante après sa prestation"></div>
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-eyebrow lc">institut de beauté · Martinique</div>
+      <h1 class="lc">un temps rien qu'à vous.</h1>
+      <p class="lead">Cils, sourcils, visage, pieds — un studio privé à Ducos, où chaque cliente est reçue seule à seule, sans précipitation.</p>
+      <div class="hero-cta">
+        <a href="#reservation" class="btn btn-gold lc">réserver mon soin</a>
+        <a href="#prestations" class="btn btn-outline lc">découvrir les prestations</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="eyebrow lc">bienvenue chez exotic beauty</div>
+    <h2 class="lc">pas un salon comme les autres. un atelier, à taille d'une seule cliente.</h2>
+    <p>Ici, pas de file d'attente ni de rendez-vous expédié. Chaque prestation est réalisée en solo, dans une cabine pensée pour la détente, avec le temps qu'il faut.</p>
+  </div>
+</section>
+
+<section class="editorial">
+  <div class="wrap">
+
+    <div class="ed-row">
+      <div class="ed-img"><img src="images/regard.jpg" alt="Extension de cils réalisée chez Exotic Beauty"></div>
+      <div class="ed-text">
+        <div class="eyebrow lc">le regard</div>
+        <h3 class="lc">un œil qui s'ouvre, sans un mot de trop.</h3>
+        <p>Extensions cil à cil ou volume, posées selon la forme de votre œil pour un rendu qui vous ressemble — naturel ou plus marqué, à vous de choisir.</p>
+      </div>
+    </div>
+
+    <div class="ed-row rev">
+      <div class="ed-img"><img src="images/sourcils.jpg" alt="Sourcils ombrés réalisés chez Exotic Beauty"></div>
+      <div class="ed-text">
+        <div class="eyebrow lc">le geste</div>
+        <h3 class="lc">des sourcils redessinés, sans jamais forcer le trait.</h3>
+        <p>Le sourcil ombré densifie et structure en douceur, pour un effet poudré qui tient dans le temps.</p>
+      </div>
+    </div>
+
+    <div class="ed-row">
+      <div class="ed-img"><img src="images/visage.jpg" alt="Soin du visage chez Exotic Beauty"></div>
+      <div class="ed-text">
+        <div class="eyebrow lc">la pause</div>
+        <h3 class="lc">une peau qui respire, un moment qui s'étire.</h3>
+        <p>Les soins du visage sont réalisés avec la gamme martiniquaise Kadalys, pour révéler l'éclat naturel de la peau.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section prestations" id="prestations">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow lc">nos prestations</div>
+      <h2 class="lc">cinq soins, une même exigence</h2>
+      <p>Chaque prestation se réserve en ligne, en quelques clics.</p>
+    </div>
+
+    <div class="service-row">
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 26c6-10 30-10 36 0" stroke-linecap="round"/><path d="M12 27l-2 6M18 29l-1 6M24 30v6M30 29l1 6M36 27l2 6" stroke-linecap="round"/></svg>
+      <div><h3 class="lc">extensions de cils</h3><p>Pose cil à cil ou volume, sur-mesure selon la forme de votre œil et l'effet recherché.</p></div>
+      <a href="#reservation" class="service-link lc">réserver →</a>
+    </div>
+    <div class="service-row">
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 30c4-14 28-14 32 0" stroke-linecap="round"/></svg>
+      <div><h3 class="lc">lash lift</h3><p>Un rehaussement de cils naturels pour un regard ouvert, sans extension.</p></div>
+      <a href="#reservation" class="service-link lc">réserver →</a>
+    </div>
+    <div class="service-row">
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M8 22c5-8 12-8 16-2M24 22c5-8 12-8 16-2" stroke-linecap="round"/></svg>
+      <div><h3 class="lc">sourcils ombrés</h3><p>Une technique de maquillage semi-permanent pour un sourcil dense et poudré.</p></div>
+      <a href="#reservation" class="service-link lc">réserver →</a>
+    </div>
+    <div class="service-row">
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="24" cy="24" r="15"/><path d="M24 15v9l6 5" stroke-linecap="round"/></svg>
+      <div><h3 class="lc">soins du visage</h3><p>Des rituels adaptés à votre peau avec la gamme Kadalys, pensée en Martinique.</p></div>
+      <a href="#reservation" class="service-link lc">réserver →</a>
+    </div>
+    <div class="service-row">
+      <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M16 10c-3 4-3 10 1 13 3 2 3 6 0 9M32 10c3 4 3 10-1 13-3 2-3 6 0 9" stroke-linecap="round"/></svg>
+      <div><h3 class="lc">rituel des pieds</h3><p>Un moment de détente complet pour des pieds soignés, jusqu'au bout des orteils.</p></div>
+      <a href="#reservation" class="service-link lc">réserver →</a>
+    </div>
+  </div>
+</section>
+
+<section class="section galerie" id="galerie">
+  <div class="wrap on-dark">
+    <div class="section-head">
+      <div class="eyebrow lc">galerie</div>
+      <h2 class="lc">l'atelier, en images</h2>
+    </div>
+    <div class="gal-grid">
+      <div class="g1"><img src="images/cabine.jpg" alt="Cabine de soin Exotic Beauty"></div>
+      <div class="g2"><img src="images/enseigne.jpg" alt="Enseigne Exotic Beauty"></div>
+      <div class="g3"><img src="images/cils.jpg" alt="Réalisation extension de cils"></div>
+      <div class="g4"><img src="images/detail.jpg" alt="Détail de la cabine, ambiance chaleureuse"></div>
+      <div class="g6"><img src="images/hero.jpg" alt="Cliente satisfaite de sa prestation"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section pourquoi">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow lc">pourquoi exotic beauty ?</div>
+      <h2 class="lc">ce qui distingue l'atelier</h2>
+    </div>
+    <div class="pq-grid">
+      <div class="pq-item"><span class="num">01</span><h4 class="lc">une seule cliente à la fois</h4><p>Pas de créneaux qui se chevauchent — votre soin a toute mon attention.</p></div>
+      <div class="pq-item"><span class="num">02</span><h4 class="lc">réservation en ligne</h4><p>Choisissez votre créneau et réservez en quelques clics, à toute heure.</p></div>
+      <div class="pq-item"><span class="num">03</span><h4 class="lc">produits martiniquais</h4><p>La gamme Kadalys, formulée en Martinique, pour les soins du visage.</p></div>
+      <div class="pq-item"><span class="num">04</span><h4 class="lc">un cadre pensé pour la détente</h4><p>Une cabine intime, loin de l'agitation, pour un vrai moment de pause.</p></div>
+      <div class="pq-item"><span class="num">05</span><h4 class="lc">un savoir-faire sur-mesure</h4><p>Chaque prestation est adaptée à votre morphologie et à vos envies.</p></div>
+      <div class="pq-item"><span class="num">06</span><h4 class="lc">un accueil personnalisé</h4><p>Un échange avant chaque soin pour comprendre ce que vous recherchez.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section avis" id="avis">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow lc">elles témoignent</div>
+      <h2 class="lc">ce qu'en disent nos clientes</h2>
+    </div>
+    <div class="avis-grid">
+      <div class="avis-card"><span class="avis-quote">”</span><p class="txt">Un accueil chaleureux et un résultat impeccable, je repars toujours avec le sourire.</p><div class="who">Cliente régulière</div></div>
+      <div class="avis-card"><span class="avis-quote">”</span><p class="txt">Le soin du visage est un vrai moment de pause, je recommande sans hésiter.</p><div class="who">Cliente régulière</div></div>
+      <div class="avis-card"><span class="avis-quote">”</span><p class="txt">Des extensions de cils qui tiennent parfaitement, et une attention aux détails rare.</p><div class="who">Cliente régulière</div></div>
+    </div>
+    <p class="avis-disclaimer">Avis d'exemple — à remplacer par les retours réels de vos clientes avant mise en ligne.</p>
+  </div>
+</section>
+
+<section class="section apropos" id="apropos">
+  <div class="wrap">
+    <div class="apropos-frame"><img src="images/apropos.jpg" alt="Fondatrice d'Exotic Beauty"></div>
+    <div class="apropos-text">
+      <div class="eyebrow lc">l'atelier</div>
+      <h2 class="lc">derrière exotic beauty</h2>
+      <p>Originaire de Bretagne et installée en Martinique, j'ai fondé Exotic Beauty pour offrir un espace de soin intime, où chaque cliente est reçue seule à seule, sans précipitation.</p>
+      <p>J'y propose des prestations cils, sourcils, visage et pieds, avec des produits choisis pour leur qualité — dont la gamme martiniquaise Kadalys pour les soins du visage.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section reservation" id="reservation">
+  <div class="wrap">
+    <h2 class="lc">réservez votre créneau</h2>
+    <p class="lead">Choisissez votre prestation, votre date, votre heure — la réservation se confirme directement ici.</p>
+
+    <div class="booking">
+      <div class="bk-label lc">1. la prestation</div>
+      <div class="bk-services" id="bkServices"></div>
+
+      <div class="bk-label lc">2. la date</div>
+      <div class="bk-dates" id="bkDates"></div>
+
+      <div class="bk-label lc">3. l'heure</div>
+      <div class="bk-slots" id="bkSlots"></div>
+
+      <div id="bkRecapWrap" style="display:none;">
+        <div class="bk-recap" id="bkRecap"></div>
+        <div class="bk-label lc">4. vos coordonnées</div>
+        <div class="bk-form">
+          <input type="text" id="bkNom" placeholder="Votre nom">
+          <input type="tel" id="bkTel" placeholder="Votre téléphone">
+        </div>
+        <button class="btn btn-gold lc" id="bkSubmit" style="width:100%; border:none;">confirmer ma réservation</button>
+        <div class="bk-msg" id="bkMsg"></div>
+      </div>
+    </div>
+
+    <a href="https://wa.me/596000000000" class="admin-link" style="margin-top:14px;" id="bkWhatsapp">un empêchement ? écrire sur whatsapp</a>
+
+    <div class="infos">
+      <div><div class="label lc">adresse</div><div class="val">722 route de la Chasse<br>Quartier Rivage, Ducos, Martinique</div></div>
+      <div><div class="label lc">contact</div><div class="val">WhatsApp : <em>à confirmer</em></div></div>
+      <div><div class="label lc">suivez l'atelier</div><div class="val">Instagram : @exoticbeautycil</div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const SERVICES = [
+    {id:'cils', label:'Extensions de cils'},
+    {id:'liftcils', label:'Lash lift'},
+    {id:'sourcils', label:'Sourcils ombrés'},
+    {id:'visage', label:'Soin du visage'},
+    {id:'pieds', label:'Rituel des pieds'}
+  ];
+  const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00'];
+  const JOURS_FR = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const MOIS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+
+  let selectedService = null;
+  let selectedDate = null;
+  let selectedSlot = null;
+  let availableSlots = [];
+
+  function isoDate(d){ return d.toISOString().slice(0,10); }
+
+  function buildDates(){
+    const wrap = document.getElementById('bkDates');
+    const today = new Date();
+    let count = 0, offset = 0;
+    while(count < 16){
+      const d = new Date(today);
+      d.setDate(d.getDate() + offset);
+      offset++;
+      if(d.getDay() === 0){ continue; }
+      const btn = document.createElement('div');
+      btn.className = 'bk-date';
+      btn.dataset.iso = isoDate(d);
+      btn.innerHTML = '<span>'+JOURS_FR[d.getDay()]+'</span><span class="d">'+d.getDate()+'</span><span>'+MOIS_FR[d.getMonth()]+'</span>';
+      btn.addEventListener('click', () => selectDate(d, btn));
+      wrap.appendChild(btn);
+      count++;
+    }
+  }
+
+  function buildServices(){
+    const wrap = document.getElementById('bkServices');
+    SERVICES.forEach(s => {
+      const chip = document.createElement('div');
+      chip.className = 'bk-chip';
+      chip.textContent = s.label;
+      chip.addEventListener('click', () => {
+        selectedService = s;
+        [...wrap.children].forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderRecapIfReady();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+
+  async function selectDate(d, btn){
+    selectedDate = d;
+    selectedSlot = null;
+    [...document.getElementById('bkDates').children].forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('bkRecapWrap').style.display = 'none';
+    const slotsWrap = document.getElementById('bkSlots');
+    slotsWrap.innerHTML = '<span style="color:rgba(250,246,238,0.4); font-size:0.85rem;">chargement…</span>';
+    try{
+      const res = await fetch('/api/availability?date=' + isoDate(d));
+      const data = await res.json();
+      availableSlots = data.available || [];
+    }catch(e){
+      availableSlots = [];
+    }
+    slotsWrap.innerHTML = '';
+    SLOTS.forEach(h => {
+      const taken = !availableSlots.includes(h);
+      const btnS = document.createElement('div');
+      btnS.className = 'bk-slot' + (taken ? ' taken' : '');
+      btnS.textContent = h + (taken ? ' · pris' : '');
+      if(!taken){
+        btnS.addEventListener('click', () => {
+          selectedSlot = h;
+          [...slotsWrap.children].forEach(c => c.classList.remove('active'));
+          btnS.classList.add('active');
+          renderRecapIfReady();
+        });
+      }
+      slotsWrap.appendChild(btnS);
+    });
+  }
+
+  function renderRecapIfReady(){
+    const recapWrap = document.getElementById('bkRecapWrap');
+    if(selectedService && selectedDate && selectedSlot){
+      const recap = document.getElementById('bkRecap');
+      recap.textContent = selectedService.label + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
+      recapWrap.style.display = 'block';
+    }
+  }
+
+  async function confirmBooking(){
+    const nom = document.getElementById('bkNom').value.trim();
+    const tel = document.getElementById('bkTel').value.trim();
+    const msg = document.getElementById('bkMsg');
+    msg.className = 'bk-msg';
+    msg.textContent = '';
+    if(!nom || !tel){
+      msg.className = 'bk-msg err';
+      msg.textContent = 'Merci de renseigner votre nom et votre téléphone.';
+      return;
+    }
+    msg.textContent = 'Redirection vers le paiement…';
+    try{
+      const res = await fetch('/api/book', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          serviceId: selectedService.id,
+          date: isoDate(selectedDate),
+          time: selectedSlot,
+          name: nom,
+          phone: tel
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.className = 'bk-msg err';
+        msg.textContent = data.error === 'ce créneau vient d\'être réservé'
+          ? 'Ce créneau vient d\'être pris — merci d\'en choisir un autre.'
+          : 'Une erreur est survenue — merci de réessayer.';
+        if(data.error && data.error.includes('créneau')){
+          selectDate(selectedDate, document.querySelector('.bk-date.active'));
+        }
+        return;
+      }
+      window.location.href = data.checkoutUrl;
+    }catch(e){
+      msg.className = 'bk-msg err';
+      msg.textContent = 'Une erreur est survenue — merci de réessayer.';
+    }
+  }
+
+  document.getElementById('bkSubmit').addEventListener('click', confirmBooking);
+
+  buildServices();
+  buildDates();
+})();
+</script>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <span class="logo">exotic beauty</span>
+        <p style="font-size:0.86rem; max-width:220px;">Institut de beauté à Ducos, Martinique.</p>
+      </div>
+      <div>
+        <h5 class="lc">navigation</h5>
+        <ul class="lc"><li><a href="#prestations">prestations</a></li><li><a href="#galerie">galerie</a></li><li><a href="#avis">avis</a></li><li><a href="#apropos">à propos</a></li></ul>
+      </div>
+      <div>
+        <h5 class="lc">réservation</h5>
+        <ul class="lc"><li><a href="#reservation">réserver en ligne</a></li><li><a href="#reservation">whatsapp</a></li></ul>
+      </div>
+      <div>
+        <h5 class="lc">suivre</h5>
+        <ul class="lc"><li><a href="#">instagram</a></li></ul>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 Exotic Beauty · Ducos, Martinique</div>
+  </div>
+</footer>
+
+</body>
+</html>
