@@ -1,0 +1,16 @@
+{
+  "name": "exotic-beauty-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "stripe": "^16.2.0",
+    "twilio": "^5.2.2",
+    "node-cron": "^3.0.3",
+    "dotenv": "^16.4.5"
+  }
+}
