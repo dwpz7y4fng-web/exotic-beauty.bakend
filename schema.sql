@@ -21,7 +21,7 @@ insert into services (id, label, duration_minutes, price_cents, deposit_cents) v
 
 create table bookings (
   id uuid primary key default gen_random_uuid(),
-  service_id text references services(id) not null,
+  service_ids text[] not null,
   slot_date date not null,
   slot_time time not null,
   client_name text not null,

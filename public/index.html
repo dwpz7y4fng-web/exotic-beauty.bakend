@@ -112,18 +112,14 @@ body.nav-open{overflow:hidden;}
 .prestations-head{max-width:600px; margin-bottom:50px;}
 .prestations-head h2{margin:0; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
 .prestations-head p{margin-top:16px; font-size:16px; color:var(--texte);}
-.service-row{display:grid; grid-template-columns:64px 1fr auto; gap:26px; align-items:center; padding:24px 0; border-top:1px solid var(--line-2);}
+.service-row{display:grid; grid-template-columns:1fr auto; gap:26px; align-items:center; padding:24px 0; border-top:1px solid var(--line-2);}
 .service-row:last-child{border-bottom:1px solid var(--line-2);}
-.service-thumb{width:64px; height:64px; border-radius:50%; overflow:hidden; flex-shrink:0;}
-.service-thumb img{width:100%; height:100%; object-fit:cover;}
 .service-row h3{font-size:22px; margin:0 0 6px;}
 .service-row p{margin:0; color:var(--gris); font-size:15px; font-weight:400;}
 .service-link{font-size:13px; color:var(--brun); border-bottom:1px solid var(--brun); padding-bottom:2px; white-space:nowrap;}
 .service-link:hover{opacity:0.65;}
 @media(max-width:640px){
-  .service-row{grid-template-columns:48px 1fr;}
-  .service-thumb{width:48px; height:48px;}
-  .service-link{grid-column:2; margin-top:6px;}
+  .service-row{grid-template-columns:1fr; row-gap:10px;}
 }
 
 /* POURQUOI ICI */
@@ -320,42 +316,34 @@ footer nav a:hover{color:var(--noir);}
     </div>
 
     <div class="service-row">
-      <div class="service-thumb"><img src="images/cil-a-cil.jpg" alt="Extensions cil à cil"></div>
       <div><h3>Extensions cil à cil</h3><p>Pose complète sur chaque cil naturel, effet mascara très discret. 1h — dès 60€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/mixte.jpg" alt="Extensions mixte"></div>
       <div><h3>Extensions mixte</h3><p>Alterne cil à cil et volume russe pour un résultat plus sophistiqué. 1h30 — dès 70€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/volume-russe.jpg" alt="Volume russe"></div>
       <div><h3>Volume russe</h3><p>Bouquets de cils pour un regard intense et très volumineux. 2h — dès 90€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/lash-lift.jpg" alt="Lash lift avec teinture"></div>
       <div><h3>Lash lift avec teinture</h3><p>Rehaussement des cils naturels, effet allongé jusqu'à 8 semaines. 45min — dès 60€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/sourcils-ombre.jpg" alt="Sourcils ombré powder"></div>
       <div><h3>Sourcils ombré powder</h3><p>Maquillage semi-permanent pour des sourcils denses et poudrés. 1h30 — dès 200€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/brow-lift.jpg" alt="Brow lift"></div>
       <div><h3>Brow lift</h3><p>Discipline et redresse les poils en douceur, pour des sourcils structurés. 30min — dès 35€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/teinture.jpg" alt="Teinture cils ou sourcils"></div>
       <div><h3>Teinture</h3><p>Intensifie le regard, cils ou sourcils. 15min — dès 15€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
     <div class="service-row">
-      <div class="service-thumb"><img src="images/epilation.jpg" alt="Épilation au fil"></div>
       <div><h3>Épilation au fil</h3><p>Méthode traditionnelle, précise et douce pour une ligne de sourcils parfaite. Dès 10€.</p></div>
       <a href="#reservation" class="service-link">réserver →</a>
     </div>
@@ -566,7 +554,7 @@ footer nav a:hover{color:var(--noir);}
   const JOURS_FR = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
   const MOIS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
-  let selectedService = null;
+  let selectedServices = [];
   let selectedDate = null;
   let selectedSlot = null;
   let availableSlots = [];
@@ -599,9 +587,14 @@ footer nav a:hover{color:var(--noir);}
       chip.className = 'bk-chip';
       chip.textContent = s.label;
       chip.addEventListener('click', () => {
-        selectedService = s;
-        [...wrap.children].forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+        const idx = selectedServices.findIndex(x => x.id === s.id);
+        if(idx === -1){
+          selectedServices.push(s);
+          chip.classList.add('active');
+        }else{
+          selectedServices.splice(idx, 1);
+          chip.classList.remove('active');
+        }
         renderRecapIfReady();
       });
       wrap.appendChild(chip);
@@ -643,10 +636,13 @@ footer nav a:hover{color:var(--noir);}
 
   function renderRecapIfReady(){
     const recapWrap = document.getElementById('bkRecapWrap');
-    if(selectedService && selectedDate && selectedSlot){
+    if(selectedServices.length && selectedDate && selectedSlot){
       const recap = document.getElementById('bkRecap');
-      recap.textContent = selectedService.label + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
+      const labels = selectedServices.map(s => s.label).join(' + ');
+      recap.textContent = labels + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
       recapWrap.style.display = 'block';
+    }else{
+      recapWrap.style.display = 'none';
     }
   }
 
@@ -667,7 +663,7 @@ footer nav a:hover{color:var(--noir);}
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          serviceId: selectedService.id,
+          serviceIds: selectedServices.map(s => s.id),
           date: isoDate(selectedDate),
           time: selectedSlot,
           name: nom,
