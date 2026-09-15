@@ -460,6 +460,8 @@ footer nav a:hover{color:var(--noir);}
     <h2>Réservez votre créneau</h2>
     <p>Choisissez votre prestation, votre date, votre heure — la réservation se confirme directement ici.</p>
 
+    <div class="bk-msg err" id="bkCancelledMsg" style="display:none; text-align:center; margin-bottom:20px;">Paiement annulé — votre créneau n'a pas été réservé, vous pouvez réessayer.</div>
+
     <div class="booking">
       <div class="bk-label">1. la prestation</div>
       <div class="bk-services" id="bkServices"></div>
@@ -498,7 +500,7 @@ footer nav a:hover{color:var(--noir);}
     <a href="#prestations">Prestations</a>
     <a href="#avis">Avis</a>
     <a href="#faq">FAQ</a>
-    <a href="https://instagram.com/">Instagram</a>
+    <a href="https://www.instagram.com/exoticbeautycil/">Instagram</a>
   </nav>
 </footer>
 
@@ -682,6 +684,13 @@ footer nav a:hover{color:var(--noir);}
 
   buildServices();
   buildDates();
+
+  if (new URLSearchParams(location.search).get('cancelled') === '1') {
+    document.getElementById('bkCancelledMsg').style.display = 'block';
+    window.addEventListener('load', () => {
+      document.getElementById('reservation').scrollIntoView();
+    });
+  }
 })();
 </script>
 
