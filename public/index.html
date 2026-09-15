@@ -58,9 +58,12 @@ header{position:sticky; top:0; z-index:30; background:rgba(246,242,237,0.9); bac
 .burger{display:none; flex-direction:column; justify-content:center; gap:5px; width:46px; height:46px; padding:0 10px; border:none; background:transparent; cursor:pointer;}
 .burger span{display:block; width:26px; height:1.5px; background:var(--noir); transition:transform 260ms ease, opacity 200ms ease;}
 @media(max-width:820px){ .burger{display:flex;} }
-.mobile-nav{overflow:hidden; max-height:0; opacity:0; transition:max-height 340ms ease, opacity 240ms ease; border-top:1px solid transparent;}
-.mobile-nav.open{max-height:420px; opacity:1; border-top:1px solid var(--line-2);}
-.mobile-nav-inner{max-width:1280px; margin:0 auto; padding:8px 26px 30px; display:flex; flex-direction:column; gap:4px;}
+.mobile-nav-backdrop{position:fixed; inset:0; background:rgba(17,14,12,0.4); opacity:0; visibility:hidden; transition:opacity 280ms ease; z-index:99;}
+.mobile-nav-backdrop.open{opacity:1; visibility:visible;}
+.mobile-nav{position:fixed; top:0; left:0; bottom:0; width:min(320px,82vw); background:var(--creme); z-index:100; transform:translateX(-100%); transition:transform 300ms ease; box-shadow:2px 0 30px rgba(17,14,12,0.18); overflow-y:auto;}
+.mobile-nav.open{transform:translateX(0);}
+.mobile-nav-inner{padding:calc(16px + env(safe-area-inset-top,0px)) 26px 30px; display:flex; flex-direction:column; gap:4px;}
+.mobile-nav-close{align-self:flex-end; width:40px; height:40px; border:none; background:transparent; cursor:pointer; font-size:22px; color:var(--noir); margin-bottom:10px;}
 .mobile-nav a{padding:14px 0; color:var(--noir); border-bottom:1px solid var(--line-2); font-size:20px;}
 .mobile-nav a:hover{color:var(--brun);}
 .mobile-nav a.cta{margin-top:16px; align-self:flex-start; padding:14px 30px; border-radius:999px; background:var(--noir); color:var(--creme); font-size:15px; border-bottom:none;}
@@ -68,6 +71,7 @@ header{position:sticky; top:0; z-index:30; background:rgba(246,242,237,0.9); bac
 .burger[aria-expanded="true"] .bar-top{transform:translateY(6.5px) rotate(45deg);}
 .burger[aria-expanded="true"] .bar-mid{opacity:0;}
 .burger[aria-expanded="true"] .bar-bot{transform:translateY(-6.5px) rotate(-45deg);}
+body.nav-open{overflow:hidden;}
 
 /* HERO */
 .hero-section{position:relative; padding:0 14px 14px;}
@@ -104,22 +108,32 @@ header{position:sticky; top:0; z-index:30; background:rgba(246,242,237,0.9); bac
 
 /* PRESTATIONS */
 .prestations-section{border-top:1px solid var(--line-2);}
-.prestations-inner{padding:clamp(70px,10vw,130px) 26px;}
-.prestations-head{max-width:600px; margin-bottom:50px;}
+.prestations-inner{padding:clamp(70px,10vw,130px) 26px clamp(40px,6vw,70px);}
+.prestations-head{max-width:640px; margin-bottom:36px;}
 .prestations-head h2{margin:0; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
 .prestations-head p{margin-top:16px; font-size:16px; color:var(--texte);}
-.service-row{display:grid; grid-template-columns:64px 1fr auto; gap:26px; align-items:center; padding:24px 0; border-top:1px solid var(--line-2);}
-.service-row:last-child{border-bottom:1px solid var(--line-2);}
-.service-thumb{width:64px; height:64px; border-radius:50%; overflow:hidden; flex-shrink:0;}
-.service-thumb img{width:100%; height:100%; object-fit:cover;}
-.service-row h3{font-size:22px; margin:0 0 6px;}
-.service-row p{margin:0; color:var(--gris); font-size:15px; font-weight:400;}
-.service-link{font-size:13px; color:var(--brun); border-bottom:1px solid var(--brun); padding-bottom:2px; white-space:nowrap;}
-.service-link:hover{opacity:0.65;}
+.presta-filters{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;}
+.presta-filters a{padding:9px 18px; border-radius:999px; border:1px solid var(--line); font-size:13px; color:var(--texte);}
+.presta-filters a:hover{border-color:var(--noir); color:var(--noir);}
+.presta-group{max-width:900px; margin:0 auto; padding:clamp(50px,7vw,80px) 0 0;}
+.presta-group.tinted{background:#EEE7DE; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); padding-left:calc(50vw - 50%); padding-right:calc(50vw - 50%);}
+.presta-group.tinted .presta-group-inner{max-width:900px; margin:0 auto; padding:0 26px;}
+.presta-group h3.group-title{font-size:clamp(24px,3.2vw,34px); margin:0 0 8px;}
+.presta-group > p{margin:0 0 20px; font-size:15px; color:var(--gris);}
+.presta-item{padding:26px 0; border-top:1px solid var(--line-2);}
+.presta-group:not(.tinted) .presta-item:first-of-type{border-top:1px solid var(--noir);}
+.presta-item-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px; margin-bottom:10px;}
+.presta-item-head h4{font-size:22px; margin:0;}
+.presta-item-head .presta-price{font-size:13px; letter-spacing:0.08em; color:var(--brun); white-space:nowrap;}
+.presta-item details summary{display:inline-flex; align-items:center; gap:8px; cursor:pointer; list-style:none; font-size:13px; letter-spacing:0.06em; color:var(--brun); padding:4px 0;}
+.presta-item details summary::-webkit-details-marker{display:none;}
+.presta-item details summary:hover{color:var(--noir);}
+.presta-item details[open] summary .plus{transform:rotate(45deg);}
+.presta-item details .plus{display:inline-block; transition:transform 0.2s ease;}
+.presta-item details p{margin:12px 0 0; font-size:15px; line-height:1.75; color:var(--texte); max-width:680px;}
+.presta-item details p + p{margin-top:12px;}
 @media(max-width:640px){
-  .service-row{grid-template-columns:48px 1fr;}
-  .service-thumb{width:48px; height:48px;}
-  .service-link{grid-column:2; margin-top:6px;}
+  .presta-item-head{gap:4px 16px;}
 }
 
 /* POURQUOI ICI */
@@ -246,17 +260,19 @@ footer nav a:hover{color:var(--noir);}
       <span class="bar-bot"></span>
     </button>
   </div>
-  <nav class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-inner">
-      <a href="#qui">Qui suis-je</a>
-      <a href="#prestations">Prestations</a>
-      <a href="#unique">Pourquoi ici</a>
-      <a href="#avis">Avis</a>
-      <a href="#faq">FAQ</a>
-      <a href="#reservation" class="cta">Réserver</a>
-    </div>
-  </nav>
 </header>
+<div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-inner">
+    <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Fermer le menu">✕</button>
+    <a href="#qui">Qui suis-je</a>
+    <a href="#prestations">Prestations</a>
+    <a href="#unique">Pourquoi ici</a>
+    <a href="#avis">Avis</a>
+    <a href="#faq">FAQ</a>
+    <a href="#reservation" class="cta">Réserver</a>
+  </div>
+</nav>
 
 <section id="haut" class="hero-section">
   <div class="hero-frame">
@@ -309,49 +325,196 @@ footer nav a:hover{color:var(--noir);}
   <div class="wrap prestations-inner">
     <div class="prestations-head">
       <p class="eyebrow">Nos prestations</p>
-      <h2>Des soins pour le regard, une même exigence</h2>
-      <p>Chaque prestation se réserve en ligne, en quelques clics.</p>
+      <h2>Tout ce que je propose, expliqué</h2>
+      <p>Chaque rendez-vous commence par un diagnostic : on regarde vos cils et vos sourcils avant de choisir la technique. Voici le détail de chaque prestation, sa durée et son tarif.</p>
+    </div>
+    <div class="presta-filters">
+      <a href="#pose">Pose complète</a>
+      <a href="#remplissage">Remplissage</a>
+      <a href="#depose">Dépose</a>
+      <a href="#sourcils">Sourcils</a>
     </div>
 
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/cil-a-cil.jpg" alt="Extensions cil à cil"></div>
-      <div><h3>Extensions cil à cil</h3><p>Pose complète sur chaque cil naturel, effet mascara très discret. 1h — dès 60€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
+    <div class="presta-group" id="pose">
+      <h3 class="group-title">Extensions de cils — pose complète</h3>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Cil à cil</h4><span class="presta-price">1 h · 60 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>La pose complète cil à cil consiste à poser une extension de cil sur tous les cils naturels. Effet mascara, très discret.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Mixte</h4><span class="presta-price">1 h 30 · 70 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Aussi appelé pose mixte, elle consiste à alterner entre le cil à cil et la pose volume russe. Convient à celles qui souhaitent un résultat un peu plus volumineux et sophistiqué, pour un résultat tout aussi naturel.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Volume russe</h4><span class="presta-price">2 h · 90 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Lash lift avec teinture</h4><span class="presta-price">45 min · 60 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Le Lash Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des cils afin de leur donner un effet plus courbé et lifté. Cette technique permet de recourber les cils naturels vers le haut, depuis leur base, pour leur donner un effet allongé et lifté.</p>
+          <p>Cette méthode permet de sublimer les cils existants en leur donnant plus de courbure et de visibilité, avec un effet qui dure en moyenne 6 à 8 semaines.</p>
+          <p>Ce soin est idéal pour des cils fins à épais frisés et/ou très longs et/ou indisciplinés. La teinture est comprise dans la prestation de lash lift pour donner plus d'intensité au regard. Durée : jusqu'à 6 semaines à 8 semaines.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Wispy volume russe</h4><span class="presta-price">2 h 10 · 95 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>En utilisant la méthode volume russe, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Wispy pose mixte</h4><span class="presta-price">2 h 20 · 75 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>En utilisant la méthode mixte, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Wet volume russe</h4><span class="presta-price">2 h 10 · 95 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Wispy pose cil à cil</h4><span class="presta-price">1 h 10 · 55 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
     </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/mixte.jpg" alt="Extensions mixte"></div>
-      <div><h3>Extensions mixte</h3><p>Alterne cil à cil et volume russe pour un résultat plus sophistiqué. 1h30 — dès 70€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
+
+    <div class="presta-group tinted" id="remplissage">
+      <div class="presta-group-inner">
+        <h3 class="group-title">Extensions de cils — remplissage</h3>
+        <p>À prévoir toutes les 3 semaines pour garder une ligne pleine.</p>
+
+        <article class="presta-item">
+          <div class="presta-item-head"><h4>Remplissage cil à cil</h4><span class="presta-price">45 min · 30 €</span></div>
+          <details><summary>En savoir plus <span class="plus">+</span></summary>
+            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
+          </details>
+          <p><a href="#reservation" class="service-link">réserver →</a></p>
+        </article>
+
+        <article class="presta-item">
+          <div class="presta-item-head"><h4>Remplissage mixte</h4><span class="presta-price">1 h 15 · 35 €</span></div>
+          <details><summary>En savoir plus <span class="plus">+</span></summary>
+            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
+          </details>
+          <p><a href="#reservation" class="service-link">réserver →</a></p>
+        </article>
+
+        <article class="presta-item">
+          <div class="presta-item-head"><h4>Remplissage volume russe</h4><span class="presta-price">1 h 45 · 45 €</span></div>
+          <details><summary>En savoir plus <span class="plus">+</span></summary>
+            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
+          </details>
+          <p><a href="#reservation" class="service-link">réserver →</a></p>
+        </article>
+      </div>
     </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/volume-russe.jpg" alt="Volume russe"></div>
-      <div><h3>Volume russe</h3><p>Bouquets de cils pour un regard intense et très volumineux. 2h — dès 90€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
+
+    <div class="presta-group" id="depose">
+      <h3 class="group-title">Dépose</h3>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Dépose</h4><span class="presta-price">25 min · 20 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Uniquement pour les poses réalisées chez Exotic Beauty.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
     </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/lash-lift.jpg" alt="Lash lift avec teinture"></div>
-      <div><h3>Lash lift avec teinture</h3><p>Rehaussement des cils naturels, effet allongé jusqu'à 8 semaines. 45min — dès 60€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
-    </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/sourcils-ombre.jpg" alt="Sourcils ombré powder"></div>
-      <div><h3>Sourcils ombré powder</h3><p>Maquillage semi-permanent pour des sourcils denses et poudrés. 1h30 — dès 200€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
-    </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/brow-lift.jpg" alt="Brow lift"></div>
-      <div><h3>Brow lift</h3><p>Discipline et redresse les poils en douceur, pour des sourcils structurés. 30min — dès 35€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
-    </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/teinture.jpg" alt="Teinture cils ou sourcils"></div>
-      <div><h3>Teinture</h3><p>Intensifie le regard, cils ou sourcils. 15min — dès 15€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
-    </div>
-    <div class="service-row">
-      <div class="service-thumb"><img src="images/epilation.jpg" alt="Épilation au fil"></div>
-      <div><h3>Épilation au fil</h3><p>Méthode traditionnelle, précise et douce pour une ligne de sourcils parfaite. Dès 10€.</p></div>
-      <a href="#reservation" class="service-link">réserver →</a>
+
+    <div class="presta-group" id="sourcils">
+      <h3 class="group-title">Sourcils</h3>
+      <p>Restructuration, teinture, brow lift et maquillage permanent.</p>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Ombré powder brow</h4><span class="presta-price">1 h 30 · 200 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Technique de maquillage permanent permettant de restructurer les sourcils clairsemés, fins, queue ou tête de sourcils inexistant. Pour réserver un créneau pour cette prestation, assurez-vous d'avoir pris connaissance de toutes les conditions ou de réserver une consultation.</p>
+          <p><strong>Contre-indications :</strong> allergies, maladies de peau évolutives, injections de silicone, femme enceinte ou allaitante, diabète non contrôlé, insuffisance rénale, port de prothèse cardiaque, maladie auto-immune, hémophilie, cicatrisation difficile, asthme chronique, conjonctivite, glaucome, VIH ou hépatite, cancer de la peau actif dans la zone à tatouer.</p>
+          <p><strong>À savoir :</strong> forte possibilité de faire des croûtes les jours qui suivent la séance. Il est fortement recommandé de ne pas s'exposer au soleil pendant les 30 jours qui suivent, pas d'eau pendant les 48 premières heures et pas de sport pendant 10 jours.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Épilation au fil (restructuration)</h4><span class="presta-price">15 min · 15 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Épilation au fil (entretien)</h4><span class="presta-price">10 min · 10 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
+          <p>Cette prestation est réservable pour les clientes qui souhaitent juste entretenir leur ligne.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Épilation lèvres supérieur</h4><span class="presta-price">5 min · 10 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
+          <p>Zone : moustache.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Brow lift (sans teinture)</h4><span class="presta-price">30 min · 35 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Le Brow Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des poils afin de leur donner un effet plus épais. Il permet de rendre les poils plus souples et disciplinés.</p>
+          <p>Ce soin est idéal pour les sourcils frisés et/ou très longs et/ou indisciplinés, mais convient également aux sourcils peu fournis (à condition de l'accompagner d'une teinture hybride). Pour une ligne de sourcils encore plus structurée, ajoutez la teinture à la prestation. L'épilation au fil est comprise dans la prestation.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Brow lift avec teinture</h4><span class="presta-price">1 h 30 · 60 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>Le Brow Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des poils afin de leur donner un effet plus épais. Il permet de rendre les poils plus souples et disciplinés.</p>
+          <p>Ce soin est idéal pour les sourcils frisés et/ou très longs et/ou indisciplinés, mais convient également aux sourcils peu fournis (à condition de l'accompagner d'une teinture hybride). Ici le brow lift est cumulé à la teinture hybride, une technique qui vient colorer temporairement la peau et les poils du sourcil.</p>
+          <p>Durée : jusqu'à 2 semaines sur la peau &amp; jusqu'à 7 semaines sur les poils. La teinture peut permettre de se projeter sur une future micro-pigmentation des sourcils un peu plus permanente. L'épilation est comprise dans cette prestation.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
+
+      <article class="presta-item">
+        <div class="presta-item-head"><h4>Teinture hybride</h4><span class="presta-price">45 min · 35 €</span></div>
+        <details><summary>En savoir plus <span class="plus">+</span></summary>
+          <p>La teinture hybride est une technique qui vient colorer temporairement la peau et les poils du sourcil.</p>
+          <p>Durée : jusqu'à 10 jours sur la peau &amp; jusqu'à 7 semaines sur les poils. La teinture peut permettre de se projeter sur une future micro-pigmentation des sourcils un peu plus permanente. L'épilation au fil est comprise dans cette prestation.</p>
+        </details>
+        <p><a href="#reservation" class="service-link">réserver →</a></p>
+      </article>
     </div>
   </div>
 </section>
@@ -506,18 +669,24 @@ footer nav a:hover{color:var(--noir);}
 
 <script>
 (function(){
-  // Mobile menu
+  // Mobile menu (slides in from the left)
   const burger = document.getElementById('burgerBtn');
   const mobileNav = document.getElementById('mobileNav');
+  const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+  const mobileNavClose = document.getElementById('mobileNavClose');
+
+  function setNavOpen(open){
+    burger.setAttribute('aria-expanded', String(open));
+    mobileNav.classList.toggle('open', open);
+    mobileNavBackdrop.classList.toggle('open', open);
+    document.body.classList.toggle('nav-open', open);
+  }
   burger.addEventListener('click', () => {
-    const open = burger.getAttribute('aria-expanded') === 'true';
-    burger.setAttribute('aria-expanded', String(!open));
-    mobileNav.classList.toggle('open', !open);
+    setNavOpen(burger.getAttribute('aria-expanded') !== 'true');
   });
-  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    burger.setAttribute('aria-expanded', 'false');
-    mobileNav.classList.remove('open');
-  }));
+  mobileNavClose.addEventListener('click', () => setNavOpen(false));
+  mobileNavBackdrop.addEventListener('click', () => setNavOpen(false));
+  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNavOpen(false)));
 
   // Carousel
   const carousel = document.getElementById('carousel');
@@ -545,16 +714,27 @@ footer nav a:hover{color:var(--noir);}
     {id:'mixte', label:'Mixte'},
     {id:'volume_russe', label:'Volume russe'},
     {id:'lash_lift', label:'Lash lift avec teinture'},
-    {id:'sourcils_ombre', label:'Sourcils ombré powder'},
-    {id:'brow_lift', label:'Brow lift'},
-    {id:'teinture', label:'Teinture'},
-    {id:'epilation_fil', label:'Épilation au fil'}
+    {id:'wispy_volume_russe', label:'Wispy volume russe'},
+    {id:'wispy_mixte', label:'Wispy pose mixte'},
+    {id:'wet_volume_russe', label:'Wet volume russe'},
+    {id:'wispy_cil_a_cil', label:'Wispy pose cil à cil'},
+    {id:'remplissage_cil_a_cil', label:'Remplissage cil à cil'},
+    {id:'remplissage_mixte', label:'Remplissage mixte'},
+    {id:'remplissage_volume_russe', label:'Remplissage volume russe'},
+    {id:'depose', label:'Dépose'},
+    {id:'ombre_powder_brow', label:'Ombré powder brow'},
+    {id:'epilation_restructuration', label:'Épilation au fil (restructuration)'},
+    {id:'epilation_entretien', label:'Épilation au fil (entretien)'},
+    {id:'epilation_levres', label:'Épilation lèvres supérieur'},
+    {id:'brow_lift', label:'Brow lift (sans teinture)'},
+    {id:'brow_lift_teinture', label:'Brow lift avec teinture'},
+    {id:'teinture_hybride', label:'Teinture hybride'}
   ];
   const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00'];
   const JOURS_FR = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
   const MOIS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
-  let selectedService = null;
+  let selectedServices = [];
   let selectedDate = null;
   let selectedSlot = null;
   let availableSlots = [];
@@ -587,9 +767,14 @@ footer nav a:hover{color:var(--noir);}
       chip.className = 'bk-chip';
       chip.textContent = s.label;
       chip.addEventListener('click', () => {
-        selectedService = s;
-        [...wrap.children].forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+        const idx = selectedServices.findIndex(x => x.id === s.id);
+        if(idx === -1){
+          selectedServices.push(s);
+          chip.classList.add('active');
+        }else{
+          selectedServices.splice(idx, 1);
+          chip.classList.remove('active');
+        }
         renderRecapIfReady();
       });
       wrap.appendChild(chip);
@@ -631,10 +816,13 @@ footer nav a:hover{color:var(--noir);}
 
   function renderRecapIfReady(){
     const recapWrap = document.getElementById('bkRecapWrap');
-    if(selectedService && selectedDate && selectedSlot){
+    if(selectedServices.length && selectedDate && selectedSlot){
       const recap = document.getElementById('bkRecap');
-      recap.textContent = selectedService.label + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
+      const labels = selectedServices.map(s => s.label).join(' + ');
+      recap.textContent = labels + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
       recapWrap.style.display = 'block';
+    }else{
+      recapWrap.style.display = 'none';
     }
   }
 
@@ -655,7 +843,7 @@ footer nav a:hover{color:var(--noir);}
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          serviceId: selectedService.id,
+          serviceIds: selectedServices.map(s => s.id),
           date: isoDate(selectedDate),
           time: selectedSlot,
           name: nom,

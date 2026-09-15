@@ -53,21 +53,23 @@ app.get('/api/availability', async (req, res) => {
 });
 
 app.post('/api/book', async (req, res) => {
-  const { serviceId, date, time, name, phone } = req.body;
-  if (!serviceId || !date || !time || !name || !phone) {
+  const { serviceIds, date, time, name, phone } = req.body;
+  if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
     return res.status(400).json({ error: 'champs manquants' });
   }
 
-  const svcRes = await pool.query('select * from services where id = $1', [serviceId]);
-  const service = svcRes.rows[0];
-  if (!service) return res.status(404).json({ error: 'prestation inconnue' });
+  const svcRes = await pool.query('select * from services where id = any($1)', [serviceIds]);
+  if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
+  const services = svcRes.rows;
+  const totalDeposit = services.reduce((sum, s) => sum + s.deposit_cents, 0);
+  const labels = services.map(s => s.label).join(' + ');
 
   let booking;
   try {
     const insertRes = await pool.query(
-      `insert into bookings (service_id, slot_date, slot_time, client_name, client_phone)
+      `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone)
        values ($1, $2, $3, $4, $5) returning id`,
-      [serviceId, date, time, name, phone]
+      [serviceIds, date, time, name, phone]
     );
     booking = insertRes.rows[0];
   } catch (err) {
@@ -83,8 +85,8 @@ app.post('/api/book', async (req, res) => {
     line_items: [{
       price_data: {
         currency: 'eur',
-        product_data: { name: `Acompte — ${service.label} (${date} ${time})` },
-        unit_amount: service.deposit_cents,
+        product_data: { name: `Acompte — ${labels} (${date} ${time})` },
+        unit_amount: totalDeposit,
       },
       quantity: 1,
     }],
@@ -98,8 +100,8 @@ app.post('/api/book', async (req, res) => {
 
 cron.schedule('0 10 * * *', async () => {
   const { rows } = await pool.query(`
-    select b.*, s.label from bookings b
-    join services s on s.id = b.service_id
+    select b.*, (select string_agg(s.label, ' + ' order by s.label) from services s where s.id = any(b.service_ids)) as label
+    from bookings b
     where b.status = 'paid'
       and b.reminder_sent = false
       and b.slot_date = (current_date + interval '1 day')::date
