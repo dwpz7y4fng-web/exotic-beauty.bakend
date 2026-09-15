@@ -40,8 +40,11 @@ create table bookings (
   status text not null default 'pending',
   stripe_session_id text,
   reminder_sent boolean not null default false,
-  created_at timestamptz not null default now(),
-  unique (slot_date, slot_time)
+  created_at timestamptz not null default now()
 );
+
+-- A cancelled booking must free up its slot, so the "one booking per
+-- slot" rule only applies to non-cancelled rows.
+create unique index bookings_active_slot_unique on bookings (slot_date, slot_time) where status != 'cancelled';
 
 create index on bookings (slot_date, status);

@@ -77,6 +77,74 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   res.json(rows);
 });
 
+const BOOKING_STATUSES = ['pending', 'paid', 'confirmed', 'cancelled'];
+
+app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
+  const { serviceIds, date, time, name, phone, status } = req.body;
+  if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
+    return res.status(400).json({ error: 'champs manquants' });
+  }
+  const bookingStatus = status || 'confirmed';
+  if (!BOOKING_STATUSES.includes(bookingStatus)) {
+    return res.status(400).json({ error: 'statut invalide' });
+  }
+
+  const svcRes = await pool.query('select id from services where id = any($1)', [serviceIds]);
+  if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
+
+  try {
+    const insertRes = await pool.query(
+      `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, status)
+       values ($1, $2, $3, $4, $5, $6) returning id`,
+      [serviceIds, date, time, name, phone, bookingStatus]
+    );
+    res.status(201).json({ id: insertRes.rows[0].id });
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'ce créneau est déjà pris' });
+    }
+    throw err;
+  }
+});
+
+app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const existingRes = await pool.query('select * from bookings where id = $1', [id]);
+  const existing = existingRes.rows[0];
+  if (!existing) return res.status(404).json({ error: 'réservation introuvable' });
+
+  const serviceIds = req.body.serviceIds || existing.service_ids;
+  const date = req.body.date || existing.slot_date.toISOString().slice(0, 10);
+  const time = req.body.time || existing.slot_time.slice(0, 5);
+  const name = req.body.name || existing.client_name;
+  const phone = req.body.phone || existing.client_phone;
+  const status = req.body.status || existing.status;
+
+  if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
+    return res.status(400).json({ error: 'au moins une prestation requise' });
+  }
+  if (!BOOKING_STATUSES.includes(status)) {
+    return res.status(400).json({ error: 'statut invalide' });
+  }
+
+  const svcRes = await pool.query('select id from services where id = any($1)', [serviceIds]);
+  if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
+
+  try {
+    await pool.query(
+      `update bookings set service_ids = $1, slot_date = $2, slot_time = $3, client_name = $4, client_phone = $5, status = $6
+       where id = $7`,
+      [serviceIds, date, time, name, phone, status, id]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'ce créneau est déjà pris' });
+    }
+    throw err;
+  }
+});
+
 app.use(express.static('public'));
 
 app.get('/api/services', async (req, res) => {
