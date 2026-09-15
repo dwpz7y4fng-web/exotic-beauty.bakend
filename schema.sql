@@ -10,11 +10,14 @@ create table services (
 );
 
 insert into services (id, label, duration_minutes, price_cents, deposit_cents) values
-  ('cils', 'Extensions de cils', 90, 6000, 2000),
-  ('liftcils', 'Lash lift', 60, 4000, 1500),
-  ('sourcils', 'Sourcils ombrés', 120, 9000, 3000),
-  ('visage', 'Soin du visage', 60, 5000, 1500),
-  ('pieds', 'Rituel des pieds', 60, 3500, 1000);
+  ('cil_a_cil', 'Extensions cil à cil', 60, 6000, 2000),
+  ('mixte', 'Extensions mixte', 90, 7000, 2500),
+  ('volume_russe', 'Volume russe', 120, 9000, 3000),
+  ('lash_lift', 'Lash lift avec teinture', 45, 6000, 2000),
+  ('sourcils_ombre', 'Sourcils ombré powder', 90, 20000, 6000),
+  ('brow_lift', 'Brow lift', 30, 3500, 1000),
+  ('teinture', 'Teinture', 15, 1500, 500),
+  ('epilation_fil', 'Épilation au fil', 15, 1000, 500);
 
 create table bookings (
   id uuid primary key default gen_random_uuid(),
