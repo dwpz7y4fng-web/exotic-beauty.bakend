@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration — Exotic Beauty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --creme:#F6F2ED;
+  --noir:#171412;
+  --brun:#6B4A3A;
+  --texte:#4A4139;
+  --gris:#6E645C;
+  --or:#C9A281;
+  --line:#DED3C5;
+  --line-2:#E3DACD;
+  --blanc:#FFFFFF;
+  --ok:#4C8A3A;
+  --warn:#B8873A;
+}
+*{box-sizing:border-box;}
+body{margin:0; font-family:'DM Sans', system-ui, sans-serif; color:var(--noir); background:var(--creme); font-weight:300; -webkit-font-smoothing:antialiased;}
+h1,h2{font-family:'Instrument Serif', serif; font-weight:400; margin:0;}
+.wrap{max-width:1180px; margin:0 auto; padding:34px 24px 80px;}
+header.top{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:6px;}
+header.top h1{font-size:32px;}
+header.top .sub{font-size:13px; letter-spacing:0.1em; color:var(--brun);}
+.cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin:28px 0 34px;}
+.card{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:22px 24px;}
+.card .label{font-size:12px; letter-spacing:0.08em; color:var(--gris); text-transform:uppercase; margin-bottom:10px;}
+.card .value{font-family:'Instrument Serif', serif; font-size:30px;}
+.filters{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;}
+.filters button{padding:9px 18px; border-radius:999px; border:1px solid var(--line); background:var(--blanc); font-size:13px; color:var(--texte); cursor:pointer; font-family:inherit;}
+.filters button.active{background:var(--noir); color:var(--creme); border-color:var(--noir);}
+.table-wrap{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:14px; min-width:760px;}
+th{text-align:left; padding:14px 16px; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); border-bottom:1px solid var(--line-2); white-space:nowrap;}
+td{padding:14px 16px; border-bottom:1px solid var(--line-2); vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.services-cell{max-width:280px;}
+.badge{display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;}
+.badge.paid{background:#E5F0E1; color:var(--ok);}
+.badge.pending{background:#F5EAD8; color:var(--warn);}
+.badge.cancelled{background:#F0E4E4; color:#B84A4A;}
+.empty, .loading{padding:40px 20px; text-align:center; color:var(--gris); font-size:14px;}
+.price{white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="sub">Exotic Beauty</p>
+      <h1>Réservations &amp; chiffre d'affaires</h1>
+    </div>
+  </header>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="filters" id="filters">
+    <button data-filter="all" class="active">Tout</button>
+    <button data-filter="month">Ce mois-ci</button>
+    <button data-filter="week">Cette semaine</button>
+    <button data-filter="upcoming">À venir</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="table" hidden>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Heure</th>
+          <th>Cliente</th>
+          <th>Téléphone</th>
+          <th>Prestations</th>
+          <th>Prix total</th>
+          <th>Acompte</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="loading" id="loading">Chargement…</div>
+    <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STATUS_LABEL = { paid: 'Payée', pending: 'En attente', cancelled: 'Annulée' };
+  let bookings = [];
+  let currentFilter = 'all';
+
+  function euros(cents){ return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+  function formatDate(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  }
+
+  function inMonth(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }
+  function inWeek(dateStr){
+    const d = new Date(dateStr + 'T00:00:00');
+    const now = new Date();
+    const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+    start.setHours(0,0,0,0);
+    const end = new Date(start); end.setDate(start.getDate() + 7);
+    return d >= start && d < end;
+  }
+  function isUpcoming(b){
+    const today = new Date().toISOString().slice(0,10);
+    return b.slot_date >= today && b.status !== 'cancelled';
+  }
+
+  function filtered(){
+    if(currentFilter === 'month') return bookings.filter(b => inMonth(b.slot_date));
+    if(currentFilter === 'week') return bookings.filter(b => inWeek(b.slot_date));
+    if(currentFilter === 'upcoming') return bookings.filter(isUpcoming);
+    return bookings;
+  }
+
+  function renderCards(){
+    const paid = bookings.filter(b => b.status === 'paid');
+    const depositsCollected = paid.reduce((sum, b) => sum + b.services.reduce((s, x) => s + x.deposit_cents, 0), 0);
+    const totalValue = paid.reduce((sum, b) => sum + b.services.reduce((s, x) => s + x.price_cents, 0), 0);
+    const upcomingCount = bookings.filter(isUpcoming).length;
+
+    document.getElementById('cards').innerHTML = `
+      <div class="card"><div class="label">Acomptes encaissés</div><div class="value">${euros(depositsCollected)}</div></div>
+      <div class="card"><div class="label">CA prévisionnel (réservations payées)</div><div class="value">${euros(totalValue)}</div></div>
+      <div class="card"><div class="label">Rendez-vous à venir</div><div class="value">${upcomingCount}</div></div>
+      <div class="card"><div class="label">Total réservations</div><div class="value">${bookings.length}</div></div>
+    `;
+  }
+
+  function renderTable(){
+    const rows = filtered();
+    const tbody = document.getElementById('tbody');
+    const table = document.getElementById('table');
+    const empty = document.getElementById('empty');
+    document.getElementById('loading').hidden = true;
+
+    if(rows.length === 0){
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+    table.hidden = false;
+    empty.hidden = true;
+
+    tbody.innerHTML = rows.map(b => {
+      const total = b.services.reduce((s, x) => s + x.price_cents, 0);
+      const deposit = b.services.reduce((s, x) => s + x.deposit_cents, 0);
+      const labels = b.services.map(s => s.label).join(', ');
+      const statusClass = b.status === 'paid' ? 'paid' : (b.status === 'cancelled' ? 'cancelled' : 'pending');
+      return `<tr>
+        <td>${formatDate(b.slot_date)}</td>
+        <td>${b.slot_time.slice(0,5)}</td>
+        <td>${escapeHtml(b.client_name)}</td>
+        <td>${escapeHtml(b.client_phone)}</td>
+        <td class="services-cell">${escapeHtml(labels)}</td>
+        <td class="price">${euros(total)}</td>
+        <td class="price">${euros(deposit)}</td>
+        <td><span class="badge ${statusClass}">${STATUS_LABEL[b.status] || b.status}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('filters').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-filter]');
+    if(!btn) return;
+    currentFilter = btn.dataset.filter;
+    [...document.querySelectorAll('#filters button')].forEach(b => b.classList.toggle('active', b === btn));
+    renderTable();
+  });
+
+  async function load(){
+    try{
+      const res = await fetch('/api/admin/bookings');
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      bookings = (await res.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      renderCards();
+      renderTable();
+    }catch(e){
+      document.getElementById('loading').textContent = 'Erreur de chargement — merci de recharger la page.';
+    }
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
