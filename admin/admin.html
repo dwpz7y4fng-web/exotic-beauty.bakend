@@ -86,6 +86,42 @@ tr:last-child td{border-bottom:none;}
 .search-box input{width:100%; max-width:360px; padding:11px 14px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:14px; background:var(--blanc);}
 .deleted-row{opacity:0.5;}
 .comments-cell{max-width:220px; color:var(--gris); font-size:13px;}
+
+.cal-nav{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px;}
+.cal-nav-left{display:flex; align-items:center; gap:10px;}
+.cal-arrow-btn{width:36px; height:36px; flex-shrink:0; border-radius:999px; border:1px solid var(--line); background:var(--blanc); cursor:pointer; font-size:15px; color:var(--texte);}
+.cal-arrow-btn:hover{border-color:var(--noir); color:var(--noir);}
+.cal-nav-label{font-family:'Instrument Serif', serif; font-size:22px; min-width:200px;}
+.cal-view-switch{display:flex; gap:6px;}
+.cal-view-switch button{padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--blanc); font-size:13px; color:var(--texte); cursor:pointer; font-family:inherit;}
+.cal-view-switch button.active{background:var(--noir); color:var(--creme); border-color:var(--noir);}
+
+.cal-appt{display:block; padding:6px 8px; border-radius:4px; font-size:12px; line-height:1.35; margin-bottom:4px; cursor:pointer; border-left:3px solid var(--brun); background:var(--creme);}
+.cal-appt.status-paid{border-left-color:var(--ok); background:#E9F3E5;}
+.cal-appt.status-confirmed{border-left-color:#3A5F8A; background:#E8EEF4;}
+.cal-appt.status-pending{border-left-color:var(--warn); background:#F7EFE0;}
+.cal-appt.status-cancelled{border-left-color:var(--err); background:#F5E9E9; opacity:0.6; text-decoration:line-through;}
+.cal-appt .t{font-weight:500;}
+.cal-appt:hover{filter:brightness(0.96);}
+
+.cal-day{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:18px 20px; max-width:520px;}
+.cal-day-empty{color:var(--gris); font-size:14px; padding:20px 0;}
+
+.cal-week{display:grid; grid-template-columns:repeat(7,1fr); gap:10px;}
+.cal-week-col{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:10px; min-height:120px;}
+.cal-week-col .dow{font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); margin-bottom:8px;}
+.cal-week-col .dow.today{color:var(--brun); font-weight:500;}
+@media(max-width:900px){ .cal-week{grid-template-columns:repeat(7,minmax(120px,1fr)); overflow-x:auto;} }
+
+.cal-month{display:grid; grid-template-columns:repeat(7,1fr); gap:8px;}
+.cal-month-dow{font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); text-align:center; padding-bottom:6px;}
+.cal-month-cell{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:8px; min-height:92px; cursor:pointer;}
+.cal-month-cell:hover{border-color:var(--noir);}
+.cal-month-cell.outside{opacity:0.4;}
+.cal-month-cell.today{border-color:var(--brun); border-width:2px;}
+.cal-month-cell .num{font-size:13px; margin-bottom:6px;}
+.cal-month-cell .more{font-size:11px; color:var(--gris);}
+@media(max-width:800px){ .cal-month{grid-template-columns:repeat(7,minmax(70px,1fr)); overflow-x:auto;} .cal-month-cell{min-height:70px;} }
 </style>
 </head>
 <body>
@@ -100,6 +136,7 @@ tr:last-child td{border-bottom:none;}
 
   <div class="tabs">
     <button type="button" class="active" data-tab="bookings">Réservations</button>
+    <button type="button" data-tab="planning">Planning</button>
     <button type="button" data-tab="clients">Clientes</button>
   </div>
 
@@ -139,6 +176,23 @@ tr:last-child td{border-bottom:none;}
       <div class="loading" id="loading">Chargement…</div>
       <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
     </div>
+  </div>
+
+  <div id="tabPlanning" hidden>
+    <div class="cal-nav">
+      <div class="cal-nav-left">
+        <button type="button" id="calPrev" class="cal-arrow-btn">←</button>
+        <button type="button" id="calToday" class="btn btn-outline">Aujourd'hui</button>
+        <button type="button" id="calNext" class="cal-arrow-btn">→</button>
+        <span class="cal-nav-label" id="calLabel"></span>
+      </div>
+      <div class="cal-view-switch">
+        <button type="button" data-calview="day">Jour</button>
+        <button type="button" data-calview="week" class="active">Semaine</button>
+        <button type="button" data-calview="month">Mois</button>
+      </div>
+    </div>
+    <div id="calBody"></div>
   </div>
 
   <div id="tabClients" hidden>
@@ -441,9 +495,129 @@ tr:last-child td{border-bottom:none;}
       document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b === btn));
       const tab = btn.dataset.tab;
       document.getElementById('tabBookings').hidden = tab !== 'bookings';
+      document.getElementById('tabPlanning').hidden = tab !== 'planning';
       document.getElementById('tabClients').hidden = tab !== 'clients';
       if(tab === 'clients' && clients.length === 0) loadClients();
+      if(tab === 'planning') renderCalendar();
     });
+  });
+
+  // ---- Planning (jour / semaine / mois) ----
+  let calView = 'week';
+  let calDate = new Date();
+  calDate.setHours(0,0,0,0);
+
+  const DOW_SHORT = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+  function toIso(d){
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+  function startOfWeek(d){ const r = new Date(d); const dow = r.getDay(); r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1)); return r; } // Monday start
+  function isSameDate(d, iso){ return toIso(d) === iso; }
+  function bookingsOnDate(iso){
+    return bookings.filter(b => b.slot_date === iso).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+  }
+
+  function apptChip(b){
+    const labels = b.services.map(s => s.label).join(', ');
+    return `<div class="cal-appt status-${b.status}" data-edit-cal="${b.id}">
+      <span class="t">${b.slot_time.slice(0,5)}</span> ${escapeHtml(b.client_name)}<br>${escapeHtml(labels)}
+    </div>`;
+  }
+
+  function renderCalDay(){
+    const iso = toIso(calDate);
+    const appts = bookingsOnDate(iso);
+    document.getElementById('calLabel').textContent = calDate.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    const body = document.getElementById('calBody');
+    if(appts.length === 0){
+      body.innerHTML = '<div class="cal-day"><div class="cal-day-empty">Aucun rendez-vous ce jour-là.</div></div>';
+      return;
+    }
+    body.innerHTML = '<div class="cal-day">' + appts.map(apptChip).join('') + '</div>';
+  }
+
+  function renderCalWeek(){
+    const start = startOfWeek(calDate);
+    const days = [...Array(7)].map((_,i) => addDays(start, i));
+    const endLabel = addDays(start,6);
+    document.getElementById('calLabel').textContent =
+      start.getDate() + ' ' + MOIS_LONG[start.getMonth()].slice(0,3) + ' – ' + endLabel.getDate() + ' ' + MOIS_LONG[endLabel.getMonth()].slice(0,3) + ' ' + endLabel.getFullYear();
+    const todayIso = toIso(new Date());
+    document.getElementById('calBody').innerHTML = '<div class="cal-week">' + days.map(d => {
+      const iso = toIso(d);
+      const appts = bookingsOnDate(iso);
+      const isToday = iso === todayIso;
+      return `<div class="cal-week-col">
+        <div class="dow ${isToday ? 'today' : ''}">${DOW_SHORT[d.getDay()]} ${d.getDate()}</div>
+        ${appts.map(apptChip).join('') || '<div style="color:var(--gris); font-size:12px;">—</div>'}
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  function renderCalMonth(){
+    const year = calDate.getFullYear(), month = calDate.getMonth();
+    document.getElementById('calLabel').textContent = MOIS_LONG[month][0].toUpperCase() + MOIS_LONG[month].slice(1) + ' ' + year;
+    const firstOfMonth = new Date(year, month, 1);
+    const gridStart = startOfWeek(firstOfMonth);
+    const todayIso = toIso(new Date());
+    const cells = [...Array(42)].map((_,i) => addDays(gridStart, i));
+
+    const dowHeader = DOW_SHORT.slice(1).concat(DOW_SHORT[0]).map(d => `<div class="cal-month-dow">${d}</div>`).join('');
+    const body = cells.map(d => {
+      const iso = toIso(d);
+      const appts = bookingsOnDate(iso);
+      const outside = d.getMonth() !== month;
+      const isToday = iso === todayIso;
+      const shown = appts.slice(0,3);
+      const more = appts.length > 3 ? `<div class="more">+${appts.length - 3} autre(s)</div>` : '';
+      return `<div class="cal-month-cell ${outside ? 'outside' : ''} ${isToday ? 'today' : ''}" data-day="${iso}">
+        <div class="num">${d.getDate()}</div>
+        ${shown.map(apptChip).join('')}${more}
+      </div>`;
+    }).join('');
+    document.getElementById('calBody').innerHTML = `<div class="cal-month">${dowHeader}${body}</div>`;
+  }
+
+  function renderCalendar(){
+    if(calView === 'day') renderCalDay();
+    else if(calView === 'month') renderCalMonth();
+    else renderCalWeek();
+  }
+
+  document.querySelectorAll('.cal-view-switch button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cal-view-switch button').forEach(b => b.classList.toggle('active', b === btn));
+      calView = btn.dataset.calview;
+      renderCalendar();
+    });
+  });
+  document.getElementById('calPrev').addEventListener('click', () => {
+    if(calView === 'day') calDate = addDays(calDate, -1);
+    else if(calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()-1, 1);
+    else calDate = addDays(calDate, -7);
+    renderCalendar();
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    if(calView === 'day') calDate = addDays(calDate, 1);
+    else if(calView === 'month') calDate = new Date(calDate.getFullYear(), calDate.getMonth()+1, 1);
+    else calDate = addDays(calDate, 7);
+    renderCalendar();
+  });
+  document.getElementById('calToday').addEventListener('click', () => {
+    calDate = new Date(); calDate.setHours(0,0,0,0);
+    renderCalendar();
+  });
+  document.getElementById('calBody').addEventListener('click', (e) => {
+    const appt = e.target.closest('[data-edit-cal]');
+    if(appt){ openModal(bookings.find(b => b.id === appt.dataset.editCal)); return; }
+    const cell = e.target.closest('.cal-month-cell');
+    if(cell){ calDate = new Date(cell.dataset.day + 'T00:00:00'); calView = 'day';
+      document.querySelectorAll('.cal-view-switch button').forEach(b => b.classList.toggle('active', b.dataset.calview === 'day'));
+      renderCalendar();
+    }
   });
 
   // ---- Clients ----
