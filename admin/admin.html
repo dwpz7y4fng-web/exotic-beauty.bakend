@@ -104,6 +104,12 @@ tr:last-child td{border-bottom:none;}
   </div>
 
   <div id="tabBookings">
+    <div class="import-bar">
+      <input type="file" id="planityFile" accept=".xlsx">
+      <button type="button" class="btn btn-outline" id="planityImportBtn">Importer un export Planity (Détails RDV)</button>
+      <span class="import-msg" id="planityImportMsg"></span>
+    </div>
+
     <div class="cards" id="cards"></div>
 
     <div class="filters" id="filters">
@@ -576,6 +582,43 @@ tr:last-child td{border-bottom:none;}
       document.getElementById('clientLoading').textContent = 'Erreur de chargement.';
     }
   }
+
+  // ---- Planity RDV import (Détails RDV .xlsx) ----
+  document.getElementById('planityImportBtn').addEventListener('click', async () => {
+    const fileInput = document.getElementById('planityFile');
+    const msg = document.getElementById('planityImportMsg');
+    msg.className = 'import-msg';
+    if(!fileInput.files.length){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Choisissez un fichier .xlsx d\'abord.';
+      return;
+    }
+    msg.textContent = 'Import en cours…';
+    try{
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      const res = await fetch('/api/admin/bookings/import-planity', { method: 'POST', body: formData });
+      const data = await res.json();
+      if(!res.ok){
+        msg.className = 'import-msg err';
+        msg.textContent = data.error || 'Erreur lors de l\'import.';
+        return;
+      }
+      let text = `${data.imported} rendez-vous importé(s)`;
+      if(data.conflicts) text += `, ${data.conflicts} déjà présent(s)`;
+      if(data.skipped) text += `, ${data.skipped} ligne(s) incomplète(s) ignorée(s)`;
+      if(data.unmatched && data.unmatched.length){
+        text += `. Prestations non reconnues : ${data.unmatched.join(', ')}`;
+        msg.className = 'import-msg err';
+      }
+      msg.textContent = text;
+      fileInput.value = '';
+      await load();
+    }catch(e){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Erreur lors de l\'import — vérifiez le fichier.';
+    }
+  });
 
   load();
 })();
