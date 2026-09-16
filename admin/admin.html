@@ -86,6 +86,16 @@ tr:last-child td{border-bottom:none;}
 .search-box input{width:100%; max-width:360px; padding:11px 14px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:14px; background:var(--blanc);}
 .deleted-row{opacity:0.5;}
 .comments-cell{max-width:220px; color:var(--gris); font-size:13px;}
+#clientTbody tr{cursor:pointer;}
+#clientTbody tr:hover{background:var(--creme);}
+
+.client-appt-section{margin-bottom:22px;}
+.client-appt-heading{font-family:'DM Sans', sans-serif; font-weight:500; font-size:13px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); margin:0 0 10px;}
+.client-appt-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line-2);}
+.client-appt-row:last-child{border-bottom:none;}
+.client-appt-date{font-size:13px; color:var(--texte); white-space:nowrap;}
+.client-appt-services{font-size:13px; color:var(--gris); flex:1; padding:0 12px;}
+.client-appt-empty{font-size:13px; color:var(--gris); padding:6px 0;}
 
 .cal-nav{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px;}
 .cal-nav-left{display:flex; align-items:center; gap:10px;}
@@ -171,6 +181,7 @@ tr:last-child td{border-bottom:none;}
       <button data-filter="month">Ce mois-ci</button>
       <button data-filter="week">Cette semaine</button>
       <button data-filter="upcoming">À venir</button>
+      <button data-filter="past">Précédents</button>
     </div>
 
     <div class="table-wrap">
@@ -289,6 +300,24 @@ tr:last-child td{border-bottom:none;}
   </div>
 </div>
 
+<div class="modal-backdrop" id="clientModalBackdrop" hidden>
+  <div class="modal" style="max-width:640px;">
+    <h2 id="clientModalName"></h2>
+    <div style="color:var(--gris); font-size:13px; margin-bottom:22px;" id="clientModalMeta"></div>
+    <div class="client-appt-section">
+      <h3 class="client-appt-heading">Rendez-vous à venir</h3>
+      <div id="clientUpcomingList"></div>
+    </div>
+    <div class="client-appt-section">
+      <h3 class="client-appt-heading">Rendez-vous précédents</h3>
+      <div id="clientPastList"></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="clientModalClose">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée' };
@@ -320,11 +349,16 @@ tr:last-child td{border-bottom:none;}
     const today = new Date().toISOString().slice(0,10);
     return b.slot_date >= today && b.status !== 'cancelled';
   }
+  function isPast(b){
+    const today = new Date().toISOString().slice(0,10);
+    return b.slot_date < today || b.status === 'cancelled';
+  }
 
   function filtered(){
     if(currentFilter === 'month') return bookings.filter(b => inMonth(b.slot_date));
     if(currentFilter === 'week') return bookings.filter(b => inWeek(b.slot_date));
     if(currentFilter === 'upcoming') return bookings.filter(isUpcoming);
+    if(currentFilter === 'past') return bookings.filter(isPast);
     return bookings;
   }
 
@@ -843,7 +877,7 @@ tr:last-child td{border-bottom:none;}
     table.hidden = false;
     empty.hidden = true;
     document.getElementById('clientTbody').innerHTML = rows.map(c => `
-      <tr class="${c.planity_deleted_at ? 'deleted-row' : ''}">
+      <tr class="${c.planity_deleted_at ? 'deleted-row' : ''}" data-client-id="${c.id}">
         <td>${escapeHtml(c.name)}</td>
         <td>${escapeHtml(c.phone || '—')}</td>
         <td>${escapeHtml(c.email || '—')}</td>
@@ -851,6 +885,53 @@ tr:last-child td{border-bottom:none;}
       </tr>
     `).join('');
   }
+
+  function normPhone(p){ return (p || '').replace(/\D/g, ''); }
+
+  function clientApptRow(b){
+    const labels = b.services.map(s => s.label).join(', ');
+    const statusClass = ['paid','confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
+    return `<div class="client-appt-row">
+      <div class="client-appt-date">${formatDate(b.slot_date)} · ${b.slot_time.slice(0,5)}</div>
+      <div class="client-appt-services">${escapeHtml(labels)}</div>
+      <span class="badge ${statusClass}">${STATUS_LABEL[b.status] || b.status}</span>
+    </div>`;
+  }
+
+  function openClientModal(client){
+    document.getElementById('clientModalName').textContent = client.name;
+    const metaParts = [client.phone, client.email].filter(Boolean);
+    document.getElementById('clientModalMeta').textContent = metaParts.join(' · ') || '—';
+
+    const phone = normPhone(client.phone);
+    const matches = phone ? bookings.filter(b => normPhone(b.client_phone) === phone) : [];
+    const upcoming = matches.filter(isUpcoming)
+      .sort((a,b) => a.slot_date === b.slot_date ? a.slot_time.localeCompare(b.slot_time) : a.slot_date.localeCompare(b.slot_date));
+    const past = matches.filter(isPast)
+      .sort((a,b) => a.slot_date === b.slot_date ? b.slot_time.localeCompare(a.slot_time) : b.slot_date.localeCompare(a.slot_date));
+
+    document.getElementById('clientUpcomingList').innerHTML = upcoming.length
+      ? upcoming.map(clientApptRow).join('')
+      : '<div class="client-appt-empty">Aucun rendez-vous à venir.</div>';
+    document.getElementById('clientPastList').innerHTML = past.length
+      ? past.map(clientApptRow).join('')
+      : '<div class="client-appt-empty">Aucun rendez-vous précédent.</div>';
+
+    document.getElementById('clientModalBackdrop').hidden = false;
+  }
+  function closeClientModal(){
+    document.getElementById('clientModalBackdrop').hidden = true;
+  }
+  document.getElementById('clientModalClose').addEventListener('click', closeClientModal);
+  document.getElementById('clientModalBackdrop').addEventListener('click', (e) => {
+    if(e.target.id === 'clientModalBackdrop') closeClientModal();
+  });
+  document.getElementById('clientTbody').addEventListener('click', (e) => {
+    const row = e.target.closest('tr[data-client-id]');
+    if(!row) return;
+    const client = clients.find(c => c.id === row.dataset.clientId);
+    if(client) openClientModal(client);
+  });
 
   async function loadClients(){
     try{
