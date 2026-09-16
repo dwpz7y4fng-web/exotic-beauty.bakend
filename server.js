@@ -71,7 +71,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   const { rows } = await pool.query(`
     select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status, b.created_at,
       coalesce((
-        select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents) order by s.label)
+        select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes) order by s.label)
         from services s where s.id = any(b.service_ids)
       ), '[]') as services
     from bookings b
