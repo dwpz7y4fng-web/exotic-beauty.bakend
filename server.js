@@ -2,12 +2,15 @@ require('dotenv').config();
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
+const multer = require('multer');
+const ExcelJS = require('exceljs');
 const { Pool } = require('pg');
 const Stripe = require('stripe');
 const twilio = require('twilio');
 const cron = require('node-cron');
 
 const app = express();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -191,6 +194,99 @@ app.post('/api/admin/clients/import', requireAdmin, async (req, res) => {
   }
 
   res.json({ imported, skipped });
+});
+
+function foldLabel(str) {
+  return (str || '')
+    .normalize('NFKC')
+    .replace(/ /g, ' ')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+app.post('/api/admin/bookings/import-planity', requireAdmin, upload.single('file'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'aucun fichier' });
+
+  const svcRes = await pool.query('select id, label from services');
+  const byFold = new Map();
+  for (const s of svcRes.rows) byFold.set(foldLabel(s.label), s.id);
+  const bareBrowLift = svcRes.rows.find(s => s.label === 'Brow lift (sans teinture)');
+  if (bareBrowLift) byFold.set('brow lift', bareBrowLift.id);
+  const mixte = svcRes.rows.find(s => s.label === 'Mixte');
+  if (mixte) byFold.set('pose mixte', mixte.id);
+
+  let workbook;
+  try {
+    workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(req.file.buffer);
+  } catch (err) {
+    return res.status(400).json({ error: 'fichier illisible — est-ce bien un .xlsx exporté de Planity ?' });
+  }
+
+  const sheet = workbook.getWorksheet('Détails RDV');
+  if (!sheet) return res.status(400).json({ error: 'feuille "Détails RDV" introuvable dans ce fichier' });
+
+  const headers = {};
+  sheet.getRow(1).eachCell((cell, colNumber) => {
+    headers[String(cell.value).trim()] = colNumber;
+  });
+  const col = (name) => headers[name];
+  const cellText = (row, name) => {
+    const c = col(name);
+    if (!c) return null;
+    const v = row.getCell(c).value;
+    if (v == null) return null;
+    if (v instanceof Date) return v;
+    if (typeof v === 'object' && v.text) return v.text;
+    return v;
+  };
+
+  let imported = 0, conflicts = 0, skipped = 0;
+  const unmatched = new Set();
+
+  for (let rowNum = 2; rowNum <= sheet.rowCount; rowNum++) {
+    const row = sheet.getRow(rowNum);
+    const clientName = cellText(row, 'Nom du client');
+    const dateRdv = cellText(row, 'Date du RDV');
+    const heureRdv = cellText(row, 'Heure du RDV');
+    const prestaName = cellText(row, 'Nom prestation');
+    const phone = cellText(row, 'Telephone');
+    const venu = cellText(row, 'Venu');
+
+    if (!clientName || !dateRdv || !heureRdv || !prestaName) { skipped++; continue; }
+
+    const isoDate = dateRdv instanceof Date ? dateRdv.toISOString().slice(0, 10) : String(dateRdv).trim().slice(0, 10);
+    const time = heureRdv instanceof Date ? heureRdv.toISOString().slice(11, 16) : String(heureRdv).trim().slice(0, 5);
+
+    const parts = String(prestaName).split('+').map(foldLabel);
+    const serviceIds = [];
+    let allMatched = true;
+    for (const p of parts) {
+      const id = byFold.get(p);
+      if (id) serviceIds.push(id);
+      else { allMatched = false; unmatched.add(p); }
+    }
+    if (!allMatched || serviceIds.length === 0) { skipped++; continue; }
+
+    const status = venu === 'Non' ? 'cancelled' : 'confirmed';
+
+    try {
+      await pool.query(
+        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, status)
+         values ($1, $2, $3, $4, $5, $6)`,
+        [serviceIds, isoDate, time, String(clientName).trim(), (phone || '').toString().trim(), status]
+      );
+      imported++;
+    } catch (err) {
+      if (err.code === '23505') { conflicts++; }
+      else throw err;
+    }
+  }
+
+  res.json({ imported, conflicts, skipped, unmatched: [...unmatched] });
 });
 
 app.use(express.static('public'));
