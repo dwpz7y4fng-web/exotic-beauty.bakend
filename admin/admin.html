@@ -20,14 +20,24 @@
   --blanc:#FFFFFF;
   --ok:#4C8A3A;
   --warn:#B8873A;
+  --err:#B84A4A;
 }
 *{box-sizing:border-box;}
 body{margin:0; font-family:'DM Sans', system-ui, sans-serif; color:var(--noir); background:var(--creme); font-weight:300; -webkit-font-smoothing:antialiased;}
 h1,h2{font-family:'Instrument Serif', serif; font-weight:400; margin:0;}
 .wrap{max-width:1180px; margin:0 auto; padding:34px 24px 80px;}
-header.top{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:6px;}
+header.top{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:6px;}
 header.top h1{font-size:32px;}
 header.top .sub{font-size:13px; letter-spacing:0.1em; color:var(--brun);}
+.btn{display:inline-flex; align-items:center; gap:6px; padding:11px 22px; border-radius:999px; font-size:13px; border:none; cursor:pointer; font-family:inherit;}
+.btn-dark{background:var(--noir); color:var(--creme);}
+.btn-dark:hover{background:var(--brun);}
+.btn-outline{background:var(--blanc); color:var(--texte); border:1px solid var(--line);}
+.btn-outline:hover{border-color:var(--noir); color:var(--noir);}
+.btn-danger-text{background:none; border:none; color:var(--err); font-size:13px; cursor:pointer; padding:4px 0; font-family:inherit;}
+.btn-danger-text:hover{text-decoration:underline;}
+.btn-text{background:none; border:none; color:var(--brun); font-size:13px; cursor:pointer; padding:4px 0; font-family:inherit;}
+.btn-text:hover{text-decoration:underline;}
 .cards{display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px; margin:28px 0 34px;}
 .card{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:22px 24px;}
 .card .label{font-size:12px; letter-spacing:0.08em; color:var(--gris); text-transform:uppercase; margin-bottom:10px;}
@@ -36,17 +46,46 @@ header.top .sub{font-size:13px; letter-spacing:0.1em; color:var(--brun);}
 .filters button{padding:9px 18px; border-radius:999px; border:1px solid var(--line); background:var(--blanc); font-size:13px; color:var(--texte); cursor:pointer; font-family:inherit;}
 .filters button.active{background:var(--noir); color:var(--creme); border-color:var(--noir);}
 .table-wrap{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; overflow-x:auto;}
-table{width:100%; border-collapse:collapse; font-size:14px; min-width:760px;}
+table{width:100%; border-collapse:collapse; font-size:14px; min-width:900px;}
 th{text-align:left; padding:14px 16px; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); border-bottom:1px solid var(--line-2); white-space:nowrap;}
 td{padding:14px 16px; border-bottom:1px solid var(--line-2); vertical-align:top;}
 tr:last-child td{border-bottom:none;}
-.services-cell{max-width:280px;}
-.badge{display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px;}
+.services-cell{max-width:260px;}
+.badge{display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; white-space:nowrap;}
 .badge.paid{background:#E5F0E1; color:var(--ok);}
+.badge.confirmed{background:#E4EAF0; color:#3A5F8A;}
 .badge.pending{background:#F5EAD8; color:var(--warn);}
-.badge.cancelled{background:#F0E4E4; color:#B84A4A;}
+.badge.cancelled{background:#F0E4E4; color:var(--err);}
 .empty, .loading{padding:40px 20px; text-align:center; color:var(--gris); font-size:14px;}
 .price{white-space:nowrap;}
+.row-actions{display:flex; gap:12px; white-space:nowrap;}
+
+.modal-backdrop{position:fixed; inset:0; background:rgba(17,14,12,0.45); display:flex; align-items:flex-start; justify-content:center; padding:5vh 20px; overflow-y:auto; z-index:200;}
+.modal-backdrop[hidden]{display:none;}
+.modal{background:var(--blanc); border-radius:8px; max-width:560px; width:100%; padding:30px 30px 26px;}
+.modal h2{font-size:24px; margin-bottom:22px;}
+.form-row{margin-bottom:16px;}
+.form-row label{display:block; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); margin-bottom:6px;}
+.form-row input, .form-row select{width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:14px; color:var(--noir); background:var(--creme);}
+.form-cols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.service-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 14px; max-height:220px; overflow-y:auto; border:1px solid var(--line); border-radius:4px; padding:12px; background:var(--creme);}
+.service-grid label{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--texte); text-transform:none; letter-spacing:0; margin:0; cursor:pointer; font-weight:300;}
+.service-grid input[type="checkbox"]{width:auto;}
+.modal-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px;}
+.modal-msg{font-size:13px; color:var(--err); margin-top:12px; min-height:1.2em;}
+@media(max-width:640px){ .form-cols{grid-template-columns:1fr;} }
+
+.tabs{display:flex; gap:6px; margin:24px 0 26px; border-bottom:1px solid var(--line-2);}
+.tabs button{padding:10px 4px; margin-right:22px; border:none; background:none; font-size:14px; color:var(--gris); cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px;}
+.tabs button.active{color:var(--noir); border-bottom-color:var(--noir);}
+.import-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:20px;}
+.import-bar input[type="file"]{font-size:13px;}
+.import-msg{font-size:13px; color:var(--texte);}
+.import-msg.err{color:var(--err);}
+.search-box{margin-bottom:16px;}
+.search-box input{width:100%; max-width:360px; padding:11px 14px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:14px; background:var(--blanc);}
+.deleted-row{opacity:0.5;}
+.comments-cell{max-width:220px; color:var(--gris); font-size:13px;}
 </style>
 </head>
 <body>
@@ -56,43 +95,130 @@ tr:last-child td{border-bottom:none;}
       <p class="sub">Exotic Beauty</p>
       <h1>Réservations &amp; chiffre d'affaires</h1>
     </div>
+    <button type="button" class="btn btn-dark" id="newBtn">+ Nouveau rendez-vous</button>
   </header>
 
-  <div class="cards" id="cards"></div>
-
-  <div class="filters" id="filters">
-    <button data-filter="all" class="active">Tout</button>
-    <button data-filter="month">Ce mois-ci</button>
-    <button data-filter="week">Cette semaine</button>
-    <button data-filter="upcoming">À venir</button>
+  <div class="tabs">
+    <button type="button" class="active" data-tab="bookings">Réservations</button>
+    <button type="button" data-tab="clients">Clientes</button>
   </div>
 
-  <div class="table-wrap">
-    <table id="table" hidden>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Heure</th>
-          <th>Cliente</th>
-          <th>Téléphone</th>
-          <th>Prestations</th>
-          <th>Prix total</th>
-          <th>Acompte</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div class="loading" id="loading">Chargement…</div>
-    <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
+  <div id="tabBookings">
+    <div class="cards" id="cards"></div>
+
+    <div class="filters" id="filters">
+      <button data-filter="all" class="active">Tout</button>
+      <button data-filter="month">Ce mois-ci</button>
+      <button data-filter="week">Cette semaine</button>
+      <button data-filter="upcoming">À venir</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="table" hidden>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Cliente</th>
+            <th>Téléphone</th>
+            <th>Prestations</th>
+            <th>Prix total</th>
+            <th>Acompte</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="loading" id="loading">Chargement…</div>
+      <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
+    </div>
+  </div>
+
+  <div id="tabClients" hidden>
+    <div class="import-bar">
+      <input type="file" id="csvFile" accept=".csv">
+      <button type="button" class="btn btn-outline" id="importBtn">Importer le fichier Planity</button>
+      <label style="font-size:13px; color:var(--texte); display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" id="showDeleted" style="width:auto;"> afficher les clientes supprimées sur Planity
+      </label>
+      <span class="import-msg" id="importMsg"></span>
+    </div>
+    <div class="search-box">
+      <input type="text" id="clientSearch" placeholder="Rechercher par nom, téléphone ou email…">
+    </div>
+    <div class="table-wrap">
+      <table id="clientTable" hidden>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Commentaires</th>
+          </tr>
+        </thead>
+        <tbody id="clientTbody"></tbody>
+      </table>
+      <div class="loading" id="clientLoading">Chargement…</div>
+      <div class="empty" id="clientEmpty" hidden>Aucune cliente. Importez votre fichier Planity ci-dessus.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal">
+    <h2 id="modalTitle">Nouveau rendez-vous</h2>
+    <form id="bookingForm">
+      <input type="hidden" id="fId">
+      <div class="form-row">
+        <label>Prestations</label>
+        <div class="service-grid" id="serviceGrid"></div>
+      </div>
+      <div class="form-cols">
+        <div class="form-row">
+          <label for="fDate">Date</label>
+          <input type="date" id="fDate" required>
+        </div>
+        <div class="form-row">
+          <label for="fTime">Heure</label>
+          <input type="time" id="fTime" required>
+        </div>
+      </div>
+      <div class="form-cols">
+        <div class="form-row">
+          <label for="fName">Nom de la cliente</label>
+          <input type="text" id="fName" required>
+        </div>
+        <div class="form-row">
+          <label for="fPhone">Téléphone</label>
+          <input type="tel" id="fPhone" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="fStatus">Statut</label>
+        <select id="fStatus">
+          <option value="confirmed">Confirmée</option>
+          <option value="paid">Payée</option>
+          <option value="pending">En attente</option>
+          <option value="cancelled">Annulée</option>
+        </select>
+      </div>
+      <div class="modal-msg" id="modalMsg"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="modalCancel">Annuler</button>
+        <button type="submit" class="btn btn-dark" id="modalSubmit">Enregistrer</button>
+      </div>
+    </form>
   </div>
 </div>
 
 <script>
 (function(){
-  const STATUS_LABEL = { paid: 'Payée', pending: 'En attente', cancelled: 'Annulée' };
+  const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée' };
   let bookings = [];
+  let services = [];
   let currentFilter = 'all';
+  let editingId = null;
 
   function euros(cents){ return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
   function formatDate(iso){
@@ -127,13 +253,14 @@ tr:last-child td{border-bottom:none;}
 
   function renderCards(){
     const paid = bookings.filter(b => b.status === 'paid');
+    const completed = bookings.filter(b => b.status === 'paid' || b.status === 'confirmed');
     const depositsCollected = paid.reduce((sum, b) => sum + b.services.reduce((s, x) => s + x.deposit_cents, 0), 0);
-    const totalValue = paid.reduce((sum, b) => sum + b.services.reduce((s, x) => s + x.price_cents, 0), 0);
+    const totalValue = completed.reduce((sum, b) => sum + b.services.reduce((s, x) => s + x.price_cents, 0), 0);
     const upcomingCount = bookings.filter(isUpcoming).length;
 
     document.getElementById('cards').innerHTML = `
-      <div class="card"><div class="label">Acomptes encaissés</div><div class="value">${euros(depositsCollected)}</div></div>
-      <div class="card"><div class="label">CA prévisionnel (réservations payées)</div><div class="value">${euros(totalValue)}</div></div>
+      <div class="card"><div class="label">Acomptes encaissés (Stripe)</div><div class="value">${euros(depositsCollected)}</div></div>
+      <div class="card"><div class="label">CA prévisionnel (payées + confirmées)</div><div class="value">${euros(totalValue)}</div></div>
       <div class="card"><div class="label">Rendez-vous à venir</div><div class="value">${upcomingCount}</div></div>
       <div class="card"><div class="label">Total réservations</div><div class="value">${bookings.length}</div></div>
     `;
@@ -158,7 +285,10 @@ tr:last-child td{border-bottom:none;}
       const total = b.services.reduce((s, x) => s + x.price_cents, 0);
       const deposit = b.services.reduce((s, x) => s + x.deposit_cents, 0);
       const labels = b.services.map(s => s.label).join(', ');
-      const statusClass = b.status === 'paid' ? 'paid' : (b.status === 'cancelled' ? 'cancelled' : 'pending');
+      const statusClass = ['paid','confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
+      const cancelBtn = b.status !== 'cancelled'
+        ? `<button type="button" class="btn-danger-text" data-cancel="${b.id}">Annuler</button>`
+        : '';
       return `<tr>
         <td>${formatDate(b.slot_date)}</td>
         <td>${b.slot_time.slice(0,5)}</td>
@@ -168,6 +298,10 @@ tr:last-child td{border-bottom:none;}
         <td class="price">${euros(total)}</td>
         <td class="price">${euros(deposit)}</td>
         <td><span class="badge ${statusClass}">${STATUS_LABEL[b.status] || b.status}</span></td>
+        <td><div class="row-actions">
+          <button type="button" class="btn-text" data-edit="${b.id}">Modifier</button>
+          ${cancelBtn}
+        </div></td>
       </tr>`;
     }).join('');
   }
@@ -186,15 +320,260 @@ tr:last-child td{border-bottom:none;}
     renderTable();
   });
 
+  document.getElementById('tbody').addEventListener('click', (e) => {
+    const editBtn = e.target.closest('button[data-edit]');
+    if(editBtn){ openModal(bookings.find(b => b.id === editBtn.dataset.edit)); return; }
+    const cancelBtn = e.target.closest('button[data-cancel]');
+    if(cancelBtn){ cancelBooking(cancelBtn.dataset.cancel); return; }
+  });
+
+  function buildServiceGrid(selectedIds){
+    const grid = document.getElementById('serviceGrid');
+    grid.innerHTML = services.map(s => `
+      <label>
+        <input type="checkbox" value="${s.id}" ${selectedIds && selectedIds.includes(s.id) ? 'checked' : ''}>
+        ${escapeHtml(s.label)}
+      </label>
+    `).join('');
+  }
+
+  function openModal(booking){
+    editingId = booking ? booking.id : null;
+    document.getElementById('modalTitle').textContent = booking ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous';
+    document.getElementById('modalMsg').textContent = '';
+    buildServiceGrid(booking ? booking.services.map(s => s.id) : []);
+    document.getElementById('fDate').value = booking ? booking.slot_date : '';
+    document.getElementById('fTime').value = booking ? booking.slot_time.slice(0,5) : '';
+    document.getElementById('fName').value = booking ? booking.client_name : '';
+    document.getElementById('fPhone').value = booking ? booking.client_phone : '';
+    document.getElementById('fStatus').value = booking ? booking.status : 'confirmed';
+    document.getElementById('modalBackdrop').hidden = false;
+  }
+  function closeModal(){
+    document.getElementById('modalBackdrop').hidden = true;
+  }
+
+  document.getElementById('newBtn').addEventListener('click', () => openModal(null));
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+    if(e.target.id === 'modalBackdrop') closeModal();
+  });
+
+  document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('modalMsg');
+    msg.textContent = '';
+
+    const serviceIds = [...document.querySelectorAll('#serviceGrid input:checked')].map(el => el.value);
+    if(serviceIds.length === 0){
+      msg.textContent = 'Choisissez au moins une prestation.';
+      return;
+    }
+    const payload = {
+      serviceIds,
+      date: document.getElementById('fDate').value,
+      time: document.getElementById('fTime').value,
+      name: document.getElementById('fName').value.trim(),
+      phone: document.getElementById('fPhone').value.trim(),
+      status: document.getElementById('fStatus').value
+    };
+
+    const submitBtn = document.getElementById('modalSubmit');
+    submitBtn.disabled = true;
+    try{
+      const url = editingId ? `/api/admin/bookings/${editingId}` : '/api/admin/bookings';
+      const method = editingId ? 'PATCH' : 'POST';
+      const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(!res.ok){
+        msg.textContent = data.error || 'Une erreur est survenue.';
+        return;
+      }
+      closeModal();
+      await load();
+    }catch(err){
+      msg.textContent = 'Une erreur est survenue — merci de réessayer.';
+    }finally{
+      submitBtn.disabled = false;
+    }
+  });
+
+  async function cancelBooking(id){
+    if(!confirm('Annuler ce rendez-vous ?')) return;
+    try{
+      const res = await fetch(`/api/admin/bookings/${id}`, {
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+      if(!res.ok) throw new Error();
+      await load();
+    }catch(e){
+      alert('Impossible d\'annuler ce rendez-vous — merci de réessayer.');
+    }
+  }
+
   async function load(){
     try{
-      const res = await fetch('/api/admin/bookings');
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      bookings = (await res.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      const [bookingsRes, servicesRes] = await Promise.all([
+        fetch('/api/admin/bookings'),
+        fetch('/api/services')
+      ]);
+      if(!bookingsRes.ok) throw new Error('HTTP ' + bookingsRes.status);
+      bookings = (await bookingsRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      services = await servicesRes.json();
       renderCards();
       renderTable();
     }catch(e){
       document.getElementById('loading').textContent = 'Erreur de chargement — merci de recharger la page.';
+    }
+  }
+
+  // ---- Tabs ----
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b === btn));
+      const tab = btn.dataset.tab;
+      document.getElementById('tabBookings').hidden = tab !== 'bookings';
+      document.getElementById('tabClients').hidden = tab !== 'clients';
+      if(tab === 'clients' && clients.length === 0) loadClients();
+    });
+  });
+
+  // ---- Clients ----
+  let clients = [];
+  let clientSearch = '';
+  let showDeleted = false;
+
+  function parseCsv(text){
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for(let i = 0; i < text.length; i++){
+      const c = text[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; }
+          else inQuotes = false;
+        }else field += c;
+      }else{
+        if(c === '"') inQuotes = true;
+        else if(c === ','){ row.push(field); field = ''; }
+        else if(c === '\n' || c === '\r'){
+          if(c === '\r' && text[i+1] === '\n') i++;
+          row.push(field); field = '';
+          if(row.length > 1 || row[0] !== ''){ rows.push(row); }
+          row = [];
+        }else field += c;
+      }
+    }
+    if(field !== '' || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function frDateToIso(d){
+    if(!d) return null;
+    const m = d.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m) return null;
+    return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+
+  document.getElementById('importBtn').addEventListener('click', async () => {
+    const fileInput = document.getElementById('csvFile');
+    const msg = document.getElementById('importMsg');
+    msg.className = 'import-msg';
+    if(!fileInput.files.length){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Choisissez un fichier CSV d\'abord.';
+      return;
+    }
+    msg.textContent = 'Import en cours…';
+    try{
+      const text = await fileInput.files[0].text();
+      const rows = parseCsv(text).filter(r => r.some(c => c.trim() !== ''));
+      const header = rows.shift().map(h => h.trim().toLowerCase());
+      const idx = (name) => header.indexOf(name);
+      const iName = idx('nom'), iPhone = idx('téléphone'), iEmail = idx('email'),
+        iComments = idx('commentaires'), iGender = idx('genre'),
+        iCreated = idx('crée le'), iDeleted = idx('supprimé le');
+
+      const parsed = rows.map(r => ({
+        name: iName >= 0 ? r[iName] : '',
+        phone: iPhone >= 0 ? r[iPhone] : '',
+        email: iEmail >= 0 ? r[iEmail] : '',
+        comments: iComments >= 0 ? r[iComments] : '',
+        gender: iGender >= 0 ? r[iGender] : '',
+        createdAt: iCreated >= 0 ? frDateToIso(r[iCreated]) : null,
+        deletedAt: iDeleted >= 0 ? frDateToIso(r[iDeleted]) : null,
+      })).filter(c => c.name && c.name.trim());
+
+      const res = await fetch('/api/admin/clients/import', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ clients: parsed })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.className = 'import-msg err';
+        msg.textContent = data.error || 'Erreur lors de l\'import.';
+        return;
+      }
+      msg.textContent = `${data.imported} cliente(s) importée(s).`;
+      fileInput.value = '';
+      await loadClients();
+    }catch(e){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Erreur lors de l\'import — vérifiez le format du fichier.';
+    }
+  });
+
+  document.getElementById('clientSearch').addEventListener('input', (e) => {
+    clientSearch = e.target.value.trim().toLowerCase();
+    renderClients();
+  });
+  document.getElementById('showDeleted').addEventListener('change', (e) => {
+    showDeleted = e.target.checked;
+    renderClients();
+  });
+
+  function renderClients(){
+    let rows = clients;
+    if(!showDeleted) rows = rows.filter(c => !c.planity_deleted_at);
+    if(clientSearch){
+      rows = rows.filter(c =>
+        (c.name || '').toLowerCase().includes(clientSearch) ||
+        (c.phone || '').toLowerCase().includes(clientSearch) ||
+        (c.email || '').toLowerCase().includes(clientSearch)
+      );
+    }
+    const table = document.getElementById('clientTable');
+    const empty = document.getElementById('clientEmpty');
+    document.getElementById('clientLoading').hidden = true;
+
+    if(rows.length === 0){
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+    table.hidden = false;
+    empty.hidden = true;
+    document.getElementById('clientTbody').innerHTML = rows.map(c => `
+      <tr class="${c.planity_deleted_at ? 'deleted-row' : ''}">
+        <td>${escapeHtml(c.name)}</td>
+        <td>${escapeHtml(c.phone || '—')}</td>
+        <td>${escapeHtml(c.email || '—')}</td>
+        <td class="comments-cell">${escapeHtml(c.comments || '')}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadClients(){
+    try{
+      const res = await fetch('/api/admin/clients');
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      clients = await res.json();
+      renderClients();
+    }catch(e){
+      document.getElementById('clientLoading').textContent = 'Erreur de chargement.';
     }
   }
 
