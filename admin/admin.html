@@ -74,6 +74,18 @@ tr:last-child td{border-bottom:none;}
 .modal-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px;}
 .modal-msg{font-size:13px; color:var(--err); margin-top:12px; min-height:1.2em;}
 @media(max-width:640px){ .form-cols{grid-template-columns:1fr;} }
+
+.tabs{display:flex; gap:6px; margin:24px 0 26px; border-bottom:1px solid var(--line-2);}
+.tabs button{padding:10px 4px; margin-right:22px; border:none; background:none; font-size:14px; color:var(--gris); cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px;}
+.tabs button.active{color:var(--noir); border-bottom-color:var(--noir);}
+.import-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:20px;}
+.import-bar input[type="file"]{font-size:13px;}
+.import-msg{font-size:13px; color:var(--texte);}
+.import-msg.err{color:var(--err);}
+.search-box{margin-bottom:16px;}
+.search-box input{width:100%; max-width:360px; padding:11px 14px; border:1px solid var(--line); border-radius:4px; font-family:inherit; font-size:14px; background:var(--blanc);}
+.deleted-row{opacity:0.5;}
+.comments-cell{max-width:220px; color:var(--gris); font-size:13px;}
 </style>
 </head>
 <body>
@@ -86,34 +98,70 @@ tr:last-child td{border-bottom:none;}
     <button type="button" class="btn btn-dark" id="newBtn">+ Nouveau rendez-vous</button>
   </header>
 
-  <div class="cards" id="cards"></div>
-
-  <div class="filters" id="filters">
-    <button data-filter="all" class="active">Tout</button>
-    <button data-filter="month">Ce mois-ci</button>
-    <button data-filter="week">Cette semaine</button>
-    <button data-filter="upcoming">À venir</button>
+  <div class="tabs">
+    <button type="button" class="active" data-tab="bookings">Réservations</button>
+    <button type="button" data-tab="clients">Clientes</button>
   </div>
 
-  <div class="table-wrap">
-    <table id="table" hidden>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Heure</th>
-          <th>Cliente</th>
-          <th>Téléphone</th>
-          <th>Prestations</th>
-          <th>Prix total</th>
-          <th>Acompte</th>
-          <th>Statut</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div class="loading" id="loading">Chargement…</div>
-    <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
+  <div id="tabBookings">
+    <div class="cards" id="cards"></div>
+
+    <div class="filters" id="filters">
+      <button data-filter="all" class="active">Tout</button>
+      <button data-filter="month">Ce mois-ci</button>
+      <button data-filter="week">Cette semaine</button>
+      <button data-filter="upcoming">À venir</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="table" hidden>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Cliente</th>
+            <th>Téléphone</th>
+            <th>Prestations</th>
+            <th>Prix total</th>
+            <th>Acompte</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="loading" id="loading">Chargement…</div>
+      <div class="empty" id="empty" hidden>Aucune réservation pour ce filtre.</div>
+    </div>
+  </div>
+
+  <div id="tabClients" hidden>
+    <div class="import-bar">
+      <input type="file" id="csvFile" accept=".csv">
+      <button type="button" class="btn btn-outline" id="importBtn">Importer le fichier Planity</button>
+      <label style="font-size:13px; color:var(--texte); display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" id="showDeleted" style="width:auto;"> afficher les clientes supprimées sur Planity
+      </label>
+      <span class="import-msg" id="importMsg"></span>
+    </div>
+    <div class="search-box">
+      <input type="text" id="clientSearch" placeholder="Rechercher par nom, téléphone ou email…">
+    </div>
+    <div class="table-wrap">
+      <table id="clientTable" hidden>
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Commentaires</th>
+          </tr>
+        </thead>
+        <tbody id="clientTbody"></tbody>
+      </table>
+      <div class="loading" id="clientLoading">Chargement…</div>
+      <div class="empty" id="clientEmpty" hidden>Aucune cliente. Importez votre fichier Planity ci-dessus.</div>
+    </div>
   </div>
 </div>
 
@@ -378,6 +426,154 @@ tr:last-child td{border-bottom:none;}
       renderTable();
     }catch(e){
       document.getElementById('loading').textContent = 'Erreur de chargement — merci de recharger la page.';
+    }
+  }
+
+  // ---- Tabs ----
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('active', b === btn));
+      const tab = btn.dataset.tab;
+      document.getElementById('tabBookings').hidden = tab !== 'bookings';
+      document.getElementById('tabClients').hidden = tab !== 'clients';
+      if(tab === 'clients' && clients.length === 0) loadClients();
+    });
+  });
+
+  // ---- Clients ----
+  let clients = [];
+  let clientSearch = '';
+  let showDeleted = false;
+
+  function parseCsv(text){
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for(let i = 0; i < text.length; i++){
+      const c = text[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; }
+          else inQuotes = false;
+        }else field += c;
+      }else{
+        if(c === '"') inQuotes = true;
+        else if(c === ','){ row.push(field); field = ''; }
+        else if(c === '\n' || c === '\r'){
+          if(c === '\r' && text[i+1] === '\n') i++;
+          row.push(field); field = '';
+          if(row.length > 1 || row[0] !== ''){ rows.push(row); }
+          row = [];
+        }else field += c;
+      }
+    }
+    if(field !== '' || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function frDateToIso(d){
+    if(!d) return null;
+    const m = d.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m) return null;
+    return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  }
+
+  document.getElementById('importBtn').addEventListener('click', async () => {
+    const fileInput = document.getElementById('csvFile');
+    const msg = document.getElementById('importMsg');
+    msg.className = 'import-msg';
+    if(!fileInput.files.length){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Choisissez un fichier CSV d\'abord.';
+      return;
+    }
+    msg.textContent = 'Import en cours…';
+    try{
+      const text = await fileInput.files[0].text();
+      const rows = parseCsv(text).filter(r => r.some(c => c.trim() !== ''));
+      const header = rows.shift().map(h => h.trim().toLowerCase());
+      const idx = (name) => header.indexOf(name);
+      const iName = idx('nom'), iPhone = idx('téléphone'), iEmail = idx('email'),
+        iComments = idx('commentaires'), iGender = idx('genre'),
+        iCreated = idx('crée le'), iDeleted = idx('supprimé le');
+
+      const parsed = rows.map(r => ({
+        name: iName >= 0 ? r[iName] : '',
+        phone: iPhone >= 0 ? r[iPhone] : '',
+        email: iEmail >= 0 ? r[iEmail] : '',
+        comments: iComments >= 0 ? r[iComments] : '',
+        gender: iGender >= 0 ? r[iGender] : '',
+        createdAt: iCreated >= 0 ? frDateToIso(r[iCreated]) : null,
+        deletedAt: iDeleted >= 0 ? frDateToIso(r[iDeleted]) : null,
+      })).filter(c => c.name && c.name.trim());
+
+      const res = await fetch('/api/admin/clients/import', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ clients: parsed })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        msg.className = 'import-msg err';
+        msg.textContent = data.error || 'Erreur lors de l\'import.';
+        return;
+      }
+      msg.textContent = `${data.imported} cliente(s) importée(s).`;
+      fileInput.value = '';
+      await loadClients();
+    }catch(e){
+      msg.className = 'import-msg err';
+      msg.textContent = 'Erreur lors de l\'import — vérifiez le format du fichier.';
+    }
+  });
+
+  document.getElementById('clientSearch').addEventListener('input', (e) => {
+    clientSearch = e.target.value.trim().toLowerCase();
+    renderClients();
+  });
+  document.getElementById('showDeleted').addEventListener('change', (e) => {
+    showDeleted = e.target.checked;
+    renderClients();
+  });
+
+  function renderClients(){
+    let rows = clients;
+    if(!showDeleted) rows = rows.filter(c => !c.planity_deleted_at);
+    if(clientSearch){
+      rows = rows.filter(c =>
+        (c.name || '').toLowerCase().includes(clientSearch) ||
+        (c.phone || '').toLowerCase().includes(clientSearch) ||
+        (c.email || '').toLowerCase().includes(clientSearch)
+      );
+    }
+    const table = document.getElementById('clientTable');
+    const empty = document.getElementById('clientEmpty');
+    document.getElementById('clientLoading').hidden = true;
+
+    if(rows.length === 0){
+      table.hidden = true;
+      empty.hidden = false;
+      return;
+    }
+    table.hidden = false;
+    empty.hidden = true;
+    document.getElementById('clientTbody').innerHTML = rows.map(c => `
+      <tr class="${c.planity_deleted_at ? 'deleted-row' : ''}">
+        <td>${escapeHtml(c.name)}</td>
+        <td>${escapeHtml(c.phone || '—')}</td>
+        <td>${escapeHtml(c.email || '—')}</td>
+        <td class="comments-cell">${escapeHtml(c.comments || '')}</td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadClients(){
+    try{
+      const res = await fetch('/api/admin/clients');
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      clients = await res.json();
+      renderClients();
+    }catch(e){
+      document.getElementById('clientLoading').textContent = 'Erreur de chargement.';
     }
   }
 

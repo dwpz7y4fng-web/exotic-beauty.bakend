@@ -145,6 +145,54 @@ app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/api/admin/clients', requireAdmin, async (req, res) => {
+  const { rows } = await pool.query(
+    'select id, name, phone, email, comments, gender, planity_created_at, planity_deleted_at from clients order by name'
+  );
+  res.json(rows);
+});
+
+app.post('/api/admin/clients/import', requireAdmin, async (req, res) => {
+  const { clients } = req.body;
+  if (!Array.isArray(clients) || clients.length === 0) {
+    return res.status(400).json({ error: 'aucune cliente à importer' });
+  }
+
+  let imported = 0;
+  let skipped = 0;
+  for (const c of clients) {
+    const name = (c.name || '').trim();
+    if (!name) { skipped++; continue; }
+    const phone = (c.phone || '').trim() || null;
+    const email = (c.email || '').trim() || null;
+    const comments = (c.comments || '').trim() || null;
+    const gender = (c.gender || '').trim() || null;
+    const createdAt = c.createdAt || null;
+    const deletedAt = c.deletedAt || null;
+
+    if (phone) {
+      await pool.query(
+        `insert into clients (name, phone, email, comments, gender, planity_created_at, planity_deleted_at)
+         values ($1, $2, $3, $4, $5, $6, $7)
+         on conflict (phone) where phone is not null and phone != ''
+         do update set name = excluded.name, email = excluded.email, comments = excluded.comments,
+           gender = excluded.gender, planity_created_at = excluded.planity_created_at,
+           planity_deleted_at = excluded.planity_deleted_at`,
+        [name, phone, email, comments, gender, createdAt, deletedAt]
+      );
+    } else {
+      await pool.query(
+        `insert into clients (name, phone, email, comments, gender, planity_created_at, planity_deleted_at)
+         values ($1, $2, $3, $4, $5, $6, $7)`,
+        [name, phone, email, comments, gender, createdAt, deletedAt]
+      );
+    }
+    imported++;
+  }
+
+  res.json({ imported, skipped });
+});
+
 app.use(express.static('public'));
 
 app.get('/api/services', async (req, res) => {

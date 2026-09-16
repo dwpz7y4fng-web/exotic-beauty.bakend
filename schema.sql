@@ -48,3 +48,20 @@ create table bookings (
 create unique index bookings_active_slot_unique on bookings (slot_date, slot_time) where status != 'cancelled';
 
 create index on bookings (slot_date, status);
+
+drop table if exists clients;
+
+create table clients (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  phone text,
+  email text,
+  comments text,
+  gender text,
+  planity_created_at date,
+  planity_deleted_at date,
+  imported_at timestamptz not null default now()
+);
+
+create unique index clients_phone_unique on clients (phone) where phone is not null and phone != '';
+create index on clients (name);
