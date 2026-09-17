@@ -17,6 +17,11 @@ const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_A
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 const OPEN_HOURS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
+const STUDIO_ADDRESS = '722 route de la Chasse, quartier Rivage, Ducos';
+
+// Seuils de la relance des clientes inactives — ajustables ici.
+const INACTIVE_MONTHS = 2; // délai sans rendez-vous avant de considérer une cliente comme inactive
+const REENGAGEMENT_COOLDOWN_WEEKS = 6; // ne jamais relancer une même cliente plus souvent que ça
 
 function safeEqual(a, b) {
   const bufA = Buffer.from(a);
@@ -357,9 +362,10 @@ app.post('/api/book', async (req, res) => {
 
 cron.schedule('0 10 * * *', async () => {
   const { rows } = await pool.query(`
-    select b.*, (select string_agg(s.label, ' + ' order by s.label) from services s where s.id = any(b.service_ids)) as label
+    select b.*, to_char(b.slot_date, 'DD/MM') as date_str,
+      (select string_agg(s.label, ' + ' order by s.label) from services s where s.id = any(b.service_ids)) as label
     from bookings b
-    where b.status = 'paid'
+    where b.status in ('paid', 'confirmed')
       and b.reminder_sent = false
       and b.slot_date = (current_date + interval '1 day')::date
   `);
@@ -369,11 +375,55 @@ cron.schedule('0 10 * * *', async () => {
       await twilioClient.messages.create({
         to: b.client_phone,
         from: process.env.TWILIO_FROM_NUMBER,
-        body: `Exotic Beauty — rappel : rendez-vous demain à ${b.slot_time.slice(0,5)} pour ${b.label}. À très vite !`,
+        body: `Exotic Beauty — rappel : rendez-vous demain ${b.date_str} à ${b.slot_time.slice(0,5)} pour ${b.label}. ${STUDIO_ADDRESS}. À très vite !`,
       });
       await pool.query('update bookings set reminder_sent = true where id = $1', [b.id]);
     } catch (err) {
       console.error('Échec envoi SMS pour', b.id, err.message);
+    }
+  }
+});
+
+// Relance hebdomadaire des clientes inactives (aucun rendez-vous depuis INACTIVE_MONTHS,
+// et aucun déjà programmé) — chaque lundi à 10h.
+cron.schedule('0 10 * * 1', async () => {
+  const { rows } = await pool.query(`
+    with norm_bookings as (
+      select regexp_replace(client_phone, '\\D', '', 'g') as phone_norm, slot_date, status
+      from bookings
+    ),
+    last_appt as (
+      select phone_norm, max(slot_date) as last_date
+      from norm_bookings
+      where status != 'cancelled'
+      group by phone_norm
+    ),
+    upcoming_phones as (
+      select distinct phone_norm
+      from norm_bookings
+      where status != 'cancelled' and slot_date >= current_date
+    )
+    select c.id, c.name, c.phone
+    from clients c
+    join last_appt la on regexp_replace(c.phone, '\\D', '', 'g') = la.phone_norm
+    where c.phone is not null and c.phone != ''
+      and c.planity_deleted_at is null
+      and la.last_date < current_date - make_interval(months => $1)
+      and la.phone_norm not in (select phone_norm from upcoming_phones)
+      and (c.last_reengagement_sms_at is null or c.last_reengagement_sms_at < now() - make_interval(weeks => $2))
+  `, [INACTIVE_MONTHS, REENGAGEMENT_COOLDOWN_WEEKS]);
+
+  for (const c of rows) {
+    try {
+      const firstName = (c.name || '').trim().split(/\s+/)[0] || '';
+      await twilioClient.messages.create({
+        to: c.phone,
+        from: process.env.TWILIO_FROM_NUMBER,
+        body: `Coucou ${firstName} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
+      });
+      await pool.query('update clients set last_reengagement_sms_at = now() where id = $1', [c.id]);
+    } catch (err) {
+      console.error('Échec envoi SMS de relance pour', c.id, err.message);
     }
   }
 });
