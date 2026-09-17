@@ -60,7 +60,8 @@ create table clients (
   gender text,
   planity_created_at date,
   planity_deleted_at date,
-  imported_at timestamptz not null default now()
+  imported_at timestamptz not null default now(),
+  last_reengagement_sms_at timestamptz
 );
 
 create unique index clients_phone_unique on clients (phone) where phone is not null and phone != '';
