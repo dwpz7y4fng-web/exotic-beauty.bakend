@@ -97,6 +97,20 @@ tr:last-child td{border-bottom:none;}
 .client-appt-services{font-size:13px; color:var(--gris); flex:1; padding:0 12px;}
 .client-appt-empty{font-size:13px; color:var(--gris); padding:6px 0;}
 
+.blocked-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line-2);}
+.blocked-row:last-child{border-bottom:none;}
+.blocked-row .info{font-size:13px; color:var(--texte);}
+.blocked-row .reason{color:var(--gris); font-size:12px;}
+.blocked-empty{font-size:13px; color:var(--gris); padding:6px 0;}
+
+.cal-closed-hatch{background-image:repeating-linear-gradient(45deg, var(--line-2), var(--line-2) 6px, var(--creme) 6px, var(--creme) 12px);}
+.cal-week-col.day-closed{position:relative;}
+.cal-week-col.day-closed .dow{color:var(--err);}
+.cal-month-cell.day-closed{position:relative;}
+.cal-month-cell.day-closed .num{color:var(--err);}
+.cal-closed-badge{font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--err); margin-bottom:4px;}
+.cal-day-closed-banner{background:#F5E9E9; color:var(--err); border:1px solid var(--err); border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:14px;}
+
 .cal-nav{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px;}
 .cal-nav-left{display:flex; align-items:center; gap:10px;}
 .cal-arrow-btn{width:36px; height:36px; flex-shrink:0; border-radius:999px; border:1px solid var(--line); background:var(--blanc); cursor:pointer; font-size:15px; color:var(--texte);}
@@ -219,6 +233,7 @@ tr:last-child td{border-bottom:none;}
         <button type="button" data-calview="week" class="active">Semaine</button>
         <button type="button" data-calview="month">Mois</button>
       </div>
+      <button type="button" class="btn btn-outline" id="blockedBtn">Jours fermés</button>
     </div>
     <div id="calBody"></div>
   </div>
@@ -315,6 +330,36 @@ tr:last-child td{border-bottom:none;}
     <div class="modal-actions">
       <button type="button" class="btn btn-outline" id="clientModalClose">Fermer</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="blockedModalBackdrop" hidden>
+  <div class="modal" style="max-width:560px;">
+    <h2>Jours et créneaux fermés</h2>
+    <form id="blockedForm">
+      <div class="form-cols">
+        <div class="form-row">
+          <label for="blockDate">Date</label>
+          <input type="date" id="blockDate" required>
+        </div>
+        <div class="form-row">
+          <label for="blockTime">Créneau</label>
+          <select id="blockTime">
+            <option value="">Toute la journée</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="blockReason">Raison (optionnel)</label>
+        <input type="text" id="blockReason" placeholder="Congés, rendez-vous perso…">
+      </div>
+      <div class="modal-msg" id="blockedMsg"></div>
+      <div class="modal-actions" style="margin-top:0;">
+        <button type="button" class="btn btn-outline" id="blockedModalClose">Fermer</button>
+        <button type="submit" class="btn btn-dark">Bloquer</button>
+      </div>
+    </form>
+    <div id="blockedList" style="margin-top:24px;"></div>
   </div>
 </div>
 
@@ -526,13 +571,17 @@ tr:last-child td{border-bottom:none;}
 
   async function load(){
     try{
-      const [bookingsRes, servicesRes] = await Promise.all([
+      const [bookingsRes, servicesRes, blockedRes] = await Promise.all([
         fetch('/api/admin/bookings'),
-        fetch('/api/services')
+        fetch('/api/services'),
+        fetch('/api/admin/blocked-slots')
       ]);
       if(!bookingsRes.ok) throw new Error('HTTP ' + bookingsRes.status);
       bookings = (await bookingsRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
       services = await servicesRes.json();
+      if(blockedRes.ok){
+        blockedSlots = (await blockedRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      }
       renderCards();
       renderTable();
     }catch(e){
@@ -557,6 +606,8 @@ tr:last-child td{border-bottom:none;}
   let calView = 'week';
   let calDate = new Date();
   calDate.setHours(0,0,0,0);
+  let blockedSlots = [];
+  const OPEN_HOURS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00']; // doit correspondre à OPEN_HOURS côté serveur
 
   const DOW_SHORT = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
   const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -570,6 +621,12 @@ tr:last-child td{border-bottom:none;}
   function bookingsOnDate(iso){
     return bookings.filter(b => b.slot_date === iso).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
   }
+  function isDayBlocked(iso){
+    return blockedSlots.some(b => b.slot_date === iso && b.slot_time === null);
+  }
+  function blockedTimesOnDate(iso){
+    return blockedSlots.filter(b => b.slot_date === iso && b.slot_time !== null).map(b => b.slot_time.slice(0,5));
+  }
 
   function apptChip(b){
     const labels = b.services.map(s => s.label).join(', ');
@@ -580,6 +637,8 @@ tr:last-child td{border-bottom:none;}
 
   const WORK_START_MIN = 9 * 60;
   const WORK_END_MIN = 17 * 60;
+  const DAY_VIEW_START_MIN = 8 * 60;
+  const DAY_VIEW_END_MIN = 18 * 60;
   const PX_PER_MIN = 1.2;
 
   function timeToMin(t){ const [h,m] = t.slice(0,5).split(':').map(Number); return h*60+m; }
@@ -622,7 +681,7 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('calLabel').textContent = calDate.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     const body = document.getElementById('calBody');
 
-    let rangeStart = WORK_START_MIN, rangeEnd = WORK_END_MIN;
+    let rangeStart = DAY_VIEW_START_MIN, rangeEnd = DAY_VIEW_END_MIN;
     for(const b of appts){
       const s = timeToMin(b.slot_time), e = s + apptDuration(b);
       if(s < rangeStart) rangeStart = Math.floor(s/60)*60;
@@ -649,6 +708,12 @@ tr:last-child td{border-bottom:none;}
       const top = (WORK_END_MIN - rangeStart) * PX_PER_MIN;
       offHoursBlocks.push(`<div class="cal-off-hours" style="top:${top}px; height:${(rangeEnd - WORK_END_MIN) * PX_PER_MIN}px;"></div>`);
     }
+    const dayClosed = isDayBlocked(iso);
+    const closedTimes = dayClosed ? [] : blockedTimesOnDate(iso);
+    for(const t of closedTimes){
+      const start = timeToMin(t);
+      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${(start - rangeStart) * PX_PER_MIN}px; height:${60 * PX_PER_MIN}px;"></div>`);
+    }
 
     function minToHHMM(m){ return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
 
@@ -666,7 +731,12 @@ tr:last-child td{border-bottom:none;}
       </div>`;
     }).join('');
 
+    const closedBanner = dayClosed
+      ? `<div class="cal-day-closed-banner">Ce jour est fermé${blockedSlots.find(b => b.slot_date === iso && b.slot_time === null && b.reason) ? ' — ' + escapeHtml(blockedSlots.find(b => b.slot_date === iso && b.slot_time === null).reason) : ''}.</div>`
+      : '';
+
     body.innerHTML = `
+      ${closedBanner}
       <div class="cal-timeline" style="height:${totalHeight}px;">
         <div class="cal-timeline-hours" style="height:${totalHeight}px;">${hourLabels.join('')}</div>
         <div class="cal-timeline-grid" style="height:${totalHeight}px;">
@@ -690,9 +760,11 @@ tr:last-child td{border-bottom:none;}
       const iso = toIso(d);
       const appts = bookingsOnDate(iso);
       const isToday = iso === todayIso;
-      return `<div class="cal-week-col">
+      const closed = isDayBlocked(iso);
+      return `<div class="cal-week-col ${closed ? 'day-closed cal-closed-hatch' : ''}">
         <div class="dow ${isToday ? 'today' : ''}">${DOW_SHORT[d.getDay()]} ${d.getDate()}</div>
-        ${appts.map(apptChip).join('') || '<div style="color:var(--gris); font-size:12px;">—</div>'}
+        ${closed ? '<div class="cal-closed-badge">Fermé</div>' : ''}
+        ${appts.map(apptChip).join('') || (closed ? '' : '<div style="color:var(--gris); font-size:12px;">—</div>')}
       </div>`;
     }).join('') + '</div>';
   }
@@ -713,8 +785,10 @@ tr:last-child td{border-bottom:none;}
       const isToday = iso === todayIso;
       const shown = appts.slice(0,3);
       const more = appts.length > 3 ? `<div class="more">+${appts.length - 3} autre(s)</div>` : '';
-      return `<div class="cal-month-cell ${outside ? 'outside' : ''} ${isToday ? 'today' : ''}" data-day="${iso}">
+      const closed = isDayBlocked(iso);
+      return `<div class="cal-month-cell ${outside ? 'outside' : ''} ${isToday ? 'today' : ''} ${closed ? 'day-closed cal-closed-hatch' : ''}" data-day="${iso}">
         <div class="num">${d.getDate()}</div>
+        ${closed ? '<div class="cal-closed-badge">Fermé</div>' : ''}
         ${shown.map(apptChip).join('')}${more}
       </div>`;
     }).join('');
@@ -757,6 +831,84 @@ tr:last-child td{border-bottom:none;}
     if(cell){ calDate = new Date(cell.dataset.day + 'T00:00:00'); calView = 'day';
       document.querySelectorAll('.cal-view-switch button').forEach(b => b.classList.toggle('active', b.dataset.calview === 'day'));
       renderCalendar();
+    }
+  });
+
+  // ---- Jours et créneaux fermés ----
+  document.getElementById('blockTime').innerHTML += OPEN_HOURS.map(h => `<option value="${h}">${h}</option>`).join('');
+
+  function renderBlockedList(){
+    const list = document.getElementById('blockedList');
+    const upcoming = blockedSlots
+      .filter(b => b.slot_date >= toIso(new Date()))
+      .sort((a,b) => a.slot_date === b.slot_date ? (a.slot_time || '').localeCompare(b.slot_time || '') : a.slot_date.localeCompare(b.slot_date));
+    if(upcoming.length === 0){
+      list.innerHTML = '<div class="blocked-empty">Aucun jour ou créneau fermé à venir.</div>';
+      return;
+    }
+    list.innerHTML = upcoming.map(b => `
+      <div class="blocked-row">
+        <div class="info">
+          ${formatDate(b.slot_date)}${b.slot_time ? ' · ' + b.slot_time.slice(0,5) : ' · Toute la journée'}
+          ${b.reason ? `<span class="reason"> — ${escapeHtml(b.reason)}</span>` : ''}
+        </div>
+        <button type="button" class="btn-danger-text" data-unblock="${b.id}">Débloquer</button>
+      </div>
+    `).join('');
+  }
+
+  function openBlockedModal(){
+    document.getElementById('blockedMsg').textContent = '';
+    document.getElementById('blockedForm').reset();
+    renderBlockedList();
+    document.getElementById('blockedModalBackdrop').hidden = false;
+  }
+  function closeBlockedModal(){
+    document.getElementById('blockedModalBackdrop').hidden = true;
+  }
+  document.getElementById('blockedBtn').addEventListener('click', openBlockedModal);
+  document.getElementById('blockedModalClose').addEventListener('click', closeBlockedModal);
+  document.getElementById('blockedModalBackdrop').addEventListener('click', (e) => {
+    if(e.target.id === 'blockedModalBackdrop') closeBlockedModal();
+  });
+
+  document.getElementById('blockedForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('blockedMsg');
+    msg.textContent = '';
+    const payload = {
+      date: document.getElementById('blockDate').value,
+      time: document.getElementById('blockTime').value || null,
+      reason: document.getElementById('blockReason').value.trim(),
+    };
+    try{
+      const res = await fetch('/api/admin/blocked-slots', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(!res.ok){ msg.textContent = data.error || 'Une erreur est survenue.'; return; }
+      document.getElementById('blockedForm').reset();
+      const blockedRes = await fetch('/api/admin/blocked-slots');
+      blockedSlots = (await blockedRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      renderBlockedList();
+      renderCalendar();
+    }catch(err){
+      msg.textContent = 'Une erreur est survenue — merci de réessayer.';
+    }
+  });
+
+  document.getElementById('blockedList').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-unblock]');
+    if(!btn) return;
+    if(!confirm('Débloquer ce jour/créneau ?')) return;
+    try{
+      await fetch(`/api/admin/blocked-slots/${btn.dataset.unblock}`, { method: 'DELETE' });
+      const blockedRes = await fetch('/api/admin/blocked-slots');
+      blockedSlots = (await blockedRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
+      renderBlockedList();
+      renderCalendar();
+    }catch(err){
+      alert('Impossible de débloquer — merci de réessayer.');
     }
   });
 

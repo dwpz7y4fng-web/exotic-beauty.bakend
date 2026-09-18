@@ -66,3 +66,19 @@ create table clients (
 
 create unique index clients_phone_unique on clients (phone) where phone is not null and phone != '';
 create index on clients (name);
+
+drop table if exists blocked_slots;
+
+-- A blocked slot with slot_time = null blocks the whole day; with a
+-- specific slot_time, it blocks only that hour.
+create table blocked_slots (
+  id uuid primary key default gen_random_uuid(),
+  slot_date date not null,
+  slot_time time,
+  reason text,
+  created_at timestamptz not null default now()
+);
+
+create unique index blocked_slots_day_unique on blocked_slots (slot_date) where slot_time is null;
+create unique index blocked_slots_time_unique on blocked_slots (slot_date, slot_time) where slot_time is not null;
+create index on blocked_slots (slot_date);

@@ -153,6 +153,35 @@ app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/api/admin/blocked-slots', requireAdmin, async (req, res) => {
+  const { rows } = await pool.query(
+    'select id, slot_date, slot_time, reason from blocked_slots order by slot_date, slot_time nulls first'
+  );
+  res.json(rows);
+});
+
+app.post('/api/admin/blocked-slots', requireAdmin, async (req, res) => {
+  const { date, time, reason } = req.body;
+  if (!date) return res.status(400).json({ error: 'date manquante' });
+  try {
+    const { rows } = await pool.query(
+      'insert into blocked_slots (slot_date, slot_time, reason) values ($1, $2, $3) returning id',
+      [date, time || null, reason || null]
+    );
+    res.json({ id: rows[0].id });
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'ce jour ou ce créneau est déjà bloqué' });
+    }
+    throw err;
+  }
+});
+
+app.delete('/api/admin/blocked-slots/:id', requireAdmin, async (req, res) => {
+  await pool.query('delete from blocked_slots where id = $1', [req.params.id]);
+  res.json({ ok: true });
+});
+
 app.get('/api/admin/clients', requireAdmin, async (req, res) => {
   const { rows } = await pool.query(
     'select id, name, phone, email, comments, gender, planity_created_at, planity_deleted_at from clients order by name'
@@ -305,12 +334,14 @@ app.get('/api/availability', async (req, res) => {
   const { date } = req.query;
   if (!date) return res.status(400).json({ error: 'date manquante' });
 
-  const { rows } = await pool.query(
-    `select slot_time from bookings where slot_date = $1 and status != 'cancelled'`,
-    [date]
-  );
-  const taken = rows.map(r => r.slot_time.slice(0, 5));
-  const available = OPEN_HOURS.filter(h => !taken.includes(h));
+  const [bookedRes, blockedRes] = await Promise.all([
+    pool.query(`select slot_time from bookings where slot_date = $1 and status != 'cancelled'`, [date]),
+    pool.query(`select slot_time from blocked_slots where slot_date = $1`, [date]),
+  ]);
+  const dayBlocked = blockedRes.rows.some(r => r.slot_time === null);
+  const taken = bookedRes.rows.map(r => r.slot_time.slice(0, 5));
+  const blockedTimes = blockedRes.rows.filter(r => r.slot_time !== null).map(r => r.slot_time.slice(0, 5));
+  const available = dayBlocked ? [] : OPEN_HOURS.filter(h => !taken.includes(h) && !blockedTimes.includes(h));
   res.json({ date, available, taken });
 });
 
@@ -325,6 +356,12 @@ app.post('/api/book', async (req, res) => {
   const services = svcRes.rows;
   const totalDeposit = services.reduce((sum, s) => sum + s.deposit_cents, 0);
   const labels = services.map(s => s.label).join(' + ');
+
+  const blockedRes = await pool.query(
+    `select 1 from blocked_slots where slot_date = $1 and (slot_time is null or slot_time = $2)`,
+    [date, time]
+  );
+  if (blockedRes.rows.length > 0) return res.status(409).json({ error: 'ce créneau est indisponible' });
 
   let booking;
   try {
