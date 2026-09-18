@@ -23,6 +23,10 @@ const STUDIO_ADDRESS = '722 route de la Chasse, quartier Rivage, Ducos';
 const INACTIVE_MONTHS = 2; // délai sans rendez-vous avant de considérer une cliente comme inactive
 const REENGAGEMENT_COOLDOWN_WEEKS = 6; // ne jamais relancer une même cliente plus souvent que ça
 
+// Une réservation "en attente" dont le paiement Stripe n'a jamais abouti (carte refusée,
+// paiement abandonné en cours de route) bloquait son créneau indéfiniment. Ce délai la libère.
+const PENDING_BOOKING_TIMEOUT_MINUTES = 30;
+
 function safeEqual(a, b) {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
@@ -463,6 +467,21 @@ cron.schedule('0 10 * * 1', async () => {
       console.error('Échec envoi SMS de relance pour', c.id, err.message);
     }
   }
+});
+
+// Libère les créneaux bloqués par un paiement Stripe jamais abouti (carte refusée, paiement
+// abandonné) : une réservation "en attente" trop ancienne est annulée automatiquement.
+async function releaseStalePendingBookings() {
+  const { rowCount } = await pool.query(
+    `update bookings set status = 'cancelled'
+     where status = 'pending' and created_at < now() - make_interval(mins => $1)`,
+    [PENDING_BOOKING_TIMEOUT_MINUTES]
+  );
+  if (rowCount > 0) console.log(`${rowCount} réservation(s) en attente expirée(s) libérée(s).`);
+}
+releaseStalePendingBookings().catch(err => console.error('Échec du nettoyage initial des réservations en attente', err.message));
+cron.schedule('*/10 * * * *', () => {
+  releaseStalePendingBookings().catch(err => console.error('Échec du nettoyage des réservations en attente', err.message));
 });
 
 const PORT = process.env.PORT || 3000;
