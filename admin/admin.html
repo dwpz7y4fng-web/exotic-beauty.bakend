@@ -104,8 +104,6 @@ tr:last-child td{border-bottom:none;}
 .blocked-empty{font-size:13px; color:var(--gris); padding:6px 0;}
 
 .cal-closed-hatch{background-image:repeating-linear-gradient(45deg, var(--line-2), var(--line-2) 6px, var(--creme) 6px, var(--creme) 12px);}
-.cal-week-col.day-closed{position:relative;}
-.cal-week-col.day-closed .dow{color:var(--err);}
 .cal-month-cell.day-closed{position:relative;}
 .cal-month-cell.day-closed .num{color:var(--err);}
 .cal-closed-badge{font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--err); margin-bottom:4px;}
@@ -148,11 +146,18 @@ tr:last-child td{border-bottom:none;}
   background-image:repeating-linear-gradient(45deg, var(--line-2), var(--line-2) 6px, var(--creme) 6px, var(--creme) 12px);
 }
 
-.cal-week{display:grid; grid-template-columns:repeat(7,1fr); gap:10px;}
-.cal-week-col{background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; padding:10px; min-height:120px;}
-.cal-week-col .dow{font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); margin-bottom:8px;}
-.cal-week-col .dow.today{color:var(--brun); font-weight:500;}
-@media(max-width:900px){ .cal-week{grid-template-columns:repeat(7,minmax(120px,1fr)); overflow-x:auto;} }
+.cal-week-timeline{display:flex; background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; overflow:hidden; overflow-x:auto;}
+.cal-week-hours{width:56px; flex-shrink:0; border-right:1px solid var(--line-2); position:relative; padding-top:36px;}
+.cal-week-days{display:flex; flex:1; min-width:700px;}
+.cal-week-daycol{flex:1; min-width:100px; border-right:1px solid var(--line-2); position:relative;}
+.cal-week-daycol:last-child{border-right:none;}
+.cal-week-daycol-head{height:36px; display:flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; color:var(--gris); border-bottom:1px solid var(--line-2); text-align:center;}
+.cal-week-daycol-head.today{color:var(--brun); font-weight:500;}
+.cal-week-daycol-head.day-closed{color:var(--err);}
+.cal-week-daycol-grid{position:relative;}
+.cal-timeline-appt.compact{padding:3px 6px; font-size:10.5px; line-height:1.25;}
+.cal-timeline-appt.compact .t{display:none;}
+@media(max-width:900px){ .cal-week-daycol{min-width:90px;} }
 
 .cal-month{display:grid; grid-template-columns:repeat(7,1fr); gap:8px;}
 .cal-month-dow{font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--gris); text-align:center; padding-bottom:6px;}
@@ -640,6 +645,11 @@ tr:last-child td{border-bottom:none;}
   const DAY_VIEW_START_MIN = 8 * 60;
   const DAY_VIEW_END_MIN = 18 * 60;
   const PX_PER_MIN = 1.2;
+  // Hour labels are vertically centered on their grid line (translateY(-50%)), so without this
+  // padding the very first/last label would be sliced in half by the container's edge.
+  const LABEL_PAD = 10;
+  function yPos(min, rangeStart){ return (min - rangeStart) * PX_PER_MIN + LABEL_PAD; }
+  function minToHHMM(m){ return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
 
   function timeToMin(t){ const [h,m] = t.slice(0,5).split(':').map(Number); return h*60+m; }
   function apptDuration(b){
@@ -690,36 +700,31 @@ tr:last-child td{border-bottom:none;}
 
     const hourLines = [];
     for(let m = rangeStart; m <= rangeEnd; m += 60){
-      const top = (m - rangeStart) * PX_PER_MIN;
-      hourLines.push(`<div class="cal-hour-line" style="top:${top}px;"></div>`);
+      hourLines.push(`<div class="cal-hour-line" style="top:${yPos(m, rangeStart)}px;"></div>`);
     }
     const hourLabels = [];
     for(let m = rangeStart; m <= rangeEnd; m += 60){
-      const top = (m - rangeStart) * PX_PER_MIN;
       const label = String(Math.floor(m/60)).padStart(2,'0') + ':00';
-      hourLabels.push(`<div class="cal-hour-label" style="top:${top}px;">${label}</div>`);
+      hourLabels.push(`<div class="cal-hour-label" style="top:${yPos(m, rangeStart)}px;">${label}</div>`);
     }
-    const totalHeight = (rangeEnd - rangeStart) * PX_PER_MIN;
+    const totalHeight = (rangeEnd - rangeStart) * PX_PER_MIN + LABEL_PAD * 2;
     const offHoursBlocks = [];
     if(rangeStart < WORK_START_MIN){
-      offHoursBlocks.push(`<div class="cal-off-hours" style="top:0px; height:${(WORK_START_MIN - rangeStart) * PX_PER_MIN}px;"></div>`);
+      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(rangeStart, rangeStart)}px; height:${(WORK_START_MIN - rangeStart) * PX_PER_MIN}px;"></div>`);
     }
     if(rangeEnd > WORK_END_MIN){
-      const top = (WORK_END_MIN - rangeStart) * PX_PER_MIN;
-      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${top}px; height:${(rangeEnd - WORK_END_MIN) * PX_PER_MIN}px;"></div>`);
+      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(WORK_END_MIN, rangeStart)}px; height:${(rangeEnd - WORK_END_MIN) * PX_PER_MIN}px;"></div>`);
     }
     const dayClosed = isDayBlocked(iso);
     const closedTimes = dayClosed ? [] : blockedTimesOnDate(iso);
     for(const t of closedTimes){
       const start = timeToMin(t);
-      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${(start - rangeStart) * PX_PER_MIN}px; height:${60 * PX_PER_MIN}px;"></div>`);
+      offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(start, rangeStart)}px; height:${60 * PX_PER_MIN}px;"></div>`);
     }
-
-    function minToHHMM(m){ return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); }
 
     const positioned = layoutColumns(appts);
     const apptEls = positioned.map(({b, start, end, col, colCount}) => {
-      const top = (start - rangeStart) * PX_PER_MIN;
+      const top = yPos(start, rangeStart);
       const height = Math.max((end - start) * PX_PER_MIN, 40);
       const width = 100 / colCount;
       const left = col * width;
@@ -756,17 +761,77 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('calLabel').textContent =
       start.getDate() + ' ' + MOIS_LONG[start.getMonth()].slice(0,3) + ' – ' + endLabel.getDate() + ' ' + MOIS_LONG[endLabel.getMonth()].slice(0,3) + ' ' + endLabel.getFullYear();
     const todayIso = toIso(new Date());
-    document.getElementById('calBody').innerHTML = '<div class="cal-week">' + days.map(d => {
-      const iso = toIso(d);
-      const appts = bookingsOnDate(iso);
+
+    const dayData = days.map(d => ({ d, iso: toIso(d), appts: bookingsOnDate(toIso(d)) }));
+
+    let rangeStart = DAY_VIEW_START_MIN, rangeEnd = DAY_VIEW_END_MIN;
+    for(const { appts } of dayData){
+      for(const b of appts){
+        const s = timeToMin(b.slot_time), e = s + apptDuration(b);
+        if(s < rangeStart) rangeStart = Math.floor(s/60)*60;
+        if(e > rangeEnd) rangeEnd = Math.ceil(e/60)*60;
+      }
+    }
+    const totalHeight = (rangeEnd - rangeStart) * PX_PER_MIN + LABEL_PAD * 2;
+
+    const hourLabels = [];
+    for(let m = rangeStart; m <= rangeEnd; m += 60){
+      hourLabels.push(`<div class="cal-hour-label" style="top:${yPos(m, rangeStart)}px;">${String(Math.floor(m/60)).padStart(2,'0')}:00</div>`);
+    }
+
+    const dayCols = dayData.map(({ d, iso, appts }) => {
       const isToday = iso === todayIso;
-      const closed = isDayBlocked(iso);
-      return `<div class="cal-week-col ${closed ? 'day-closed cal-closed-hatch' : ''}">
-        <div class="dow ${isToday ? 'today' : ''}">${DOW_SHORT[d.getDay()]} ${d.getDate()}</div>
-        ${closed ? '<div class="cal-closed-badge">Fermé</div>' : ''}
-        ${appts.map(apptChip).join('') || (closed ? '' : '<div style="color:var(--gris); font-size:12px;">—</div>')}
+      const dayClosed = isDayBlocked(iso);
+
+      const hourLines = [];
+      for(let m = rangeStart; m <= rangeEnd; m += 60){
+        hourLines.push(`<div class="cal-hour-line" style="top:${yPos(m, rangeStart)}px;"></div>`);
+      }
+      const offHoursBlocks = [];
+      if(rangeStart < WORK_START_MIN){
+        offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(rangeStart, rangeStart)}px; height:${(WORK_START_MIN - rangeStart) * PX_PER_MIN}px;"></div>`);
+      }
+      if(rangeEnd > WORK_END_MIN){
+        offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(WORK_END_MIN, rangeStart)}px; height:${(rangeEnd - WORK_END_MIN) * PX_PER_MIN}px;"></div>`);
+      }
+      if(dayClosed){
+        offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(WORK_START_MIN, rangeStart)}px; height:${(WORK_END_MIN - WORK_START_MIN) * PX_PER_MIN}px;"></div>`);
+      }else{
+        for(const t of blockedTimesOnDate(iso)){
+          const s = timeToMin(t);
+          offHoursBlocks.push(`<div class="cal-off-hours" style="top:${yPos(s, rangeStart)}px; height:${60 * PX_PER_MIN}px;"></div>`);
+        }
+      }
+
+      const positioned = layoutColumns(appts);
+      const apptEls = positioned.map(({b, start: s, end: e, col, colCount}) => {
+        const top = yPos(s, rangeStart);
+        const height = Math.max((e - s) * PX_PER_MIN, 30);
+        const width = 100 / colCount;
+        const left = col * width;
+        const labels = b.services.map(sv => sv.label).join(', ');
+        return `<div class="cal-timeline-appt compact status-${b.status}" data-edit-cal="${b.id}"
+          style="top:${top}px; height:${height}px; left:calc(${left}% + 1px); width:calc(${width}% - 2px);">
+          <span class="c">${minToHHMM(s)} ${escapeHtml(b.client_name)}</span> <span class="s">${escapeHtml(labels)}</span>
+        </div>`;
+      }).join('');
+
+      return `<div class="cal-week-daycol">
+        <div class="cal-week-daycol-head ${isToday ? 'today' : ''} ${dayClosed ? 'day-closed' : ''}">${DOW_SHORT[d.getDay()]} ${d.getDate()}${dayClosed ? ' · Fermé' : ''}</div>
+        <div class="cal-week-daycol-grid" style="height:${totalHeight}px;">
+          ${offHoursBlocks.join('')}
+          ${hourLines.join('')}
+          ${apptEls}
+        </div>
       </div>`;
-    }).join('') + '</div>';
+    }).join('');
+
+    document.getElementById('calBody').innerHTML = `
+      <div class="cal-week-timeline">
+        <div class="cal-week-hours" style="height:${totalHeight + 36}px;">${hourLabels.join('')}</div>
+        <div class="cal-week-days">${dayCols}</div>
+      </div>
+    `;
   }
 
   function renderCalMonth(){
