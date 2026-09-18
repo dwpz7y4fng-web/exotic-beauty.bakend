@@ -624,7 +624,7 @@ tr:last-child td{border-bottom:none;}
   function startOfWeek(d){ const r = new Date(d); const dow = r.getDay(); r.setDate(r.getDate() - (dow === 0 ? 6 : dow - 1)); return r; } // Monday start
   function isSameDate(d, iso){ return toIso(d) === iso; }
   function bookingsOnDate(iso){
-    return bookings.filter(b => b.slot_date === iso).sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+    return bookings.filter(b => b.slot_date === iso && b.status !== 'cancelled').sort((a,b) => a.slot_time.localeCompare(b.slot_time));
   }
   function isDayBlocked(iso){
     return blockedSlots.some(b => b.slot_date === iso && b.slot_time === null);
