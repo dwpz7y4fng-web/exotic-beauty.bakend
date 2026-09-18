@@ -9,6 +9,12 @@ const Stripe = require('stripe');
 const twilio = require('twilio');
 const cron = require('node-cron');
 
+// A single request throwing an unhandled async error (e.g. a failing external API call)
+// must never take the whole server down for every other visitor — log it and keep serving.
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection (server kept running):', err);
+});
+
 const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -382,20 +388,27 @@ app.post('/api/book', async (req, res) => {
     throw err;
   }
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'payment',
-    payment_method_types: ['card'],
-    line_items: [{
-      price_data: {
-        currency: 'eur',
-        product_data: { name: `Acompte — ${labels} (${date} ${time})` },
-        unit_amount: totalDeposit,
-      },
-      quantity: 1,
-    }],
-    success_url: `${SITE_URL}/confirmation.html?booking=${booking.id}`,
-    cancel_url: `${SITE_URL}/?cancelled=1`,
-  });
+  let session;
+  try {
+    session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'eur',
+          product_data: { name: `Acompte — ${labels} (${date} ${time})` },
+          unit_amount: totalDeposit,
+        },
+        quantity: 1,
+      }],
+      success_url: `${SITE_URL}/confirmation.html?booking=${booking.id}`,
+      cancel_url: `${SITE_URL}/?cancelled=1`,
+    });
+  } catch (err) {
+    console.error('Échec de création de la session Stripe pour', booking.id, err.message);
+    await pool.query(`update bookings set status = 'cancelled' where id = $1`, [booking.id]);
+    return res.status(502).json({ error: 'le paiement n\'a pas pu être initié — merci de réessayer.' });
+  }
 
   await pool.query('update bookings set stripe_session_id = $1 where id = $2', [session.id, booking.id]);
   res.json({ checkoutUrl: session.url });
