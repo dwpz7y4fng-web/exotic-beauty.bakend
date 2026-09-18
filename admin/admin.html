@@ -637,6 +637,8 @@ tr:last-child td{border-bottom:none;}
 
   const WORK_START_MIN = 9 * 60;
   const WORK_END_MIN = 17 * 60;
+  const DAY_VIEW_START_MIN = 8 * 60;
+  const DAY_VIEW_END_MIN = 18 * 60;
   const PX_PER_MIN = 1.2;
 
   function timeToMin(t){ const [h,m] = t.slice(0,5).split(':').map(Number); return h*60+m; }
@@ -679,7 +681,7 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('calLabel').textContent = calDate.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
     const body = document.getElementById('calBody');
 
-    let rangeStart = WORK_START_MIN, rangeEnd = WORK_END_MIN;
+    let rangeStart = DAY_VIEW_START_MIN, rangeEnd = DAY_VIEW_END_MIN;
     for(const b of appts){
       const s = timeToMin(b.slot_time), e = s + apptDuration(b);
       if(s < rangeStart) rangeStart = Math.floor(s/60)*60;
