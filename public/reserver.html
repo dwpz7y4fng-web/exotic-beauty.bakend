@@ -259,7 +259,7 @@
     $('heures').innerHTML = '<p class="aide">Chargement…</p>';
     var libres = [];
     try {
-      var r = await fetch('/api/availability?date=' + iso);
+      var r = await fetch('/api/availability?date=' + iso + '&services=' + encodeURIComponent(choisis.join(',')));
       libres = (await r.json()).available || [];
     } catch (err) {
       $('heures').innerHTML = '<p class="aide">Impossible de charger les horaires. Vérifiez votre connexion et réessayez.</p>';
@@ -269,8 +269,8 @@
     var now = maintenantMQ();
     if (iso === now.date) libres = libres.filter(function (h) { return h > now.heure; }); // pas de créneau déjà passé
     if (!libres.length) { $('heures').innerHTML = '<p class="aide">Plus de créneau libre ce jour-là. Essayez un autre jour.</p>'; return; }
-    var matin = libres.filter(function (h) { return h < '12:30'; });
-    var aprem = libres.filter(function (h) { return h >= '12:30'; });
+    var matin = libres.filter(function (h) { return h < '12:00'; });
+    var aprem = libres.filter(function (h) { return h >= '12:00'; });
     function groupe(titre, hs) {
       if (!hs.length) return '';
       return '<div class="groupe"><div class="mono">' + titre + '</div><div class="pilules">' +

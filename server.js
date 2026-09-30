@@ -22,7 +22,85 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
-const OPEN_HOURS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
+
+// ─── Horaires d'ouverture (heure de Martinique) ───────────────────────────────
+// Une ligne par jour (0 = dimanche … 6 = samedi), avec les plages de travail.
+// Pour changer tes horaires, modifie uniquement ce tableau (et le bloc « Horaires »
+// de public/index.html pour l'affichage).
+const TIMEZONE = 'America/Martinique';
+const SCHEDULE = {
+  0: [],                                        // dimanche : fermé
+  1: [['09:00', '12:00'], ['12:30', '17:00']],  // lundi
+  2: [['09:00', '12:00'], ['12:30', '17:00']],  // mardi
+  3: [['09:00', '10:30'], ['12:00', '14:30']],  // mercredi (pour le moment)
+  4: [['09:00', '12:00'], ['12:30', '17:00']],  // jeudi
+  5: [['09:00', '12:00'], ['12:30', '17:00']],  // vendredi
+  6: [['09:00', '12:00'], ['12:30', '18:00']],  // samedi
+};
+const SLOT_STEP_MINUTES = 30;     // on propose un début toutes les 30 min (9h00, 9h30…)
+const BUFFER_MINUTES = 0;         // temps de battement entre deux clientes (ménage…)
+const BLOCKED_SLOT_MINUTES = 60;  // un créneau fermé dans l'admin bloque 1 h
+const DEFAULT_DURATION_MINUTES = 60;
+
+function timeToMinutes(t) { const [h, m] = String(t).slice(0, 5).split(':').map(Number); return h * 60 + m; }
+function minutesToTime(n) { return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0'); }
+function dayOfWeek(isoDate) { return new Date(isoDate + 'T12:00:00Z').getUTCDay(); }
+function nowInMartinique() {
+  const p = {};
+  new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+    .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+  return { date: `${p.year}-${p.month}-${p.day}`, minutes: Number(p.hour) * 60 + Number(p.minute) };
+}
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const HH_MM = /^\d{2}:\d{2}$/;
+
+// Heures de début libres pour une prestation de `durationMinutes` ce jour-là :
+// la prestation doit tenir entière dans une plage d'ouverture, sans chevaucher un
+// rendez-vous existant (avec SA durée réelle) ni un créneau fermé.
+async function computeAvailableTimes(db, date, durationMinutes) {
+  const ranges = SCHEDULE[dayOfWeek(date)] || [];
+  const now = nowInMartinique();
+  if (!ranges.length || date < now.date) return [];
+
+  const [bookedRes, blockedRes] = await Promise.all([
+    db.query(
+      `select b.slot_time, coalesce(sum(s.duration_minutes), 0)::int as duration
+       from bookings b left join services s on s.id = any(b.service_ids)
+       where b.slot_date = $1 and b.status != 'cancelled'
+       group by b.id, b.slot_time`,
+      [date]
+    ),
+    db.query('select slot_time from blocked_slots where slot_date = $1', [date]),
+  ]);
+  if (blockedRes.rows.some(r => r.slot_time === null)) return [];
+
+  const busy = bookedRes.rows.map(r => {
+    const start = timeToMinutes(r.slot_time);
+    return [start, start + (r.duration || DEFAULT_DURATION_MINUTES) + BUFFER_MINUTES];
+  }).concat(blockedRes.rows.map(r => {
+    const start = timeToMinutes(r.slot_time);
+    return [start, start + BLOCKED_SLOT_MINUTES];
+  }));
+
+  const available = [];
+  for (const [open, close] of ranges) {
+    const rangeStart = timeToMinutes(open), rangeEnd = timeToMinutes(close);
+    for (let t = rangeStart; t + durationMinutes <= rangeEnd; t += SLOT_STEP_MINUTES) {
+      if (date === now.date && t <= now.minutes) continue; // déjà passé
+      const end = t + durationMinutes + BUFFER_MINUTES;
+      if (busy.some(([bStart, bEnd]) => t < bEnd && bStart < end)) continue;
+      available.push(minutesToTime(t));
+    }
+  }
+  return available;
+}
+
+async function totalDuration(db, serviceIds) {
+  if (!serviceIds.length) return { ok: true, minutes: DEFAULT_DURATION_MINUTES };
+  const { rows } = await db.query('select id, duration_minutes from services where id = any($1)', [serviceIds]);
+  if (rows.length !== new Set(serviceIds).size) return { ok: false };
+  return { ok: true, minutes: rows.reduce((sum, s) => sum + s.duration_minutes, 0), rows };
+}
 const STUDIO_ADDRESS = '722 route de la Chasse, quartier Rivage, Ducos';
 
 // Seuils de la relance des clientes inactives — ajustables ici.
@@ -340,19 +418,18 @@ app.get('/api/services', async (req, res) => {
   res.json(rows);
 });
 
+// GET /api/availability?date=2026-10-02&services=mixte,brow_lift
+// Renvoie les heures de début possibles pour la durée TOTALE des prestations choisies.
 app.get('/api/availability', async (req, res) => {
   const { date } = req.query;
-  if (!date) return res.status(400).json({ error: 'date manquante' });
+  if (!date || !ISO_DATE.test(date)) return res.status(400).json({ error: 'date manquante' });
+  const serviceIds = String(req.query.services || '').split(',').map(s => s.trim()).filter(Boolean);
+  const duration = await totalDuration(pool, serviceIds);
+  if (!duration.ok) return res.status(404).json({ error: 'prestation inconnue' });
 
-  const [bookedRes, blockedRes] = await Promise.all([
-    pool.query(`select slot_time from bookings where slot_date = $1 and status != 'cancelled'`, [date]),
-    pool.query(`select slot_time from blocked_slots where slot_date = $1`, [date]),
-  ]);
-  const dayBlocked = blockedRes.rows.some(r => r.slot_time === null);
-  const taken = bookedRes.rows.map(r => r.slot_time.slice(0, 5));
-  const blockedTimes = blockedRes.rows.filter(r => r.slot_time !== null).map(r => r.slot_time.slice(0, 5));
-  const available = dayBlocked ? [] : OPEN_HOURS.filter(h => !taken.includes(h) && !blockedTimes.includes(h));
-  res.json({ date, available, taken });
+  const available = await computeAvailableTimes(pool, date, duration.minutes);
+  const { rows } = await pool.query(`select slot_time from bookings where slot_date = $1 and status != 'cancelled'`, [date]);
+  res.json({ date, duration: duration.minutes, available, taken: rows.map(r => r.slot_time.slice(0, 5)) });
 });
 
 app.post('/api/book', async (req, res) => {
@@ -361,31 +438,44 @@ app.post('/api/book', async (req, res) => {
     return res.status(400).json({ error: 'champs manquants' });
   }
 
+  if (!ISO_DATE.test(date) || !HH_MM.test(time)) return res.status(400).json({ error: 'date ou heure invalide' });
+  if (new Set(serviceIds).size !== serviceIds.length) return res.status(400).json({ error: 'prestation en double' });
+
   const svcRes = await pool.query('select * from services where id = any($1)', [serviceIds]);
   if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
   const services = svcRes.rows;
   const totalDeposit = services.reduce((sum, s) => sum + s.deposit_cents, 0);
+  const totalMinutes = services.reduce((sum, s) => sum + s.duration_minutes, 0);
   const labels = services.map(s => s.label).join(' + ');
 
-  const blockedRes = await pool.query(
-    `select 1 from blocked_slots where slot_date = $1 and (slot_time is null or slot_time = $2)`,
-    [date, time]
-  );
-  if (blockedRes.rows.length > 0) return res.status(409).json({ error: 'ce créneau est indisponible' });
-
+  // On re-vérifie le créneau au moment de réserver, en tenant compte de la durée.
+  // Le verrou (un par jour) empêche deux clientes qui valident en même temps de
+  // prendre des créneaux qui se chevauchent.
   let booking;
+  const client = await pool.connect();
   try {
-    const insertRes = await pool.query(
+    await client.query('begin');
+    await client.query('select pg_advisory_xact_lock(hashtext($1))', ['booking-day:' + date]);
+    const available = await computeAvailableTimes(client, date, totalMinutes);
+    if (!available.includes(time)) {
+      await client.query('rollback');
+      return res.status(409).json({ error: 'ce créneau vient d\'être réservé' });
+    }
+    const insertRes = await client.query(
       `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone)
        values ($1, $2, $3, $4, $5) returning id`,
       [serviceIds, date, time, name, phone]
     );
+    await client.query('commit');
     booking = insertRes.rows[0];
   } catch (err) {
+    await client.query('rollback').catch(() => {});
     if (err.code === '23505') {
       return res.status(409).json({ error: 'ce créneau vient d\'être réservé' });
     }
     throw err;
+  } finally {
+    client.release();
   }
 
   let session;

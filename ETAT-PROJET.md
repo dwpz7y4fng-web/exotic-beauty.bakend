@@ -20,6 +20,14 @@
 - Direction visuelle : « clinique premium » (ardoise #1E2B31, brume #DCE6EA, Hanken
   Grotesk + IBM Plex Mono).
 - WhatsApp : le numéro est un **07 → +33**. Liens corrigés en `wa.me/33770211399`.
+- **Horaires (30 sept.)** : lun., mar., jeu., ven. 9h–12h / 12h30–17h · mer. 9h–10h30 /
+  12h–14h30 (pour le moment) · sam. 9h–12h / 12h30–18h · dim. fermé. Réglés dans
+  `SCHEDULE` (`server.js`) + affichage sur l'accueil.
+- **Créneaux selon la durée (30 sept.)** : un début est proposé toutes les 30 min, seulement
+  si la prestation entière (durée totale des prestations choisies) tient dans une plage
+  d'ouverture sans chevaucher un rendez-vous existant ou un créneau fermé (1 h). Re-vérifié
+  au moment de réserver, avec un verrou par jour contre les réservations simultanées.
+  Battement entre clientes : 0 min (`BUFFER_MINUTES`, à ajuster si besoin).
 
 ## 2. Ce qui existe déjà dans le code (≠ stack cible du kit)
 - Express + Postgres (Railway) + Stripe Checkout + SMS Twilio. Détails dans `CLAUDE.md`.
@@ -30,14 +38,8 @@
   Next.js/Supabase/Vercel comme le prévoit le kit.
 
 ## 3. Points ouverts (à décider par Malorie)
-- **Horaires** : l'accueil affiche lun.–ven. 9h–12h / 12h30–17h, mais la réservation
-  propose aussi le **samedi** et un créneau à **12h00** (`OPEN_HOURS` dans `server.js`).
-  Aligner l'un sur l'autre.
 - **Offre regard « dès 80 € »** : aucune remise n'existe en base ; cil à cil + brow lift
   = 95 € au paiement. Soit créer la vraie offre (prestation à 80 €), soit changer le texte.
-- **Créneaux et durée** : un créneau = une heure fixe, quelle que soit la durée
-  (un volume russe de 2 h ne bloque pas l'heure suivante). À revoir avec le moteur de
-  créneaux (HANDOFF §5) — méthode à valider avant code.
 - **Téléphone** : enregistré tel que tapé (pas en +596…). Nécessaire pour fiabiliser les
   SMS/WhatsApp — attention, la relance des inactives compare les numéros : à migrer proprement.
 - **Prix à vérifier** (audit) : wispy cil à cil 55 € < cil à cil 60 € ; wispy mixte
@@ -55,7 +57,7 @@
 - [~] 1. Maquette : accueil ✅ · écrans 2-6 à personnaliser
 - [ ] 2. Onboarding (blocs 1-5) + comptes + connecteurs
 - [~] 3. Site vitrine : accueil ✅ (PR) · pages prestation à faire (après maquette)
-- [~] 4. Créneaux + mini-admin : version simple existante · moteur « durée » à faire
+- [~] 4. Créneaux + mini-admin : durée prise en compte ✅ · horaires en base (modifiables sans code) à faire
 - [x] 5. Acompte Stripe (existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
 - [~] 6. Automatisations : SMS J-1 + relance inactives existants · WhatsApp/e-mail à faire
 - [ ] 7. Tracking Meta (Pixel + CAPI) + bandeau cookies
@@ -64,4 +66,4 @@
 
 ## 5. Prochaine action concrète
 Tester la PR `refonte-accueil-maquette` sur iPhone (navigation privée), la valider,
-puis trancher les points ouverts « horaires » et « offre regard ».
+puis trancher le point ouvert « offre regard ».

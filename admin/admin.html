@@ -612,7 +612,8 @@ tr:last-child td{border-bottom:none;}
   let calDate = new Date();
   calDate.setHours(0,0,0,0);
   let blockedSlots = [];
-  const OPEN_HOURS = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00']; // doit correspondre à OPEN_HOURS côté serveur
+  // Heures proposées pour fermer un créneau (1 h) — toutes les 30 min, de 9h00 à 17h30.
+  const OPEN_HOURS = Array.from({ length: 18 }, (_, i) => String(9 + Math.floor(i / 2)).padStart(2, '0') + (i % 2 ? ':30' : ':00'));
 
   const DOW_SHORT = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
   const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -641,7 +642,7 @@ tr:last-child td{border-bottom:none;}
   }
 
   const WORK_START_MIN = 9 * 60;
-  const WORK_END_MIN = 17 * 60;
+  const WORK_END_MIN = 18 * 60; // le samedi finit à 18h
   const DAY_VIEW_START_MIN = 8 * 60;
   const DAY_VIEW_END_MIN = 18 * 60;
   const PX_PER_MIN = 1.2;
