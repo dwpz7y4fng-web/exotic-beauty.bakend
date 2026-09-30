@@ -45,8 +45,6 @@
 ## 3. Points ouverts (à décider par Malorie)
 - **Téléphone** : enregistré tel que tapé (pas en +596…). Nécessaire pour fiabiliser les
   SMS/WhatsApp — attention, la relance des inactives compare les numéros : à migrer proprement.
-- **Prix à vérifier** (audit) : wispy cil à cil 55 € < cil à cil 60 € ; wispy mixte
-  2 h 20 à 75 € vs wispy volume russe 2 h 10 à 95 €.
 - **CGV / mentions légales** : liens présents dans le pied de page mais pages inexistantes
   — obligatoires puisque le site encaisse déjà des acomptes.
 - **Politique d'annulation / report** : pas encore affichée au paiement.
