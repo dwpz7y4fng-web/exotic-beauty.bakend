@@ -2,51 +2,49 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Réservation confirmée — Exotic Beauty</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>C'est réservé ! — Exotic Beauty</title>
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
-  --creme:#F6F2ED;
-  --noir:#171412;
-  --brun:#6B4A3A;
-  --texte:#4A4139;
-  --gris:#6E645C;
-  --or:#C9A281;
-  --line:#DED3C5;
-}
-*{box-sizing:border-box;}
-body{margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'DM Sans', system-ui, sans-serif; color:var(--noir); background:var(--creme); font-weight:300; -webkit-font-smoothing:antialiased; padding:26px;}
-a{color:inherit;}
-.card{max-width:480px; width:100%; text-align:center; background:#fff; border:1px solid var(--line); border-radius:4px; padding:52px 34px;}
-.mark{width:56px; height:56px; margin:0 auto 26px; border-radius:999px; background:var(--noir); color:var(--creme); display:flex; align-items:center; justify-content:center; font-size:26px;}
-.eyebrow{font-size:13px; letter-spacing:0.26em; color:var(--brun); margin:0 0 16px;}
-h1{margin:0 0 18px; font-family:'Instrument Serif', serif; font-weight:400; font-size:clamp(28px,5vw,38px); line-height:1.2;}
-p{margin:0 0 14px; font-size:16px; line-height:1.7; color:var(--texte);}
-.ref{font-size:13px; color:var(--gris); margin-bottom:30px;}
-.btn{display:inline-block; padding:15px 32px; border-radius:999px; background:var(--noir); color:var(--creme); font-size:13px; text-decoration:none; margin-top:6px;}
-.btn:hover{background:var(--brun);}
-.wa{display:block; margin-top:18px; font-size:13px; color:var(--gris); text-decoration:none;}
-.wa:hover{color:var(--brun);}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="reserver.css">
 </head>
 <body>
-  <div class="card">
-    <div class="mark">✓</div>
-    <p class="eyebrow">Exotic Beauty</p>
-    <h1>Votre créneau est réservé</h1>
-    <p>L'acompte a bien été réglé. Vous recevrez un rappel par SMS la veille de votre rendez-vous.</p>
-    <p class="ref" id="bookingRef"></p>
-    <a href="/" class="btn">Retour à l'accueil</a>
-    <a href="https://wa.me/596770211399" class="wa">une question ? écrire sur whatsapp</a>
+<header class="hdr solid hdr-static">
+  <div class="hdr-in">
+    <a href="/" class="hdr-logo" aria-label="Exotic Beauty — accueil"><img src="images/accueil/logo.png" alt="Exotic Beauty &amp; Spa" width="98" height="56"></a>
   </div>
-  <script>
-    const id = new URLSearchParams(location.search).get('booking');
-    if (id) {
-      document.getElementById('bookingRef').textContent = 'Référence de réservation : ' + id;
-    }
-  </script>
+</header>
+
+<main class="confirm">
+  <div class="confirm-ok" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+  </div>
+  <div class="mono">Réservation confirmée</div>
+  <h1 class="resa-h1">C'est réservé, <span>à très vite !</span></h1>
+  <p class="lead">Votre acompte a bien été réglé. Vous recevrez un rappel par SMS la veille de votre rendez-vous.</p>
+
+  <div class="recap">
+    <div class="recap-ligne"><span class="mono">Adresse</span><strong>Quartier Durivage, Ducos</strong></div>
+    <div class="recap-ligne"><span class="mono">Parking</span><strong>Place privée</strong></div>
+    <div class="recap-ligne" id="refLigne" hidden><span class="mono">Référence</span><strong id="ref"></strong></div>
+  </div>
+
+  <div class="tab-note">Pour préparer votre rendez-vous : venez sans maquillage sur la zone traitée.</div>
+
+  <a href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">Itinéraire</a>
+  <a href="/" class="btn btn-brume btn-lg">Retour à l'accueil</a>
+  <p class="rassure">Un empêchement ? <a href="https://wa.me/33770211399" target="_blank" rel="noopener">Écrivez-moi sur WhatsApp</a></p>
+</main>
+
+<script>
+  var id = new URLSearchParams(location.search).get('booking');
+  if (id) {
+    document.getElementById('ref').textContent = id.slice(0, 8).toUpperCase();
+    document.getElementById('refLigne').hidden = false;
+  }
+</script>
 </body>
 </html>

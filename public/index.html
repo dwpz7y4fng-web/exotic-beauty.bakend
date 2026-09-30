@@ -2,873 +2,378 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Exotic Beauty — cils &amp; sourcils, Ducos, Martinique</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Exotic Beauty — extensions de cils et sourcils à Ducos, Martinique</title>
+<meta name="description" content="Studio privé de beauté du regard à Ducos : extensions de cils, lash lift, brow lift, ombré powder brow. Diagnostic offert avant chaque rendez-vous. ★ 4,9 sur Google.">
+<meta name="theme-color" content="#141D21">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-<style>
-:root{
-  --creme:#F6F2ED;
-  --noir:#171412;
-  --noir-2:#2E2823;
-  --brun:#6B4A3A;
-  --texte:#4A4139;
-  --gris:#6E645C;
-  --gris-clair:#A89C91;
-  --or:#C9A281;
-  --or-clair:#E6C8AC;
-  --line:#DED3C5;
-  --line-2:#E3DACD;
-  --blanc:#FFFFFF;
-}
-*{box-sizing:border-box;}
-body{margin:0; font-family:'DM Sans', system-ui, sans-serif; color:var(--noir); background:var(--creme); -webkit-font-smoothing:antialiased; font-weight:300; line-height:1.65;}
-html{scroll-behavior:smooth;}
-a{color:inherit; text-decoration:none;}
-img{max-width:100%; display:block;}
-h1,h2,h3,.script{font-family:'Instrument Serif', serif; font-weight:400;}
-.wrap{max-width:1280px; margin:0 auto; padding:0 26px;}
-section[id]{scroll-margin-top:112px;}
-.eyebrow{margin:0 0 18px; font-size:13px; letter-spacing:0.26em; color:var(--brun);}
-.btn{display:inline-block; padding:15px 32px; border-radius:999px; font-size:13px; border:none; cursor:pointer; transition:background 0.2s ease, color 0.2s ease, border-color 0.2s ease;}
-.btn-dark{background:var(--noir); color:var(--creme);}
-.btn-dark:hover{background:var(--brun);}
-.btn-light{background:var(--creme); color:var(--noir);}
-.btn-light:hover{background:var(--or-clair);}
-.btn-outline{border:1px solid rgba(250,247,243,0.5); color:#FAF7F3; background:transparent;}
-.btn-outline:hover{background:rgba(250,247,243,0.14);}
-
-/* TICKER */
-.ticker{background:var(--noir); color:#E8DDD2; overflow:hidden; padding:11px 0;}
-.ticker-track{display:flex; width:max-content; animation:marquee 34s linear infinite;}
-.ticker-set{display:flex; gap:46px; padding-right:46px; font-size:13px; letter-spacing:0.1em; white-space:nowrap;}
-.ticker-set span.dot{color:var(--brun);}
-@keyframes marquee{from{transform:translateX(0);} to{transform:translateX(-50%);}}
-
-/* HEADER */
-header{position:sticky; top:0; z-index:30; background:rgba(246,242,237,0.9); backdrop-filter:blur(12px);}
-.header-inner{max-width:1280px; margin:0 auto; padding:16px 26px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px;}
-.logo-block{display:flex; flex-direction:column; gap:3px;}
-.logo-block .name{font-family:'Instrument Serif', serif; font-size:27px; line-height:1;}
-.logo-block .sub{font-size:13px; letter-spacing:0.28em; color:var(--brun);}
-.burger{display:flex; flex-direction:column; justify-content:center; gap:5px; width:46px; height:46px; padding:0 10px; border:none; background:transparent; cursor:pointer;}
-.burger span{display:block; width:26px; height:1.5px; background:var(--noir); transition:transform 260ms ease, opacity 200ms ease;}
-.mobile-nav-backdrop{position:fixed; inset:0; background:rgba(17,14,12,0.4); opacity:0; visibility:hidden; transition:opacity 280ms ease; z-index:99;}
-.mobile-nav-backdrop.open{opacity:1; visibility:visible;}
-.mobile-nav{position:fixed; top:0; left:0; bottom:0; width:min(320px,82vw); background:var(--creme); z-index:100; transform:translateX(-100%); transition:transform 300ms ease; box-shadow:2px 0 30px rgba(17,14,12,0.18); overflow-y:auto;}
-.mobile-nav.open{transform:translateX(0);}
-.mobile-nav-inner{padding:calc(16px + env(safe-area-inset-top,0px)) 26px 30px; display:flex; flex-direction:column; gap:4px;}
-.mobile-nav-close{align-self:flex-end; width:40px; height:40px; border:none; background:transparent; cursor:pointer; font-size:22px; color:var(--noir); margin-bottom:10px;}
-.mobile-nav a{padding:14px 0; color:var(--noir); border-bottom:1px solid var(--line-2); font-size:20px;}
-.mobile-nav a:hover{color:var(--brun);}
-.mobile-nav a.cta{margin-top:16px; align-self:flex-start; padding:14px 30px; border-radius:999px; background:var(--noir); color:var(--creme); font-size:15px; border-bottom:none;}
-.mobile-nav a.cta:hover{background:var(--brun);}
-.burger[aria-expanded="true"] .bar-top{transform:translateY(6.5px) rotate(45deg);}
-.burger[aria-expanded="true"] .bar-mid{opacity:0;}
-.burger[aria-expanded="true"] .bar-bot{transform:translateY(-6.5px) rotate(-45deg);}
-body.nav-open{overflow:hidden;}
-
-/* HERO */
-.hero-section{position:relative; padding:0 14px 14px;}
-.hero-frame{position:relative; overflow:hidden; border-radius:4px; min-height:clamp(440px,82vh,800px); display:flex; align-items:flex-end;}
-.hero-frame img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 42%; filter:brightness(1.2) contrast(0.97);}
-.hero-overlay{position:absolute; inset:0; background:linear-gradient(to top, rgba(18,15,13,0.88) 0%, rgba(18,15,13,0.8) 74%, rgba(18,15,13,0.04) 100%);}
-.hero-content{position:relative; width:100%; padding:0 clamp(20px,5vw,62px) clamp(36px,6vw,68px);}
-.hero-content .eyebrow{color:#DCC3AC;}
-.hero-content h1{margin:0; max-width:800px; font-size:clamp(42px,7.4vw,86px); line-height:1.15; color:#FAF7F3; letter-spacing:-0.01em;}
-.hero-content h1 span{color:var(--or-clair);}
-.hero-cta{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;}
-
-/* INTRO + CAROUSEL */
-.intro-section{padding:clamp(70px,10vw,130px) 26px; display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:44px 70px; align-items:center;}
-.intro-section h2{margin:0 0 26px; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.intro-section > div:first-child p{margin:0; font-size:16px; color:var(--texte);}
-.carousel{position:relative; border-radius:4px; overflow:hidden;}
-.carousel-frame{position:relative; width:100%; aspect-ratio:4/5;}
-.carousel-frame img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 700ms ease;}
-.carousel-frame img.active{opacity:1;}
-.carousel-arrow{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:999px; border:none; background:rgba(246,242,237,0.9); color:var(--noir); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
-.carousel-arrow:hover{background:var(--creme);}
-.carousel-arrow.prev{left:14px;} .carousel-arrow.next{right:14px;}
-.carousel-dots{position:absolute; bottom:16px; left:0; right:0; display:flex; justify-content:center; gap:8px;}
-.carousel-dots button{width:8px; height:8px; border-radius:999px; border:none; padding:0; cursor:pointer; background:rgba(246,242,237,0.5); transition:width 300ms ease, background 300ms ease;}
-.carousel-dots button.active{width:22px; background:var(--creme);}
-
-/* QUI SUIS-JE */
-.qui-section{border-top:1px solid var(--line-2);}
-.qui-inner{max-width:820px; margin:0 auto; padding:clamp(70px,10vw,130px) 26px;}
-.portrait{width:180px; height:180px; border-radius:999px; overflow:hidden; background:#EEE7DE; margin-bottom:30px;}
-.portrait img{width:100%; height:100%; object-fit:cover;}
-.qui-inner p{margin:0 0 18px; font-size:16px; color:var(--texte);}
-
-/* PRESTATIONS */
-.prestations-section{border-top:1px solid var(--line-2);}
-.prestations-inner{padding:clamp(70px,10vw,130px) 26px clamp(40px,6vw,70px);}
-.prestations-head{max-width:640px; margin-bottom:36px;}
-.prestations-head h2{margin:0; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.prestations-head p{margin-top:16px; font-size:16px; color:var(--texte);}
-.presta-filters{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;}
-.presta-filters a{padding:9px 18px; border-radius:999px; border:1px solid var(--line); font-size:13px; color:var(--texte);}
-.presta-filters a:hover{border-color:var(--noir); color:var(--noir);}
-.presta-group{max-width:900px; margin:0 auto; padding:clamp(50px,7vw,80px) 0 0;}
-.presta-group.tinted{background:#EEE7DE; margin-left:calc(50% - 50vw); margin-right:calc(50% - 50vw); padding-left:calc(50vw - 50%); padding-right:calc(50vw - 50%);}
-.presta-group.tinted .presta-group-inner{max-width:900px; margin:0 auto; padding:0 26px;}
-.presta-group h3.group-title{font-size:clamp(24px,3.2vw,34px); margin:0 0 8px;}
-.presta-group > p{margin:0 0 20px; font-size:15px; color:var(--gris);}
-.presta-item{padding:26px 0; border-top:1px solid var(--line-2);}
-.presta-group:not(.tinted) .presta-item:first-of-type{border-top:1px solid var(--noir);}
-.presta-item-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px; margin-bottom:10px;}
-.presta-item-head h4{font-size:22px; margin:0;}
-.presta-item-head .presta-price{font-size:13px; letter-spacing:0.08em; color:var(--brun); white-space:nowrap;}
-.presta-item details summary{display:inline-flex; align-items:center; gap:8px; cursor:pointer; list-style:none; font-size:13px; letter-spacing:0.06em; color:var(--brun); padding:4px 0;}
-.presta-item details summary::-webkit-details-marker{display:none;}
-.presta-item details summary:hover{color:var(--noir);}
-.presta-item details[open] summary .plus{transform:rotate(45deg);}
-.presta-item details .plus{display:inline-block; transition:transform 0.2s ease;}
-.presta-item details p{margin:12px 0 0; font-size:15px; line-height:1.75; color:var(--texte); max-width:680px;}
-.presta-item details p + p{margin-top:12px;}
-@media(max-width:640px){
-  .presta-item-head{gap:4px 16px;}
-}
-
-/* POURQUOI ICI */
-.unique-section{background:var(--noir); color:var(--creme);}
-.unique-inner{padding:clamp(70px,10vw,130px) 26px;}
-.unique-inner .eyebrow{color:var(--or);}
-.unique-inner h2{margin:0 0 22px; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.unique-inner > .wrap > p{margin:0 0 54px; font-size:16px; color:var(--gris-clair); max-width:520px; font-weight:300;}
-.unique-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:1px; background:var(--noir-2);}
-.unique-item{background:var(--noir); padding:36px 30px;}
-.unique-item .num{font-size:16px; color:var(--or);}
-.unique-item h3{margin:18px 0 12px; font-size:24px; line-height:1.2;}
-.unique-item p{margin:0; font-size:16px; color:var(--gris-clair); font-weight:300;}
-
-/* AVIS */
-.avis-section{padding:clamp(70px,10vw,130px) 26px;}
-.avis-head{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:24px 70px; align-items:end; margin-bottom:40px;}
-.avis-head h2{margin:0; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.avis-head p{margin:0; font-size:16px; color:var(--texte); max-width:420px;}
-.score-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:24px; margin-bottom:40px;}
-.score-card{display:flex; align-items:center; justify-content:space-between; gap:20px; padding:26px 28px; border:1px solid var(--line); border-radius:4px;}
-.score-card:hover{border-color:var(--noir);}
-.score-card .src{font-size:13px; letter-spacing:0.22em; color:var(--brun); margin-bottom:8px;}
-.score-card .score{font-family:'Instrument Serif', serif; font-size:34px; line-height:1;}
-.score-card .score span{font-size:18px; color:var(--gris);}
-.score-card .stars{text-align:right; font-size:13px; line-height:1.7; color:var(--gris); font-weight:300;}
-.quote-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:24px;}
-.quote-card{padding:30px; border:1px solid var(--line-2); border-radius:4px; background:var(--blanc); display:flex; flex-direction:column; gap:18px;}
-.quote-card .row{display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px;}
-.quote-card .row .src{letter-spacing:0.22em; color:var(--brun);}
-.quote-card .row .stars{color:var(--gris);}
-.quote-card blockquote{margin:0; font-family:'Instrument Serif', serif; font-size:22px; line-height:1.45;}
-.quote-card figcaption{margin-top:auto; font-size:13px; color:var(--gris);}
-
-/* FAQ */
-.faq-section{max-width:960px; margin:0 auto; padding:clamp(70px,10vw,130px) 26px;}
-.faq-section h2{margin:0 0 46px; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.faq-section details{border-top:1px solid var(--line);}
-.faq-section details:last-child{border-bottom:1px solid var(--line);}
-.faq-section summary{display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 0; font-size:16px; cursor:pointer; list-style:none;}
-.faq-section summary::-webkit-details-marker{display:none;}
-.faq-plus{font-size:24px; color:var(--brun); font-weight:300; transition:transform 0.2s ease;}
-.faq-section details[open] .faq-plus{transform:rotate(45deg);}
-.faq-section details p{margin:0 0 24px; font-size:16px; color:var(--texte); max-width:720px;}
-
-/* RESERVATION */
-.reservation-section{border-top:1px solid var(--line-2);}
-.reservation-inner{max-width:720px; margin:0 auto; padding:clamp(70px,10vw,130px) 26px; text-align:center;}
-.reservation-inner h2{margin:0 0 18px; font-size:clamp(30px,4.4vw,54px); line-height:1.1;}
-.reservation-inner > p{margin:0 0 40px; font-size:16px; color:var(--texte);}
-.booking{text-align:left; background:var(--blanc); border:1px solid var(--line-2); border-radius:4px; padding:34px 30px;}
-.bk-label{font-size:13px; letter-spacing:0.1em; color:var(--brun); margin-bottom:12px; text-transform:uppercase;}
-.bk-services{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px;}
-.bk-chip{padding:10px 16px; border:1px solid var(--line); border-radius:20px; font-size:14px; color:var(--noir); cursor:pointer; background:var(--creme);}
-.bk-chip.active{background:var(--brun); color:#fff; border-color:var(--brun);}
-.bk-dates{display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:30px;}
-.bk-date{flex:0 0 auto; padding:12px 16px; border:1px solid var(--line); border-radius:4px; font-size:13px; color:var(--noir); cursor:pointer; text-align:center; min-width:64px; background:var(--creme);}
-.bk-date span{display:block;}
-.bk-date .d{font-size:1.15rem; font-family:'Instrument Serif', serif; margin-top:2px;}
-.bk-date.active{background:var(--brun); color:#fff; border-color:var(--brun);}
-.bk-slots{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:30px;}
-@media(max-width:520px){.bk-slots{grid-template-columns:repeat(3,1fr);}}
-.bk-slot{padding:12px 6px; border:1px solid var(--line); border-radius:4px; font-size:14px; color:var(--noir); cursor:pointer; text-align:center; background:var(--creme);}
-.bk-slot.active{background:var(--brun); color:#fff; border-color:var(--brun);}
-.bk-slot.taken{opacity:0.35; text-decoration:line-through; cursor:not-allowed;}
-.bk-form{display:grid; gap:14px; margin-bottom:22px;}
-.bk-form input{width:100%; padding:13px 14px; background:var(--creme); border:1px solid var(--line); border-radius:4px; color:var(--noir); font-family:'DM Sans', sans-serif; font-size:15px;}
-.bk-form input::placeholder{color:var(--gris);}
-.bk-msg{font-size:14px; margin-top:10px; min-height:1.2em;}
-.bk-msg.ok{color:#4C8A3A;}
-.bk-msg.err{color:#B84A4A;}
-.bk-recap{font-size:14px; color:var(--noir); margin-bottom:18px; padding:14px 16px; border-left:2px solid var(--brun); background:var(--creme);}
-.admin-link{display:block; text-align:center; margin-top:26px; font-size:13px; color:var(--gris);}
-.admin-link:hover{color:var(--brun);}
-.infos{margin-top:60px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px; border-top:1px solid var(--line-2); padding-top:42px; text-align:left;}
-@media(max-width:700px){.infos{grid-template-columns:1fr; text-align:center;}}
-.infos .label{font-size:12px; letter-spacing:0.1em; color:var(--brun); margin-bottom:10px; text-transform:uppercase;}
-.infos .val{font-size:15px; color:var(--texte);}
-
-/* FOOTER */
-footer{max-width:1280px; margin:0 auto; padding:46px 26px 60px; display:flex; flex-wrap:wrap; gap:22px; align-items:center; justify-content:space-between; border-top:1px solid var(--line);}
-footer .name{font-family:'Instrument Serif', serif; font-size:24px;}
-footer nav{display:flex; flex-wrap:wrap; gap:24px; font-size:13px; font-weight:300;}
-footer nav a{color:var(--gris);}
-footer nav a:hover{color:var(--noir);}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="images/accueil/hero.jpg">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="ticker">
-  <div class="ticker-track">
-    <div class="ticker-set">
-      <span>Diagnostic offert avant chaque pose</span><span class="dot">·</span>
-      <span>Matériel stérilisé, une cliente à la fois</span><span class="dot">·</span>
-      <span>Réponse sous 24 h à votre demande</span><span class="dot">·</span>
-      <span>Colle sans latex sur demande</span><span class="dot">·</span>
-    </div>
-    <div class="ticker-set">
-      <span>Diagnostic offert avant chaque pose</span><span class="dot">·</span>
-      <span>Matériel stérilisé, une cliente à la fois</span><span class="dot">·</span>
-      <span>Réponse sous 24 h à votre demande</span><span class="dot">·</span>
-      <span>Colle sans latex sur demande</span><span class="dot">·</span>
+<!-- Barre d'annonce + header (fixes, en overlay sur la photo) -->
+<div class="top" id="top">
+  <div class="annonce" aria-hidden="true">
+    <div class="annonce-track">
+      <span>Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé · Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé ·</span>
+      <span>Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé · Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé ·</span>
     </div>
   </div>
+  <header class="hdr" id="hdr">
+    <div class="hdr-in">
+      <a href="#haut" class="hdr-logo" aria-label="Exotic Beauty — retour en haut">
+        <img src="images/accueil/logo.png" alt="Exotic Beauty &amp; Spa" width="98" height="56">
+      </a>
+      <div class="hdr-actions">
+        <a href="reserver.html" class="hdr-btn">Réserver</a>
+        <button type="button" class="hdr-menu" id="menuOpen" aria-label="Ouvrir le menu" aria-controls="menu" aria-expanded="false">
+          <svg width="28" height="16" viewBox="0 0 30 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h26M2 15h26"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
 </div>
 
-<header>
-  <div class="header-inner">
-    <a href="#haut" class="logo-block">
-      <span class="name">Exotic Beauty</span>
-      <span class="sub">Cils &amp; sourcils · ducos</span>
-    </a>
-    <button type="button" class="burger" id="burgerBtn" aria-label="Ouvrir le menu" aria-expanded="false">
-      <span class="bar-top"></span>
-      <span class="bar-mid"></span>
-      <span class="bar-bot"></span>
+<!-- Menu plein écran -->
+<div class="menu" id="menu" aria-hidden="true">
+  <div class="menu-top">
+    <span class="mono menu-lbl">Menu</span>
+    <button type="button" class="menu-close" id="menuClose" aria-label="Fermer le menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-</header>
-<div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
-<nav class="mobile-nav" id="mobileNav">
-  <div class="mobile-nav-inner">
-    <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Fermer le menu">✕</button>
+  <nav class="menu-nav">
+    <a href="reserver.html">Prestations et tarifs</a>
+    <a href="#methode">Le déroulement du rendez-vous</a>
     <a href="#qui">Qui suis-je</a>
-    <a href="#prestations">Prestations</a>
-    <a href="#unique">Pourquoi ici</a>
     <a href="#avis">Avis</a>
-    <a href="#faq">FAQ</a>
-    <a href="#reservation" class="cta">Réserver</a>
-  </div>
-</nav>
-
-<section id="haut" class="hero-section">
-  <div class="hero-frame">
-    <img src="images/hero.jpg" alt="Regard avec extensions de cils réalisées chez Exotic Beauty">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <p class="eyebrow">Extensions de cils · ducos</p>
-      <h1>Votre regard,<br><span>Un moment unique&nbsp;</span></h1>
-      <div class="hero-cta">
-        <a href="#reservation" class="btn btn-light">Réserver&nbsp;</a>
-        <a href="#avis" class="btn btn-outline">Voir les avis</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="intro-section wrap">
-  <div>
-    <p class="eyebrow">Bienvenue chez Exotic Beauty</p>
-    <h2>Votre regard, votre moment à vous</h2>
-    <p>Exotic Beauty est un studio privé où chaque rendez-vous devient une vraie parenthèse pour soi. Dans une atmosphère cocooning, à l'abri des regards.</p>
-  </div>
-  <div class="carousel" id="carousel">
-    <div class="carousel-frame">
-      <img class="active" src="images/enseigne.jpg" alt="L'enseigne Exotic Beauty à l'accueil du studio">
-      <img src="images/cabine.jpg" alt="La cabine de pose, table et éclairage">
-      <img src="images/geste.jpg" alt="Application du soin pendant une pose">
-    </div>
-    <button type="button" class="carousel-arrow prev" id="carPrev" aria-label="Image précédente">←</button>
-    <button type="button" class="carousel-arrow next" id="carNext" aria-label="Image suivante">→</button>
-    <div class="carousel-dots" id="carDots">
-      <button type="button" class="active" aria-label="Image 1"></button>
-      <button type="button" aria-label="Image 2"></button>
-      <button type="button" aria-label="Image 3"></button>
-    </div>
-  </div>
-</section>
-
-<section id="qui" class="qui-section">
-  <div class="qui-inner">
-    <div class="portrait"><img src="images/apropos.jpg" alt="Fondatrice d'Exotic Beauty"></div>
-    <p class="eyebrow">Qui suis-je</p>
-    <p>Esthéticienne, spécialisée dans la beauté du regard depuis 5 ans.</p>
-    <p>Mon objectif est de permettre aux femmes de retrouver confiance en elles et de se retrouver, le temps d'une pause.</p>
-    <a href="#prestations" class="btn btn-dark">Voir les prestations</a>
-  </div>
-</section>
-
-<section id="prestations" class="prestations-section">
-  <div class="wrap prestations-inner">
-    <div class="prestations-head">
-      <p class="eyebrow">Nos prestations</p>
-      <h2>Tout ce que je propose, expliqué</h2>
-      <p>Chaque rendez-vous commence par un diagnostic : on regarde vos cils et vos sourcils avant de choisir la technique. Voici le détail de chaque prestation, sa durée et son tarif.</p>
-    </div>
-    <div class="presta-filters">
-      <a href="#pose">Pose complète</a>
-      <a href="#remplissage">Remplissage</a>
-      <a href="#depose">Dépose</a>
-      <a href="#sourcils">Sourcils</a>
-    </div>
-
-    <div class="presta-group" id="pose">
-      <h3 class="group-title">Extensions de cils — pose complète</h3>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Cil à cil</h4><span class="presta-price">1 h · 60 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>La pose complète cil à cil consiste à poser une extension de cil sur tous les cils naturels. Effet mascara, très discret.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Mixte</h4><span class="presta-price">1 h 30 · 70 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Aussi appelé pose mixte, elle consiste à alterner entre le cil à cil et la pose volume russe. Convient à celles qui souhaitent un résultat un peu plus volumineux et sophistiqué, pour un résultat tout aussi naturel.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Volume russe</h4><span class="presta-price">2 h · 90 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Lash lift avec teinture</h4><span class="presta-price">45 min · 60 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Le Lash Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des cils afin de leur donner un effet plus courbé et lifté. Cette technique permet de recourber les cils naturels vers le haut, depuis leur base, pour leur donner un effet allongé et lifté.</p>
-          <p>Cette méthode permet de sublimer les cils existants en leur donnant plus de courbure et de visibilité, avec un effet qui dure en moyenne 6 à 8 semaines.</p>
-          <p>Ce soin est idéal pour des cils fins à épais frisés et/ou très longs et/ou indisciplinés. La teinture est comprise dans la prestation de lash lift pour donner plus d'intensité au regard. Durée : jusqu'à 6 semaines à 8 semaines.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Wispy volume russe</h4><span class="presta-price">2 h 10 · 95 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>En utilisant la méthode volume russe, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Wispy pose mixte</h4><span class="presta-price">2 h 20 · 75 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>En utilisant la méthode mixte, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Wet volume russe</h4><span class="presta-price">2 h 10 · 95 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Wispy pose cil à cil</h4><span class="presta-price">1 h 10 · 55 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-    </div>
-
-    <div class="presta-group tinted" id="remplissage">
-      <div class="presta-group-inner">
-        <h3 class="group-title">Extensions de cils — remplissage</h3>
-        <p>À prévoir toutes les 3 semaines pour garder une ligne pleine.</p>
-
-        <article class="presta-item">
-          <div class="presta-item-head"><h4>Remplissage cil à cil</h4><span class="presta-price">45 min · 30 €</span></div>
-          <details><summary>En savoir plus <span class="plus">+</span></summary>
-            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
-          </details>
-          <p><a href="#reservation" class="service-link">réserver →</a></p>
-        </article>
-
-        <article class="presta-item">
-          <div class="presta-item-head"><h4>Remplissage mixte</h4><span class="presta-price">1 h 15 · 35 €</span></div>
-          <details><summary>En savoir plus <span class="plus">+</span></summary>
-            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
-          </details>
-          <p><a href="#reservation" class="service-link">réserver →</a></p>
-        </article>
-
-        <article class="presta-item">
-          <div class="presta-item-head"><h4>Remplissage volume russe</h4><span class="presta-price">1 h 45 · 45 €</span></div>
-          <details><summary>En savoir plus <span class="plus">+</span></summary>
-            <p>Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose.</p>
-          </details>
-          <p><a href="#reservation" class="service-link">réserver →</a></p>
-        </article>
-      </div>
-    </div>
-
-    <div class="presta-group" id="depose">
-      <h3 class="group-title">Dépose</h3>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Dépose</h4><span class="presta-price">25 min · 20 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Uniquement pour les poses réalisées chez Exotic Beauty.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-    </div>
-
-    <div class="presta-group" id="sourcils">
-      <h3 class="group-title">Sourcils</h3>
-      <p>Restructuration, teinture, brow lift et maquillage permanent.</p>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Ombré powder brow</h4><span class="presta-price">1 h 30 · 200 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Technique de maquillage permanent permettant de restructurer les sourcils clairsemés, fins, queue ou tête de sourcils inexistant. Pour réserver un créneau pour cette prestation, assurez-vous d'avoir pris connaissance de toutes les conditions ou de réserver une consultation.</p>
-          <p><strong>Contre-indications :</strong> allergies, maladies de peau évolutives, injections de silicone, femme enceinte ou allaitante, diabète non contrôlé, insuffisance rénale, port de prothèse cardiaque, maladie auto-immune, hémophilie, cicatrisation difficile, asthme chronique, conjonctivite, glaucome, VIH ou hépatite, cancer de la peau actif dans la zone à tatouer.</p>
-          <p><strong>À savoir :</strong> forte possibilité de faire des croûtes les jours qui suivent la séance. Il est fortement recommandé de ne pas s'exposer au soleil pendant les 30 jours qui suivent, pas d'eau pendant les 48 premières heures et pas de sport pendant 10 jours.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Épilation au fil (restructuration)</h4><span class="presta-price">15 min · 15 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Épilation au fil (entretien)</h4><span class="presta-price">10 min · 10 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
-          <p>Cette prestation est réservable pour les clientes qui souhaitent juste entretenir leur ligne.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Épilation lèvres supérieur</h4><span class="presta-price">5 min · 10 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, cette technique permet une épilation beaucoup plus précise, et plus douce pour la peau car sans utilisation de produits chimiques ou de chaleur.</p>
-          <p>Zone : moustache.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Brow lift (sans teinture)</h4><span class="presta-price">30 min · 35 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Le Brow Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des poils afin de leur donner un effet plus épais. Il permet de rendre les poils plus souples et disciplinés.</p>
-          <p>Ce soin est idéal pour les sourcils frisés et/ou très longs et/ou indisciplinés, mais convient également aux sourcils peu fournis (à condition de l'accompagner d'une teinture hybride). Pour une ligne de sourcils encore plus structurée, ajoutez la teinture à la prestation. L'épilation au fil est comprise dans la prestation.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Brow lift avec teinture</h4><span class="presta-price">1 h 30 · 60 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>Le Brow Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des poils afin de leur donner un effet plus épais. Il permet de rendre les poils plus souples et disciplinés.</p>
-          <p>Ce soin est idéal pour les sourcils frisés et/ou très longs et/ou indisciplinés, mais convient également aux sourcils peu fournis (à condition de l'accompagner d'une teinture hybride). Ici le brow lift est cumulé à la teinture hybride, une technique qui vient colorer temporairement la peau et les poils du sourcil.</p>
-          <p>Durée : jusqu'à 2 semaines sur la peau &amp; jusqu'à 7 semaines sur les poils. La teinture peut permettre de se projeter sur une future micro-pigmentation des sourcils un peu plus permanente. L'épilation est comprise dans cette prestation.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-
-      <article class="presta-item">
-        <div class="presta-item-head"><h4>Teinture hybride</h4><span class="presta-price">45 min · 35 €</span></div>
-        <details><summary>En savoir plus <span class="plus">+</span></summary>
-          <p>La teinture hybride est une technique qui vient colorer temporairement la peau et les poils du sourcil.</p>
-          <p>Durée : jusqu'à 10 jours sur la peau &amp; jusqu'à 7 semaines sur les poils. La teinture peut permettre de se projeter sur une future micro-pigmentation des sourcils un peu plus permanente. L'épilation au fil est comprise dans cette prestation.</p>
-        </details>
-        <p><a href="#reservation" class="service-link">réserver →</a></p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section id="unique" class="unique-section">
-  <div class="wrap unique-inner">
-    <p class="eyebrow">Pourquoi ici ?</p>
-    <h2>Pourquoi les clientes me choisissent</h2>
-    <p>Quatre choses que mes clientes citent en premier quand on leur demande pourquoi elles reviennent.</p>
-    <div class="unique-grid">
-      <div class="unique-item">
-        <span class="num">01</span>
-        <h3>Un regard sur mesure</h3>
-        <p>Avant chaque prestation, un diagnostic de votre regard est effectué.</p>
-      </div>
-      <div class="unique-item">
-        <span class="num">02</span>
-        <h3>Effets naturels garantis</h3>
-        <p>Volume russe ou teinture, ici un résultat naturel sur toutes vos prestations.</p>
-      </div>
-      <div class="unique-item">
-        <span class="num">03</span>
-        <h3>Une douceur qui se ressent</h3>
-        <p>Nos clientes le disent souvent : le geste est doux, le rythme posé. Le rendez-vous devient un vrai moment de détente.</p>
-      </div>
-      <div class="unique-item">
-        <span class="num">04</span>
-        <h3>Cadre cocooning</h3>
-        <p>Un cadre privé et soigné où l'on se sent immédiatement à l'aise.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="avis" class="avis-section wrap">
-  <div class="avis-head">
-    <div>
-      <p class="eyebrow">Elles en parlent</p>
-      <h2>Les avis Google et Planity</h2>
-    </div>
-    <p>Les avis publiés par mes clientes sur Google et sur Planity, après leur rendez-vous.</p>
-  </div>
-
-  <div class="score-grid">
-    <a href="https://www.google.com/maps" class="score-card">
-      <div>
-        <div class="src">Google</div>
-        <div class="score">4,9 <span>/ 5</span></div>
-      </div>
-      <div class="stars">★★★★★<br>sur 48 avis</div>
-    </a>
-    <a href="https://www.planity.com/exotic-beauty-97224-ducos" class="score-card">
-      <div>
-        <div class="src">Planity</div>
-        <div class="score">5,0 <span>/ 5</span></div>
-      </div>
-      <div class="stars">★★★★★<br>sur 31 avis</div>
-    </a>
-  </div>
-
-  <div class="quote-grid">
-    <figure class="quote-card">
-      <div class="row"><span class="src">Google</span><span class="stars">★★★★★</span></div>
-      <blockquote>« Première pose et je me suis endormie. Le résultat est exactement ce que j'avais demandé : naturel. »</blockquote>
-      <figcaption>Sarah · cil à cil</figcaption>
-    </figure>
-    <figure class="quote-card">
-      <div class="row"><span class="src">Planity</span><span class="stars">★★★★★</span></div>
-      <blockquote>« Super prestation avec Malorie, elle a su respecter mes envies de A à Z. Je recommande, n'hésitez pas les filles ! »</blockquote>
-      <figcaption>Avis Planity · février 2026</figcaption>
-    </figure>
-    <figure class="quote-card">
-      <div class="row"><span class="src">Google</span><span class="stars">★★★★★</span></div>
-      <blockquote>« Elle prend le temps d'expliquer l'entretien. Je gagne vingt minutes chaque matin. »</blockquote>
-      <figcaption>Nadia · volume russe</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section id="faq" class="faq-section">
-  <h2>Avant votre premier rendez-vous</h2>
-  <details>
-    <summary>Est-ce que les extensions abîment mes cils naturels ?<span class="faq-plus">+</span></summary>
-    <p>Non, si la pose est adaptée. J'utilise des extensions plus légères que vos cils naturels et je n'en pose jamais deux sur un même cil en cil à cil. Le cil suit son cycle de pousse normalement.</p>
-  </details>
-  <details>
-    <summary>Combien de temps ça tient ?<span class="faq-plus">+</span></summary>
-    <p>Entre trois et quatre semaines selon votre cycle de pousse. Un remplissage toutes les trois semaines permet de garder une ligne pleine en permanence.</p>
-  </details>
-  <details>
-    <summary>Comment me préparer le jour J ?<span class="faq-plus">+</span></summary>
-    <p>Venez sans maquillage sur les yeux et sans crème contour. Évitez le café juste avant : cela limite les tremblements de paupière pendant la pose.</p>
-  </details>
-  <details>
-    <summary>Puis-je me maquiller normalement ?<span class="faq-plus">+</span></summary>
-    <p>Oui, avec un démaquillant sans huile. Le mascara waterproof est à éviter, il fragilise la colle. La plupart des clientes arrêtent simplement le mascara.</p>
-  </details>
-  <details>
-    <summary>Et si j'ai les yeux sensibles ?<span class="faq-plus">+</span></summary>
-    <p>Dites-le-moi à la prise de rendez-vous : il existe des colles sans latex à faible teneur en cyanoacrylate. Un test de tolérance peut être fait quelques jours avant.</p>
-  </details>
-</section>
-
-<section id="reservation" class="reservation-section">
-  <div class="reservation-inner">
-    <h2>Réservez votre créneau</h2>
-    <p>Choisissez votre prestation, votre date, votre heure — la réservation se confirme directement ici.</p>
-
-    <div class="bk-msg err" id="bkCancelledMsg" style="display:none; text-align:center; margin-bottom:20px;">Paiement annulé — votre créneau n'a pas été réservé, vous pouvez réessayer.</div>
-
-    <div class="booking">
-      <div class="bk-label">1. la prestation</div>
-      <div class="bk-services" id="bkServices"></div>
-
-      <div class="bk-label">2. la date</div>
-      <div class="bk-dates" id="bkDates"></div>
-
-      <div class="bk-label">3. l'heure</div>
-      <div class="bk-slots" id="bkSlots"></div>
-
-      <div id="bkRecapWrap" style="display:none;">
-        <div class="bk-recap" id="bkRecap"></div>
-        <div class="bk-label">4. vos coordonnées</div>
-        <div class="bk-form">
-          <input type="text" id="bkNom" placeholder="Votre nom">
-          <input type="tel" id="bkTel" placeholder="Votre téléphone">
-        </div>
-        <button class="btn btn-dark" id="bkSubmit" style="width:100%; border:none;">Confirmer ma réservation</button>
-        <div class="bk-msg" id="bkMsg"></div>
-      </div>
-    </div>
-
-    <a href="https://wa.me/596770211399" class="admin-link" id="bkWhatsapp">un empêchement ? écrire sur whatsapp</a>
-
-    <div class="infos">
-      <div><div class="label">adresse</div><div class="val">722 route de la Chasse<br>Quartier Rivage, Ducos, Martinique</div></div>
-      <div><div class="label">contact</div><div class="val">WhatsApp : 07 70 21 13 99</div></div>
-      <div><div class="label">suivez l'atelier</div><div class="val">Instagram : @exoticbeautycil</div></div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <span class="name">Exotic Beauty</span>
-  <nav>
-    <a href="#prestations">Prestations</a>
-    <a href="#avis">Avis</a>
-    <a href="#faq">FAQ</a>
-    <a href="https://www.instagram.com/exoticbeautycil/">Instagram</a>
+    <a href="#infos">Horaires et contact</a>
+    <a href="#faq" class="last">Questions</a>
+    <a href="reserver.html" class="menu-cta">Réserver mon rendez-vous</a>
   </nav>
+</div>
+
+<main>
+  <!-- HERO -->
+  <section id="haut" class="hero">
+    <img src="images/accueil/hero.jpg" alt="Gros plan d'un regard avec extensions de cils" class="hero-img" fetchpriority="high">
+    <div class="hero-veil"></div>
+    <div class="hero-in">
+      <div class="hero-txt">
+        <div class="hero-note">★ <strong>4,9</strong> sur Google · <a href="https://www.google.com/search?q=Exotic+beauty+cil+-+Extension+de+cils+et+sourcils+-+Ducos%2C+Martinique+Avis" target="_blank" rel="noopener">23 avis</a></div>
+        <h1>Un regard sur mesure, <span>pensé avant d'être posé.</span></h1>
+        <p>Extensions de cils et sourcils à Ducos. Diagnostic offert avant chaque rendez-vous.</p>
+        <a href="reserver.html" class="btn btn-white btn-lg">Réserver mon rendez-vous</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chiffres -->
+  <div class="chiffres">
+    <div class="chiffres-in">
+      <div><div class="chiffre">5 ans</div><div class="mono">Spécialiste du regard</div></div>
+      <div><div class="chiffre">4,9</div><div class="mono">Note Google</div></div>
+      <div><div class="chiffre">1</div><div class="mono">Cliente à la fois</div></div>
+    </div>
+  </div>
+
+  <!-- 01 PRESTATIONS -->
+  <section id="prestations" class="split">
+    <div class="head">
+      <div class="mono">01 — Prestations</div>
+      <h2>Nos <span>prestations.</span></h2>
+    </div>
+    <div class="col">
+      <div class="portes">
+        <a href="reserver.html?c=cils" class="porte">
+          <img src="images/accueil/porte-cils.jpg" alt="Pose mixte" width="72" height="72" loading="lazy">
+          <div class="porte-txt"><div class="porte-t">Mes extensions de cils</div><div class="mono">Dès 55 € · 1 h – 2 h 10</div></div>
+          <span class="rond"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="reserver.html?c=remplissage" class="porte">
+          <img src="images/accueil/porte-remplissage.jpg" alt="Remplissage" width="72" height="72" loading="lazy">
+          <div class="porte-txt"><div class="porte-t">Mon remplissage</div><div class="mono">Dès 30 € · toutes les 3 semaines</div></div>
+          <span class="rond"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="reserver.html?c=sourcils" class="porte">
+          <img src="images/accueil/porte-sourcils.jpg" alt="Sourcils" width="72" height="72" loading="lazy">
+          <div class="porte-txt"><div class="porte-t">Mes sourcils</div><div class="mono">Dès 10 € · brow lift, fil, powder</div></div>
+          <span class="rond"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a href="reserver.html?c=offre" class="porte">
+          <img src="images/accueil/porte-offre.jpg" alt="Offre regard" width="72" height="72" loading="lazy">
+          <div class="porte-txt"><div class="porte-t">L'offre regard</div><div class="mono">Dès 80 € · cils + brow lift</div></div>
+          <span class="rond"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+      </div>
+      <a href="reserver.html" class="btn btn-brume">Voir toutes les prestations et tarifs</a>
+    </div>
+  </section>
+
+  <!-- 02 DIAGNOSTIC -->
+  <section id="diagnostic" class="alt">
+    <div class="split split-center">
+      <div class="head">
+        <div class="mono">02 — Le diagnostic</div>
+        <h2>Un diagnostic <span>avant chaque rendez-vous.</span></h2>
+        <p class="lead">Pour les cils : la forme de vos yeux, l'épaisseur de vos cils naturels et vos attentes. Pour les sourcils : leur épaisseur, s'ils sont disciplinés ou non, et vos attentes. La prestation est adaptée pour qu'elle vous aille au mieux.</p>
+      </div>
+      <div class="col col-10">
+        <div class="fiche">
+          <div class="fiche-photo"><img src="images/accueil/diagnostic.jpg" alt="Cliente pendant le diagnostic" loading="lazy"></div>
+          <div class="fiche-lignes">
+            <div class="fiche-grp">Cils</div>
+            <div class="ligne"><span class="mono">Forme des yeux</span><strong>Amande</strong></div>
+            <div class="ligne"><span class="mono">Épaisseur des cils</span><strong>Moyenne</strong></div>
+            <div class="ligne"><span class="mono">Vos attentes</span><strong>Effet naturel</strong></div>
+            <div class="fiche-grp">Sourcils</div>
+            <div class="ligne"><span class="mono">Épaisseur</span><strong>Fine</strong></div>
+            <div class="ligne"><span class="mono">Disciplinés</span><strong>Non</strong></div>
+            <div class="ligne ligne-last"><span class="mono">Vos attentes</span><strong>Plus fournis</strong></div>
+          </div>
+        </div>
+        <div class="mono">Exemple de diagnostic · offert avant chaque rendez-vous</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 REALISATIONS -->
+  <section id="resultats" class="bloc">
+    <div class="bloc-head">
+      <div class="mono">03 — Réalisations</div>
+      <h2>Nos <span>réalisations.</span></h2>
+    </div>
+    <div class="rail">
+      <figure class="aa">
+        <div class="aa-grid">
+          <div><img src="images/accueil/brow-lift-avant.jpg" alt="Brow lift avant" loading="lazy"><span class="pill mono">Avant</span></div>
+          <div><img src="images/accueil/brow-lift-apres.jpg" alt="Brow lift après" loading="lazy"><span class="pill mono">Après</span></div>
+        </div>
+        <figcaption>Brow lift</figcaption>
+      </figure>
+      <figure class="aa">
+        <div class="aa-grid">
+          <div><img src="images/accueil/lash-lift-avant.jpg" alt="Rehaussement de cils avant" loading="lazy"><span class="pill mono">Avant</span></div>
+          <div><img src="images/accueil/lash-lift-apres.jpg" alt="Rehaussement de cils après" loading="lazy"><span class="pill mono">Après</span></div>
+        </div>
+        <figcaption>Rehaussement de cils</figcaption>
+      </figure>
+      <figure class="aa">
+        <div class="aa-grid">
+          <div><img src="images/accueil/powder-1-avant.jpg" alt="Ombré powder brow avant" loading="lazy"><span class="pill mono">Avant</span></div>
+          <div><img src="images/accueil/powder-1-apres.jpg" alt="Ombré powder brow après" loading="lazy"><span class="pill mono">Après</span></div>
+        </div>
+        <figcaption>Ombré powder brow</figcaption>
+      </figure>
+      <figure class="aa">
+        <div class="aa-grid">
+          <div><img src="images/accueil/fil-avant.jpg" alt="Épilation au fil avant" loading="lazy"><span class="pill mono">Avant</span></div>
+          <div><img src="images/accueil/fil-apres.jpg" alt="Épilation au fil après" loading="lazy"><span class="pill mono">Après</span></div>
+        </div>
+        <figcaption>Épilation au fil</figcaption>
+      </figure>
+      <figure class="aa">
+        <div class="aa-grid">
+          <div><img src="images/accueil/powder-2-avant.jpg" alt="Ombré powder brow avant" loading="lazy"><span class="pill mono">Avant</span></div>
+          <div><img src="images/accueil/powder-2-apres.jpg" alt="Ombré powder brow après" loading="lazy"><span class="pill mono">Après</span></div>
+        </div>
+        <figcaption>Ombré powder brow</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 04 DEROULEMENT -->
+  <section id="methode" class="split split-top0">
+    <div class="head">
+      <div class="mono">04 — Le déroulement</div>
+      <h2>Le déroulement <span>de votre rendez-vous.</span></h2>
+    </div>
+    <ol class="etapes">
+      <li><span class="mono">01</span><div><strong>Le diagnostic</strong><p>Chaque rendez-vous commence par un diagnostic de vos cils ou de vos sourcils, pour choisir ensemble la prestation adaptée.</p></div></li>
+      <li><span class="mono">02</span><div><strong>La prestation</strong><p>Une fois le diagnostic fait, la prestation commence dans une ambiance calme et détendue.</p></div></li>
+      <li><span class="mono">03</span><div><strong>L'entretien</strong><p>Je vous donne des conseils d'entretien pour faire durer le résultat.</p></div></li>
+      <li><span class="mono">04</span><div><strong>Le suivi</strong><p>Vous revenez pour entretenir votre résultat : remplissage, retouche ou nouveau rendez-vous selon votre prestation.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- 05 QUI SUIS-JE -->
+  <section id="qui" class="alt">
+    <div class="split split-center">
+      <img src="images/accueil/malorie.jpg" alt="Portrait de Malorie" class="portrait" loading="lazy">
+      <div class="head head-18">
+        <div class="mono">05 — Qui suis-je</div>
+        <h2 class="h2-sm">Malorie, <span>spécialiste du regard depuis 5 ans.</span></h2>
+        <p class="lead">Esthéticienne spécialisée en beauté du regard, je vous reçois dans mon studio privé à Ducos. Mes clientes me décrivent souvent comme calme, accueillante et à l'écoute de leurs envies.</p>
+        <p class="lead">Mon objectif est de permettre aux femmes de se sentir plus confiantes et plus belles, grâce à la beauté du regard.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 AVIS -->
+  <section id="avis" class="bloc bloc-avis">
+    <div class="bloc-head bloc-head-row">
+      <div class="head-12"><div class="mono">06 — Avis</div><h2>Avis clientes.</h2></div>
+      <div class="note-g"><div class="chiffre">4,9</div><div class="mono">23 avis Google</div></div>
+    </div>
+    <div class="rail">
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« J'ai essayé le rehaussement de cils chez Exotic Beauty cil et je dois dire que je suis ravie du résultat ! »</blockquote><figcaption class="mono">Karine J. · Lash lift</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Superbe prestation du début à la fin. Malorie m'a mise à l'aise tout au long, elle est vraiment douce. »</blockquote><figcaption class="mono">Chloé N. · Teinture hybride</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Un agréable moment avec Malorie ! Au-delà d'être extrêmement douce, elle est très pédagogue et prend le temps d'expliquer chaque étape. »</blockquote><figcaption class="mono">Gwenaëlle L. · Brow lift</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Une excellente expérience ! Malorie est une personne très accueillante et à l'écoute. Elle prend vraiment le temps de comprendre et de donner des conseils. »</blockquote><figcaption class="mono">Rose B. · Sourcils</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Très satisfaite de la prestation de Malorie ! J'ai fait le lash lift et mes cils étaient on fleek durant 2 mois, même plus ! »</blockquote><figcaption class="mono">Livia B. · Lash lift</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« 100 % satisfaite de ma prestation ! Malorie a été à l'écoute concernant mes attentes, douce et rapide. Le résultat est comme je le souhaitais. »</blockquote><figcaption class="mono">Fleur de miel · Extensions + fil</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="4 étoiles sur 5">★★★★<span class="off">★</span></div><blockquote>« Très professionnel, au petit soin et à l'écoute. Pour une première fois, j'ai été mise en confiance, bien conseillée. J'ai déjà pris mon prochain RDV. »</blockquote><figcaption class="mono">Lydie J.-B. · Extensions de cils</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Le cadre du rendez-vous est très cocooning et relaxant. D'autant plus que les rendez-vous sont accompagnés de musiques douces :) »</blockquote><figcaption class="mono">Emma M. · Pose mixte</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Malorie est très professionnelle et cela se ressent dès les premiers échanges. Très douce et attentionnée durant l'épilation, on ne sent presque rien ! »</blockquote><figcaption class="mono">Dharyl E. · Épilation au fil</figcaption></figure>
+      <figure class="avis"><div class="etoiles" aria-label="5 étoiles sur 5">★★★★★</div><blockquote>« Excellente prestation, elle est très douce et à l'écoute. »</blockquote><figcaption class="mono">Marine J.-P. · Wispy volume russe</figcaption></figure>
+    </div>
+
+    <div class="bloc-sub mono">Leurs retours en story</div>
+    <div class="rail rail-stories">
+      <video class="story" data-src="videos/story-01.mp4" poster="videos/story-01.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-02.mp4" poster="videos/story-02.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-03.mp4" poster="videos/story-03.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-04.mp4" poster="videos/story-04.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-05.mp4" poster="videos/story-05.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-06.mp4" poster="videos/story-06.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-07.mp4" poster="videos/story-07.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-08.mp4" poster="videos/story-08.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-09.mp4" poster="videos/story-09.jpg" muted playsinline loop preload="none"></video>
+      <video class="story" data-src="videos/story-10.mp4" poster="videos/story-10.jpg" muted playsinline loop preload="none"></video>
+    </div>
+    <div class="bloc-foot">
+      <a href="https://www.google.com/search?q=Exotic+beauty+cil+-+Extension+de+cils+et+sourcils+-+Ducos%2C+Martinique+Avis" target="_blank" rel="noopener" class="btn btn-ghost">Voir tous les avis sur Google
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>
+  </section>
+
+  <!-- 07 FAQ -->
+  <section id="faq" class="split split-top0 split-faq">
+    <div class="head head-12">
+      <div class="mono">07 — Questions</div>
+      <h2>Questions <span>fréquentes.</span></h2>
+    </div>
+    <div class="faq">
+      <details><summary>Les extensions abîment-elles les cils ?<span class="plus">+</span></summary><p>Non, si la pose est adaptée. Les extensions sont plus légères que vos cils naturels, et le cil suit son cycle de pousse normalement.</p></details>
+      <details><summary>Combien de temps dure le résultat ?<span class="plus">+</span></summary><p>Cela dépend de la prestation : 3 à 4 semaines pour les extensions de cils, jusqu'à 8 semaines pour un lash lift ou un brow lift, 12 à 18 mois pour l'ombré powder brow.</p></details>
+      <details><summary>Comment me préparer ?<span class="plus">+</span></summary><p>Venez sans maquillage sur la zone traitée. Les consignes propres à chaque prestation sont indiquées sur sa fiche.</p></details>
+      <details><summary>Et si j'ai la peau ou les yeux sensibles ?<span class="plus">+</span></summary><p>Signalez-le à la réservation. On en parle pendant le diagnostic, avant de commencer la prestation.</p></details>
+    </div>
+  </section>
+
+  <!-- 08 INFOS PRATIQUES -->
+  <section id="infos" class="alt">
+    <div class="split">
+      <div class="head">
+        <div class="mono">08 — Infos pratiques</div>
+        <h2>Horaires <span>d'ouverture.</span></h2>
+        <div class="horaires">
+          <div><span>Lundi</span><span class="mono-num">09:00 – 12:00<br>12:30 – 17:00</span></div>
+          <div><span>Mardi</span><span class="mono-num">09:00 – 12:00<br>12:30 – 17:00</span></div>
+          <div><span>Mercredi</span><span class="mono-num">09:00 – 12:00<br>12:30 – 17:00</span></div>
+          <div><span>Jeudi</span><span class="mono-num">09:00 – 12:00<br>12:30 – 17:00</span></div>
+          <div><span>Vendredi</span><span class="mono-num">09:00 – 12:00<br>12:30 – 17:00</span></div>
+        </div>
+      </div>
+      <div class="contact">
+        <a href="tel:+33770211399"><span class="mono">Téléphone</span><strong>07 70 21 13 99</strong></a>
+        <a href="https://instagram.com/exotic_beautycil" target="_blank" rel="noopener"><span class="mono">Instagram</span><strong>@exotic_beautycil</strong></a>
+        <a href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" target="_blank" rel="noopener"><span class="mono">Adresse</span><strong>Quartier Durivage, Ducos</strong></a>
+        <div><span class="mono">Parking</span><strong>Place privée</strong></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="pied">
+  <div class="pied-in">
+    <div class="pied-titre">Un regard <span>sur mesure.</span></div>
+    <div class="pied-adr">Quartier Durivage, Ducos · 07 70 21 13 99</div>
+    <a href="https://wa.me/33770211399" target="_blank" rel="noopener" class="btn btn-ghost-light">Nous contacter sur WhatsApp</a>
+    <nav class="pied-nav mono">
+      <a href="reserver.html">Prestations</a>
+      <a href="#avis">Avis</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://instagram.com/exotic_beautycil" target="_blank" rel="noopener">Instagram</a>
+      <a href="#">CGV</a>
+      <a href="#">Mentions légales</a>
+    </nav>
+  </div>
 </footer>
 
+<!-- CTA collé en bas, apparaît après la photo d'accueil -->
+<div class="sticky-cta" id="stickyCta">
+  <a href="reserver.html" class="btn btn-ardoise btn-sticky">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+    Réserver mon rendez-vous</a>
+</div>
+
 <script>
-(function(){
-  // Mobile menu (slides in from the left)
-  const burger = document.getElementById('burgerBtn');
-  const mobileNav = document.getElementById('mobileNav');
-  const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
-  const mobileNavClose = document.getElementById('mobileNavClose');
-
-  function setNavOpen(open){
-    burger.setAttribute('aria-expanded', String(open));
-    mobileNav.classList.toggle('open', open);
-    mobileNavBackdrop.classList.toggle('open', open);
-    document.body.classList.toggle('nav-open', open);
-  }
-  burger.addEventListener('click', () => {
-    setNavOpen(burger.getAttribute('aria-expanded') !== 'true');
-  });
-  mobileNavClose.addEventListener('click', () => setNavOpen(false));
-  mobileNavBackdrop.addEventListener('click', () => setNavOpen(false));
-  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNavOpen(false)));
-
-  // Carousel
-  const carousel = document.getElementById('carousel');
-  const carImages = carousel.querySelectorAll('.carousel-frame img');
-  const carDots = document.querySelectorAll('#carDots button');
-  let carIndex = 0, carTimer;
-
-  function showSlide(i){
-    carIndex = (i + carImages.length) % carImages.length;
-    carImages.forEach((img, idx) => img.classList.toggle('active', idx === carIndex));
-    carDots.forEach((dot, idx) => dot.classList.toggle('active', idx === carIndex));
-  }
-  function restartTimer(){
-    clearInterval(carTimer);
-    carTimer = setInterval(() => showSlide(carIndex + 1), 5200);
-  }
-  document.getElementById('carPrev').addEventListener('click', () => { showSlide(carIndex - 1); restartTimer(); });
-  document.getElementById('carNext').addEventListener('click', () => { showSlide(carIndex + 1); restartTimer(); });
-  carDots.forEach((dot, idx) => dot.addEventListener('click', () => { showSlide(idx); restartTimer(); }));
-  restartTimer();
-
-  // Booking widget
-  const SERVICES = [
-    {id:'cil_a_cil', label:'Cil à cil'},
-    {id:'mixte', label:'Mixte'},
-    {id:'volume_russe', label:'Volume russe'},
-    {id:'lash_lift', label:'Lash lift avec teinture'},
-    {id:'wispy_volume_russe', label:'Wispy volume russe'},
-    {id:'wispy_mixte', label:'Wispy pose mixte'},
-    {id:'wet_volume_russe', label:'Wet volume russe'},
-    {id:'wispy_cil_a_cil', label:'Wispy pose cil à cil'},
-    {id:'remplissage_cil_a_cil', label:'Remplissage cil à cil'},
-    {id:'remplissage_mixte', label:'Remplissage mixte'},
-    {id:'remplissage_volume_russe', label:'Remplissage volume russe'},
-    {id:'depose', label:'Dépose'},
-    {id:'ombre_powder_brow', label:'Ombré powder brow'},
-    {id:'epilation_restructuration', label:'Épilation au fil (restructuration)'},
-    {id:'epilation_entretien', label:'Épilation au fil (entretien)'},
-    {id:'epilation_levres', label:'Épilation lèvres supérieur'},
-    {id:'brow_lift', label:'Brow lift (sans teinture)'},
-    {id:'brow_lift_teinture', label:'Brow lift avec teinture'},
-    {id:'teinture_hybride', label:'Teinture hybride'}
-  ];
-  const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00'];
-  const JOURS_FR = ['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
-  const MOIS_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-
-  let selectedServices = [];
-  let selectedDate = null;
-  let selectedSlot = null;
-  let availableSlots = [];
-
-  function isoDate(d){ return d.toISOString().slice(0,10); }
-
-  function buildDates(){
-    const wrap = document.getElementById('bkDates');
-    const today = new Date();
-    let count = 0, offset = 0;
-    while(count < 16){
-      const d = new Date(today);
-      d.setDate(d.getDate() + offset);
-      offset++;
-      if(d.getDay() === 0){ continue; } // fermé le dimanche
-      const btn = document.createElement('div');
-      btn.className = 'bk-date';
-      btn.dataset.iso = isoDate(d);
-      btn.innerHTML = '<span>'+JOURS_FR[d.getDay()]+'</span><span class="d">'+d.getDate()+'</span><span>'+MOIS_FR[d.getMonth()]+'</span>';
-      btn.addEventListener('click', () => selectDate(d, btn));
-      wrap.appendChild(btn);
-      count++;
-    }
-  }
-
-  function buildServices(){
-    const wrap = document.getElementById('bkServices');
-    SERVICES.forEach(s => {
-      const chip = document.createElement('div');
-      chip.className = 'bk-chip';
-      chip.textContent = s.label;
-      chip.addEventListener('click', () => {
-        const idx = selectedServices.findIndex(x => x.id === s.id);
-        if(idx === -1){
-          selectedServices.push(s);
-          chip.classList.add('active');
-        }else{
-          selectedServices.splice(idx, 1);
-          chip.classList.remove('active');
-        }
-        renderRecapIfReady();
-      });
-      wrap.appendChild(chip);
-    });
-  }
-
-  async function selectDate(d, btn){
-    selectedDate = d;
-    selectedSlot = null;
-    [...document.getElementById('bkDates').children].forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('bkRecapWrap').style.display = 'none';
-    const slotsWrap = document.getElementById('bkSlots');
-    slotsWrap.innerHTML = '<span style="color:var(--gris); font-size:0.85rem;">chargement…</span>';
-    try{
-      const res = await fetch('/api/availability?date=' + isoDate(d));
-      const data = await res.json();
-      availableSlots = data.available || [];
-    }catch(e){
-      availableSlots = [];
-    }
-    slotsWrap.innerHTML = '';
-    SLOTS.forEach(h => {
-      const taken = !availableSlots.includes(h);
-      const btnS = document.createElement('div');
-      btnS.className = 'bk-slot' + (taken ? ' taken' : '');
-      btnS.textContent = h + (taken ? ' · pris' : '');
-      if(!taken){
-        btnS.addEventListener('click', () => {
-          selectedSlot = h;
-          [...slotsWrap.children].forEach(c => c.classList.remove('active'));
-          btnS.classList.add('active');
-          renderRecapIfReady();
-        });
-      }
-      slotsWrap.appendChild(btnS);
-    });
-  }
-
-  function renderRecapIfReady(){
-    const recapWrap = document.getElementById('bkRecapWrap');
-    if(selectedServices.length && selectedDate && selectedSlot){
-      const recap = document.getElementById('bkRecap');
-      const labels = selectedServices.map(s => s.label).join(' + ');
-      recap.textContent = labels + ' — ' + JOURS_FR[selectedDate.getDay()] + ' ' + selectedDate.getDate() + ' ' + MOIS_FR[selectedDate.getMonth()] + ' à ' + selectedSlot;
-      recapWrap.style.display = 'block';
-    }else{
-      recapWrap.style.display = 'none';
-    }
-  }
-
-  async function confirmBooking(){
-    const nom = document.getElementById('bkNom').value.trim();
-    const tel = document.getElementById('bkTel').value.trim();
-    const msg = document.getElementById('bkMsg');
-    msg.className = 'bk-msg';
-    msg.textContent = '';
-    if(!nom || !tel){
-      msg.className = 'bk-msg err';
-      msg.textContent = 'Merci de renseigner votre nom et votre téléphone.';
-      return;
-    }
-    msg.textContent = 'Redirection vers le paiement…';
-    try{
-      const res = await fetch('/api/book', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          serviceIds: selectedServices.map(s => s.id),
-          date: isoDate(selectedDate),
-          time: selectedSlot,
-          name: nom,
-          phone: tel
-        })
-      });
-      const data = await res.json();
-      if(!res.ok){
-        msg.className = 'bk-msg err';
-        msg.textContent = data.error === 'ce créneau vient d\'être réservé'
-          ? 'Ce créneau vient d\'être pris — merci d\'en choisir un autre.'
-          : 'Une erreur est survenue — merci de réessayer.';
-        if(data.error && data.error.includes('créneau')){
-          selectDate(selectedDate, document.querySelector('.bk-date.active'));
-        }
-        return;
-      }
-      window.location.href = data.checkoutUrl;
-    }catch(e){
-      msg.className = 'bk-msg err';
-      msg.textContent = 'Une erreur est survenue — merci de réessayer.';
-    }
-  }
-
-  document.getElementById('bkSubmit').addEventListener('click', confirmBooking);
-
-  buildServices();
-  buildDates();
-
+(function () {
+  // Ancien lien de retour Stripe (« paiement annulé ») : on renvoie vers la page de réservation.
   if (new URLSearchParams(location.search).get('cancelled') === '1') {
-    document.getElementById('bkCancelledMsg').style.display = 'block';
-    window.addEventListener('load', () => {
-      document.getElementById('reservation').scrollIntoView();
+    location.replace('reserver.html?cancelled=1');
+    return;
+  }
+
+  var body = document.body;
+  var sticky = document.getElementById('stickyCta');
+  var menu = document.getElementById('menu');
+  var openBtn = document.getElementById('menuOpen');
+  var menuOpen = false;
+
+  function onScroll() {
+    var y = window.scrollY || 0;
+    var h = window.innerHeight || 800;
+    body.classList.toggle('scrolled', y > 40);
+    sticky.classList.toggle('show', y > h * 0.8 && !menuOpen);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  function setMenu(open) {
+    menuOpen = open;
+    menu.classList.toggle('open', open);
+    menu.setAttribute('aria-hidden', String(!open));
+    openBtn.setAttribute('aria-expanded', String(open));
+    body.classList.toggle('no-scroll', open);
+    onScroll();
+  }
+  openBtn.addEventListener('click', function () { setMenu(true); });
+  document.getElementById('menuClose').addEventListener('click', function () { setMenu(false); });
+  menu.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { setMenu(false); }); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menuOpen) setMenu(false); });
+
+  // FAQ : un seul accordéon ouvert à la fois
+  var faqs = document.querySelectorAll('.faq details');
+  faqs.forEach(function (d) {
+    d.addEventListener('toggle', function () {
+      if (d.open) faqs.forEach(function (o) { if (o !== d) o.open = false; });
     });
+  });
+
+  // Vidéos stories : chargées et lues seulement quand elles sont visibles (site rapide en 4G)
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var videos = document.querySelectorAll('video.story');
+  videos.forEach(function (v) {
+    v.addEventListener('click', function () { v.paused ? play(v) : v.pause(); });
+  });
+  function play(v) {
+    if (!v.src) v.src = v.dataset.src;
+    var p = v.play(); if (p && p.catch) p.catch(function () {});
+  }
+  if ('IntersectionObserver' in window && !reduce) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) play(e.target); else e.target.pause();
+      });
+    }, { threshold: 0.5 });
+    videos.forEach(function (v) { io.observe(v); });
   }
 })();
 </script>
-
 </body>
 </html>
