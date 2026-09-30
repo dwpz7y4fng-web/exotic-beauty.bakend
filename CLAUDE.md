@@ -14,9 +14,14 @@ est différent** — pars toujours de ce qui existe :
 - Paiement : **Stripe Checkout** (acompte = `deposit_cents` de chaque service, en base) ;
   le webhook `checkout.session.completed` passe la résa en `paid`.
 - Rappels : **SMS Twilio** (cron J-1 à 10h) + relance des clientes inactives (lundi 10h).
-- Site public en HTML/CSS/JS simple dans `public/` : `index.html` (accueil, maquette
-  « direction clinique »), `reserver.html` (réservation), `confirmation.html`,
-  styles partagés `styles.css` + `reserver.css`. Admin : `admin/admin.html` (Basic Auth).
+- Site public en HTML/CSS/JS simple dans `public/`, fidèle aux maquettes de `maquettes/` :
+  `index.html` (accueil) → `prestation.html` (fiche prestation + calendrier en bottom sheet)
+  → `rendez-vous.html` (compléments, récap, coordonnées → Stripe) → `confirmation.html`.
+  Textes/photos du catalogue : `catalogue.js` (les prix/durées/acomptes viennent de
+  `/api/services`, jamais du front). `reserver.html` = simple redirection (anciens liens).
+  Styles : `styles.css` + `parcours.css`. Admin : `admin/admin.html` (Basic Auth).
+- API publiques en lecture : `/api/services`, `/api/availability`, `/api/availability-range`,
+  `/api/booking/:id` (résumé pour la page Merci).
 - Créneaux : horaires par jour dans `SCHEDULE` (`server.js`), début toutes les 30 min,
   calcul selon la **durée totale** des prestations (`computeAvailableTimes`), re-vérifié dans
   `/api/book` sous verrou par jour. Index unique `(slot_date, slot_time)` hors `cancelled`.

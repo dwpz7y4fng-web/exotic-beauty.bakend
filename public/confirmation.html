@@ -7,44 +7,112 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="reserver.css">
+<link rel="stylesheet" href="parcours.css">
+<style>
+  .m-hdr { height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--filet); }
+  .m-top { padding: 40px 24px 0; display: flex; flex-direction: column; gap: 14px; }
+  .m-ok { width: 56px; height: 56px; border-radius: 9999px; background: var(--ardoise); display: flex; align-items: center; justify-content: center; }
+  .m-top h1 { font-size: clamp(32px, 6vw, 44px); font-weight: 600; line-height: 1.02; letter-spacing: -.03em; }
+  .m-recap { margin: 28px 24px 0; }
+  .m-recap > div { display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid var(--filet); }
+  .m-recap > div:last-child { border-bottom: 1px solid var(--filet); }
+  .m-recap strong { font-weight: 600; font-size: 15px; text-align: right; }
+  .m-2 { margin: 16px 24px 0; display: flex; gap: 10px; }
+  .m-2 .btn { flex: 1; }
+  .m-info { margin: 20px 24px 0; background: var(--fond-alt); border-radius: 12px; padding: 16px; display: flex; gap: 14px; align-items: center; }
+  .m-info .t { font-weight: 600; font-size: 15px; }
+  .m-info .s { font-size: 13px; color: var(--gris-label); }
+  .m-jj { margin: 36px 24px 0; }
+  .m-jj .mono { margin-bottom: 12px; }
+  .m-jj > div:not(.mono) { display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid var(--filet); font-size: 15px; }
+  .m-jj > div:last-child { border-bottom: 1px solid var(--filet); }
+  .m-jj span.n { font-family: var(--mono); font-size: 11px; padding-top: 3px; }
+  .m-refill { margin: 36px 24px 0; background: var(--noir); color: var(--blanc); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .m-refill .k { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65); }
+  .m-refill .t { font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+  .m-refill .box { border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 12px 14px; }
+  .m-refill .box div:first-child { font-weight: 600; font-size: 15px; }
+  .m-refill .box div:last-child { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.65); }
+  .m-fin { margin: 24px 24px 48px; display: flex; flex-direction: column; gap: 10px; }
+</style>
 </head>
 <body>
-<header class="hdr solid hdr-static">
-  <div class="hdr-in">
-    <a href="/" class="hdr-logo" aria-label="Exotic Beauty — accueil"><img src="images/accueil/logo.png" alt="Exotic Beauty &amp; Spa" width="98" height="56"></a>
-  </div>
-</header>
-
-<main class="confirm">
-  <div class="confirm-ok" aria-hidden="true">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-  </div>
-  <div class="mono">Réservation confirmée</div>
-  <h1 class="resa-h1">C'est réservé, <span>à très vite !</span></h1>
-  <p class="lead">Votre acompte a bien été réglé. Vous recevrez un rappel par SMS la veille de votre rendez-vous.</p>
-
-  <div class="recap">
-    <div class="recap-ligne"><span class="mono">Adresse</span><strong>Quartier Durivage, Ducos</strong></div>
-    <div class="recap-ligne"><span class="mono">Parking</span><strong>Place privée</strong></div>
-    <div class="recap-ligne" id="refLigne" hidden><span class="mono">Référence</span><strong id="ref"></strong></div>
+<div class="m-hdr"><a href="/" class="p-marque">EXOTIC BEAUTY</a></div>
+<div class="r-wrap">
+  <div class="m-top">
+    <div class="m-ok"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div>
+    <div class="mono" id="ref">Réservation confirmée</div>
+    <h1>C'est réservé<span id="hello" style="color:inherit"></span>. <span>Votre regard vous attend.</span></h1>
   </div>
 
-  <div class="tab-note">Pour préparer votre rendez-vous : venez sans maquillage sur la zone traitée.</div>
+  <div class="m-recap" id="recap"></div>
 
-  <a href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">Itinéraire</a>
-  <a href="/" class="btn btn-brume btn-lg">Retour à l'accueil</a>
-  <p class="rassure">Un empêchement ? <a href="https://wa.me/33770211399" target="_blank" rel="noopener">Écrivez-moi sur WhatsApp</a></p>
-</main>
+  <div class="m-2">
+    <a class="btn btn-ghost" id="ics" href="#" download="exotic-beauty.ics" hidden>Ajouter à l'agenda</a>
+    <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" target="_blank" rel="noopener">Itinéraire</a>
+  </div>
 
+  <div class="m-info">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+    <div><div class="t">Un rappel vous arrive la veille</div><div class="s">Par SMS, avec l'heure et l'adresse.</div></div>
+  </div>
+
+  <div class="m-jj">
+    <div class="mono">Pour le jour J</div>
+    <div><span class="n">01</span><span>Venez sans maquillage sur la zone traitée.</span></div>
+    <div><span class="n">02</span><span>Pas de crème contour des yeux.</span></div>
+    <div><span class="n">03</span><span>Évitez le café juste avant.</span></div>
+    <div><span class="n">04</span><span>Au-delà de 15 minutes de retard, la prestation peut être raccourcie ou reportée.</span></div>
+  </div>
+
+  <div class="m-refill" id="refill" hidden>
+    <div class="k">Pour garder l'effet</div>
+    <div class="t">Réservez déjà votre remplissage.</div>
+    <div class="box"><div id="refillQuand"></div><div id="refillMeta"></div></div>
+    <a class="btn btn-white btn-lg" id="refillLien" href="#">Voir les disponibilités</a>
+    <div style="font-size:12px;color:rgba(255,255,255,.65)">Idéalement 3 semaines après votre pose.</div>
+  </div>
+
+  <div class="m-fin">
+    <a class="btn btn-ghost btn-lg" href="https://wa.me/33770211399" target="_blank" rel="noopener">Nous écrire sur WhatsApp</a>
+    <a class="btn btn-brume btn-lg" href="/">Retour à l'accueil</a>
+  </div>
+</div>
+
+<script src="catalogue.js"></script>
 <script>
+(function () {
+  var U = EB.U, $ = function (id) { return document.getElementById(id); };
   var id = new URLSearchParams(location.search).get('booking');
-  if (id) {
-    document.getElementById('ref').textContent = id.slice(0, 8).toUpperCase();
-    document.getElementById('refLigne').hidden = false;
-  }
+  if (!id) return;
+  $('ref').textContent = 'Réservation confirmée · n° ' + id.slice(0, 8).toUpperCase();
+  fetch('/api/booking/' + encodeURIComponent(id)).then(function (r) { return r.ok ? r.json() : null; }).then(function (b) {
+    if (!b || !b.services.length) return;
+    var principal = b.services.map(function (s) { return EB.trouver(s.id); }).filter(Boolean)[0];
+    var t = b.services.reduce(function (a, s) { a.p += s.price_cents; a.a += s.deposit_cents; a.d += s.duration_minutes; return a; }, { p: 0, a: 0, d: 0 });
+    var fin = U.hm(U.min(b.time) + t.d);
+    var noms = b.services.map(function (s) { var f = EB.trouver(s.id); return f ? f.item.name : s.label; }).join(' + ');
+    if (b.firstName) $('hello').textContent = ', ' + b.firstName;
+    var rows = [['Prestation', noms], ['Date', U.long(b.date)], ['Heure', b.time + ' → ' + fin], ['Adresse', 'Quartier Durivage, Ducos'],
+      ['Acompte payé', U.euros(t.a)], ['Au studio', U.euros(t.p - t.a)]];
+    $('recap').innerHTML = rows.map(function (r) { return '<div><span class="mono">' + r[0] + '</span><strong>' + U.esc(r[1]) + '</strong></div>'; }).join('');
+
+    var st = b.date.replace(/-/g, '') + 'T' + b.time.replace(':', '') + '00', en = b.date.replace(/-/g, '') + 'T' + fin.replace(':', '') + '00';
+    var ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Exotic Beauty//FR\r\nBEGIN:VEVENT\r\nUID:' + id + '@exotic-beauty\r\nDTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z\r\nDTSTART;TZID=America/Martinique:' + st + '\r\nDTEND;TZID=America/Martinique:' + en + '\r\nSUMMARY:Exotic Beauty · ' + noms + '\r\nLOCATION:Quartier Durivage\\, Ducos\\, Martinique\r\nEND:VEVENT\r\nEND:VCALENDAR';
+    $('ics').href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); $('ics').hidden = false;
+
+    var refillId = principal && principal.item.refill;
+    if (refillId) {
+      var r = EB.trouver(refillId).item;
+      $('refillQuand').textContent = 'Vers le ' + U.court(U.ajouter(b.date, 21));
+      $('refillMeta').textContent = r.name;
+      $('refillLien').href = 'prestation.html?c=remplissage&p=' + refillId;
+      $('refill').hidden = false;
+    }
+  }).catch(function () {});
+})();
 </script>
 </body>
 </html>

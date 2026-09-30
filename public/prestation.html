@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Prestations et tarifs — Exotic Beauty, Ducos</title>
+<meta name="description" content="Extensions de cils, remplissage, brow lift, ombré powder brow : prix, durée, photos et prochaines disponibilités. Réservation en ligne chez Exotic Beauty à Ducos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="parcours.css">
+</head>
+<body class="parcours">
+
+<div class="p-top">
+  <div class="p-annonce"><span>Diagnostic offert · Une cliente à la fois · Parking privé</span></div>
+  <div class="p-hdr">
+    <div class="p-hdr-in">
+      <a href="/" class="p-marque">EXOTIC BEAUTY</a>
+      <div class="p-ronds">
+        <a href="/" class="p-rond" aria-label="Accueil"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+        <button type="button" class="p-rond js-sheet" aria-label="Voir les créneaux"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="msg msg-err" id="annule" style="margin:16px 16px 0" hidden>Paiement annulé : votre créneau n'a pas été réservé. Vous pouvez réessayer.</div>
+
+<div class="p-cats"><div class="pills" id="cats" role="tablist"></div></div>
+
+<div class="p-grid">
+  <div class="gal">
+    <div class="gal-main"><img id="galMain" src="" alt=""><span class="gal-count" id="galCount"></span></div>
+    <div class="gal-thumbs" id="galThumbs"></div>
+  </div>
+
+  <div>
+    <div class="p-titre">
+      <div class="mono" id="kicker"></div>
+      <h1 id="nom"></h1>
+      <div class="p-tagline" id="tagline"></div>
+      <div class="p-note">★ 4,9 · 23 avis Google</div>
+    </div>
+
+    <div class="p-effets">
+      <div class="mono">Choisissez votre effet</div>
+      <div class="pills" id="effets"></div>
+    </div>
+
+    <div class="p-fiche">
+      <div class="mono">Fiche technique</div>
+      <div id="specs"></div>
+      <div class="spec-fin"></div>
+    </div>
+
+    <div class="dispos">
+      <div class="dispos-head">
+        <h2 class="h2p">Prochaines <span>disponibilités</span></h2>
+        <div class="direct"><i></i>En direct</div>
+      </div>
+      <div id="dispos"><div class="dispo-vide">Recherche des créneaux…</div></div>
+      <button type="button" class="lien-cal js-sheet">Voir tout le calendrier</button>
+    </div>
+  </div>
+</div>
+
+<div class="p-col">
+  <div class="p-bloc">
+    <h2 class="h2p">Le résultat</h2>
+    <p class="p-desc court" id="desc"></p>
+    <button type="button" class="btn-plus" id="plus">Lire la suite</button>
+  </div>
+
+  <div class="p-bloc">
+    <h2 class="h2p">Recommandé si…</h2>
+    <div class="pour" id="pour"></div>
+  </div>
+
+  <div class="p-bloc">
+    <h2 class="h2p">Inclus dans <span>chaque rendez-vous.</span></h2>
+    <div class="inclus">
+      <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Diagnostic offert</div>
+      <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Une cliente à la fois</div>
+      <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><path d="M5 5h14v14H5z"/><path d="M9 10h6M9 14h4"/></svg>Conseils d'entretien</div>
+    </div>
+  </div>
+</div>
+
+<div class="studio">
+  <div class="studio-head"><h2 class="h2p">Le studio</h2></div>
+  <div class="rail">
+    <img src="images/prestations/studio-cabine.jpg" alt="La cabine de pose" loading="lazy">
+    <img src="images/prestations/studio-soin.jpg" alt="Une pose en cours" loading="lazy">
+    <img src="images/prestations/studio-enseigne.jpg" alt="L'accueil du studio" loading="lazy">
+  </div>
+</div>
+
+<div class="p-col">
+  <div class="faq-p faq">
+    <h2 class="h2p">À savoir</h2>
+    <details><summary>Comment me préparer<span class="plus">+</span></summary><p id="prepa"></p></details>
+    <details><summary>L'entretien au quotidien<span class="plus">+</span></summary><p id="entretien"></p></details>
+    <details><summary>Report, retard, annulation<span class="plus">+</span></summary><p>Le report est gratuit jusqu'à 48 h avant le rendez-vous. Au-delà, ou en cas d'absence, l'acompte est conservé. Au-delà de 15 minutes de retard, la prestation peut être raccourcie ou reportée.</p></details>
+  </div>
+
+  <div class="refill" id="refill" hidden>
+    <div class="mono">Pour garder l'effet</div>
+    <div class="refill-l"><span id="refillNom"></span><span id="refillPrix"></span></div>
+    <p>Toutes les 3 semaines · <span id="refillDuree"></span>. Réservable dès maintenant, dans l'onglet Remplissage.</p>
+  </div>
+
+  <div class="conseil">
+    <div class="t">Besoin d'un conseil avant de réserver ?</div>
+    <p id="conseil"></p>
+    <a href="https://wa.me/33770211399" target="_blank" rel="noopener" class="btn btn-ghost-light">Nous contacter sur WhatsApp</a>
+  </div>
+
+  <div class="faq-p faq" id="faq">
+    <h2 class="h2p">Questions fréquentes</h2>
+    <details data-si="powder"><summary>Comment le dessin est-il choisi ?<span class="plus">+</span></summary><p>Je dessine le sourcil en fonction de la morphologie de votre visage et de vos attentes : une ligne plus épaissie, plus arquée… Je vous conseille au mieux pour que le résultat vous corresponde et vous aille. Le dessin est validé avec vous avant de commencer la pigmentation.</p></details>
+    <details data-si="powder"><summary>J'ai une maladie, puis-je quand même le faire ?<span class="plus">+</span></summary><p>Oui, avec l'accord de votre médecin.</p></details>
+    <details data-si="douleur"><summary>Est-ce douloureux ?<span class="plus">+</span></summary><p id="faqDouleur"></p></details>
+    <details data-si="yeux"><summary>Est-ce que ça abîme mes cils ?<span class="plus">+</span></summary><p id="faqAbime"></p></details>
+    <details data-si="maquillage"><summary>Puis-je me maquiller ?<span class="plus">+</span></summary><p id="faqMaquillage"></p></details>
+    <details data-si="yeux"><summary>Et si j'ai les yeux sensibles ?<span class="plus">+</span></summary><p>Signalez-le à la réservation. On en parle pendant le diagnostic, avant de commencer la pose.</p></details>
+    <details><summary>Pourquoi un acompte ?<span class="plus">+</span></summary><p>Je ne reçois qu'une cliente à la fois : un rendez-vous manqué, c'est une demi-journée perdue. L'acompte bloque votre créneau et il est déduit du total le jour J.</p></details>
+  </div>
+</div>
+
+<footer class="p-pied">
+  <div class="p-pied-in">
+    <div class="pied-titre">Un regard <span>sur mesure.</span></div>
+    <a href="/" class="mono">← Retour à l'accueil</a>
+  </div>
+</footer>
+
+<div class="p-barre">
+  <div class="p-barre-in">
+    <div class="p-barre-txt"><div class="p-barre-l1" id="barPrix"></div><div class="mono" id="barMeta"></div></div>
+    <button type="button" class="btn btn-ardoise js-sheet">Voir les disponibilités</button>
+  </div>
+</div>
+
+<div class="bs" id="bs" aria-hidden="true">
+  <div class="bs-fond js-close"></div>
+  <div class="bs-panel" role="dialog" aria-modal="true" aria-labelledby="bsTitre">
+    <div class="bs-poignee"><i></i></div>
+    <div class="bs-top">
+      <button type="button" class="bs-x js-close" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button type="button" class="bs-eff" id="effacer">Effacer</button>
+    </div>
+    <div class="bs-corps">
+      <div class="bs-h"><div class="mono" id="bsKicker"></div><div class="t" id="bsTitre">Choisissez votre jour</div></div>
+      <div class="bs-mois" id="bsMois"></div>
+      <div class="bs-jours" id="bsJours"></div>
+      <div class="bs-sep"></div>
+      <div class="bs-heures">
+        <div class="t">Choisissez votre heure</div>
+        <div id="bsHeures"></div>
+      </div>
+    </div>
+    <div class="bs-bas">
+      <div class="txt"><div class="p" id="bsPrix"></div><div class="mono" id="bsPick">Choisissez une heure</div></div>
+      <a href="#" class="bs-cont" id="continuer">Continuer</a>
+    </div>
+  </div>
+</div>
+
+<script src="catalogue.js"></script>
+<script>
+(function () {
+  var C = EB.CATALOGUE, U = EB.U;
+  var $ = function (id) { return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  if (q.get('cancelled') === '1') $('annule').hidden = false;
+
+  var services = {};
+  var cat = C[q.get('c')] ? q.get('c') : 'cils';
+  var found = EB.trouver(q.get('p'));
+  if (found) cat = found.cat;
+  var itemId = found ? found.item.id : C[cat].defaut;
+  var galIdx = 0, plus = false;
+  var dispoCache = {};   // id -> {days:[...]}
+  var jourSel = null, heureSel = null;
+
+  function item() { return C[cat].items.filter(function (i) { return i.id === itemId; })[0] || C[cat].items[0]; }
+  function svc() { return services[item().id]; }
+  function lienRdv(date, h) { return 'rendez-vous.html?p=' + encodeURIComponent(item().id) + '&d=' + date + '&h=' + h; }
+
+  function rendre() {
+    var it = item(), s = svc();
+    history.replaceState(null, '', 'prestation.html?c=' + cat + '&p=' + it.id);
+    document.title = it.name + ' — Exotic Beauty, Ducos';
+
+    $('cats').innerHTML = Object.keys(C).map(function (k) {
+      return '<button type="button" class="pill-btn' + (k === cat ? ' on' : '') + '" data-cat="' + k + '">' + C[k].label + '</button>';
+    }).join('');
+    $('effets').innerHTML = C[cat].items.filter(function (i) { return services[i.id]; }).map(function (i) {
+      return '<button type="button" class="pill-btn' + (i.id === it.id ? ' on' : '') + '" data-id="' + i.id + '">' + U.esc(i.chip) + '</button>';
+    }).join('');
+
+    var g = it.gallery; galIdx = Math.min(galIdx, g.length - 1);
+    $('galMain').src = g[galIdx]; $('galMain').alt = it.name;
+    $('galCount').textContent = (galIdx + 1) + ' / ' + g.length;
+    $('galThumbs').innerHTML = g.map(function (src, i) {
+      return '<button type="button" class="' + (i === galIdx ? 'on' : '') + '" data-g="' + i + '" aria-label="Voir la photo ' + (i + 1) + '"><img src="' + src + '" alt=""></button>';
+    }).join('');
+
+    $('kicker').textContent = C[cat].kicker;
+    $('nom').textContent = it.name;
+    $('tagline').textContent = it.tagline;
+
+    var refill = it.refill && services[it.refill] ? EB.trouver(it.refill).item : null;
+    var specs = [['Durée', s ? U.duree(s.duration_minutes) : '—'], ['Prix', s ? U.euros(s.price_cents) : '—'],
+      ['Acompte en ligne', s ? U.euros(s.deposit_cents) : '—'], ['Technique', it.technique], ['Tenue', it.tenue]];
+    if (refill) specs.push(['Remplissage conseillé', 'Toutes les 3 semaines']);
+    $('specs').innerHTML = specs.map(function (x) { return '<div class="spec"><span class="mono">' + x[0] + '</span><strong>' + U.esc(x[1]) + '</strong></div>'; }).join('');
+
+    $('desc').textContent = it.desc; $('desc').classList.toggle('court', !plus);
+    $('plus').textContent = plus ? 'Réduire' : 'Lire la suite';
+    $('pour').innerHTML = it.pour.map(function (t, i) { return '<div><span class="mono">0' + (i + 1) + '</span><span>' + U.esc(t) + '</span></div>'; }).join('');
+
+    var id = it.id, fil = ['epilation_restructuration', 'epilation_entretien', 'epilation_levres'].indexOf(id) !== -1;
+    $('prepa').textContent = id === 'ombre_powder_brow' ? "Évitez le café avant le rendez-vous : il favorise les saignements."
+      : fil ? "Venez simplement sans maquillage."
+      : (id === 'brow_lift' || id === 'brow_lift_teinture') ? "Pas de préparation particulière, venez simplement sans maquillage."
+      : "Venez sans maquillage sur les yeux et sans crème contour. Évitez le café juste avant, cela limite les tremblements de paupière.";
+    $('entretien').textContent = id === 'ombre_powder_brow'
+      ? "Achetez en pharmacie, avant le rendez-vous, le soin cicatrisant Cicaplast Gel B5. Pas d'eau pendant 48 heures, pas de soleil pendant un mois, et ne grattez pas les croûtes. Une retouche est parfois possible après la cicatrisation, selon les clientes."
+      : fil ? "Pas de soin particulier à prévoir entre deux rendez-vous."
+      : id === 'teinture_hybride' ? "Une fois la teinture partie de la peau, appliquez chaque jour le soin fourni."
+      : id === 'brow_lift_teinture' ? "Ne mouillez pas vos sourcils pendant 48 heures. Une fois la teinture partie de la peau, appliquez chaque jour le soin fourni."
+      : id === 'brow_lift' ? "Appliquez chaque jour le soin fourni. Ne mouillez pas la zone pendant les 48 premières heures."
+      : id === 'lash_lift' ? "Appliquez chaque jour le soin fourni. Ne mouillez pas vos cils pendant les 48 premières heures."
+      : "Démaquillant sans huile, pas de mascara waterproof, et un coup de brosse chaque matin. Évitez l'eau et la vapeur pendant les 24 premières heures."
+        + ((cat === 'cils' || cat === 'offre' || (cat === 'remplissage' && id !== 'depose')) ? " Il est important de revenir toutes les 3 semaines pour entretenir votre pose." : '');
+
+    $('refill').hidden = !refill;
+    if (refill) {
+      var rs = services[refill.id];
+      $('refillNom').textContent = refill.name; $('refillPrix').textContent = U.euros(rs.price_cents); $('refillDuree').textContent = U.duree(rs.duration_minutes);
+    }
+    $('conseil').textContent = cat === 'sourcils' ? "Envoyez une photo de vos sourcils : nous vous orientons vers l'effet le plus adapté." : "Envoyez une photo de vos cils : nous vous orientons vers l'effet le plus adapté.";
+
+    var sourcilsSeuls = ['ombre_powder_brow', 'brow_lift', 'brow_lift_teinture', 'teinture_hybride'].concat(fil ? [id] : []);
+    var regles = {
+      powder: id === 'ombre_powder_brow',
+      douleur: id === 'ombre_powder_brow' || fil,
+      yeux: sourcilsSeuls.indexOf(id) === -1 && !fil,
+      maquillage: id !== 'ombre_powder_brow' && !fil
+    };
+    document.querySelectorAll('#faq details[data-si]').forEach(function (d) { d.hidden = !regles[d.dataset.si]; d.open = false; });
+    $('faqDouleur').textContent = id === 'ombre_powder_brow' ? "Très peu. La première étape se fait sans anesthésiant et peut être plus ou moins sensible selon les clientes. Un anesthésiant est ensuite appliqué : la suite est quasiment indolore." : "Cela reste une épilation. La tolérance à la douleur est différente pour chaque cliente.";
+    $('faqAbime').textContent = id === 'lash_lift' ? "Non. Le rehaussement est toutefois un soin qui assèche les cils : il est important d'appliquer chaque jour le soin fourni." : "Non, si la pose est adaptée. Les extensions sont plus légères que vos cils naturels et le cil suit son cycle de pousse normalement.";
+    $('faqMaquillage').textContent = ['brow_lift', 'brow_lift_teinture', 'teinture_hybride'].indexOf(id) !== -1 ? "Évitez le maquillage sur la zone. Une fois la teinture partie de la peau, appliquez le soin fourni."
+      : id === 'lash_lift' ? "Oui, vous pouvez vous maquiller et mettre du mascara sans problème."
+      : "Oui, le maquillage autour des yeux est possible, il ne fragilise pas la pose. Le mascara, en revanche, est à proscrire.";
+
+    $('barPrix').textContent = s ? 'À partir de ' + U.euros(s.price_cents) : '';
+    $('barMeta').textContent = s ? U.duree(s.duration_minutes) + ' · ★ 4,9' : '';
+    $('bsKicker').textContent = it.name + (s ? ' · ' + U.duree(s.duration_minutes) : '');
+    $('bsPrix').textContent = s ? U.euros(s.price_cents) : '';
+    chargerDispos();
+  }
+
+  // ---- Disponibilités réelles (serveur) ----
+  function chargerDispos() {
+    var id = item().id;
+    if (dispoCache[id]) return afficherDispos();
+    $('dispos').innerHTML = '<div class="dispo-vide">Recherche des créneaux…</div>';
+    fetch('/api/availability-range?days=21&services=' + encodeURIComponent(id))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { dispoCache[id] = d; if (item().id === id) afficherDispos(); })
+      .catch(function () { $('dispos').innerHTML = '<div class="dispo-vide">Impossible de charger les créneaux pour le moment. Réessayez dans un instant.</div>'; });
+  }
+  function joursOuverts() { var d = dispoCache[item().id]; return d ? d.days.filter(function (x) { return x.open; }) : []; }
+  function libelleJour(iso, auj) {
+    var pre = iso === auj ? "Aujourd'hui, " : iso === U.ajouter(auj, 1) ? 'Demain, ' : '';
+    return pre + U.court(iso);
+  }
+  function afficherDispos() {
+    var d = dispoCache[item().id]; if (!d) return;
+    var auj = d.days[0] && d.days[0].date;
+    var dur = d.duration, trouves = d.days.filter(function (x) { return x.available.length; }).slice(0, 3);
+    if (!trouves.length) { $('dispos').innerHTML = '<div class="dispo-vide">Aucun créneau libre dans les 3 prochaines semaines. Écrivez-moi sur WhatsApp, je vous trouve une place.</div>'; }
+    else {
+      $('dispos').innerHTML = trouves.map(function (x, i) {
+        var h = x.available[0], r = h + ' → ' + U.hm(U.min(h) + dur);
+        if (i === 0) return '<a class="dispo-1" href="' + lienRdv(x.date, h) + '"><span class="txt"><span class="k">La plus proche</span><span class="d">' + libelleJour(x.date, auj) + '</span><span class="r">' + r + '</span></span><span class="go">Réserver</span></a>';
+        return '<a class="dispo-n" href="' + lienRdv(x.date, h) + '"><span class="txt"><span class="d">' + libelleJour(x.date, auj) + '</span><span class="r">' + r + '</span></span><span class="rond"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>';
+      }).join('');
+    }
+    if ($('bs').classList.contains('open')) rendreSheet();
+  }
+
+  // ---- Bottom sheet ----
+  function ouvrir() {
+    if (!jourSel) { var j = joursOuverts().filter(function (x) { return x.available.length; })[0]; jourSel = j ? j.date : null; }
+    rendreSheet();
+    $('bs').classList.add('open'); $('bs').setAttribute('aria-hidden', 'false'); document.body.classList.add('no-scroll');
+  }
+  function fermer() { $('bs').classList.remove('open'); $('bs').setAttribute('aria-hidden', 'true'); document.body.classList.remove('no-scroll'); }
+  function rendreSheet() {
+    var d = dispoCache[item().id];
+    if (!d) { $('bsJours').innerHTML = ''; $('bsHeures').innerHTML = '<div class="bs-vide">Chargement…</div>'; return; }
+    var jours = joursOuverts();
+    var sel = jours.filter(function (x) { return x.date === jourSel; })[0];
+    $('bsMois').textContent = sel ? (U.MOIS_L[U.jour(sel.date).getUTCMonth()].replace(/^./, function (c) { return c.toUpperCase(); }) + ' ' + sel.date.slice(0, 4)) : '';
+    $('bsJours').innerHTML = jours.map(function (x) {
+      var dt = U.jour(x.date), dispo = x.available.length > 0;
+      return '<button type="button" class="bs-jour' + (x.date === jourSel ? ' on' : '') + (dispo ? '' : ' off') + '" data-d="' + x.date + '"' + (dispo ? '' : ' disabled') + '><span class="w">' + U.JOURS[dt.getUTCDay()].replace('.', '') + '</span><span class="n">' + dt.getUTCDate() + '</span></button>';
+    }).join('');
+    if (!sel) { $('bsHeures').innerHTML = '<div class="bs-vide">Aucun créneau libre pour le moment.</div>'; }
+    else {
+      var btn = function (h) { return '<button type="button" class="bs-h-btn' + (h === heureSel ? ' on' : '') + '" data-h="' + h + '">' + h + '</button>'; };
+      var am = sel.available.filter(function (h) { return h < '12:00'; }), pm = sel.available.filter(function (h) { return h >= '12:00'; });
+      $('bsHeures').innerHTML = (am.length ? '<div class="mono">Matin</div><div class="bs-grille">' + am.map(btn).join('') + '</div>' : '')
+        + (pm.length ? '<div class="mono" style="margin-top:12px">Après-midi</div><div class="bs-grille">' + pm.map(btn).join('') + '</div>' : '');
+    }
+    var ok = !!(jourSel && heureSel);
+    $('bsPick').textContent = ok ? U.court(jourSel) + ' · ' + heureSel + ' → ' + U.hm(U.min(heureSel) + d.duration) : 'Choisissez une heure';
+    $('continuer').classList.toggle('ok', ok);
+    $('continuer').href = ok ? lienRdv(jourSel, heureSel) : '#';
+  }
+
+  // ---- Événements ----
+  $('cats').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-cat]'); if (!b) return;
+    cat = b.dataset.cat; itemId = C[cat].defaut; galIdx = 0; plus = false; jourSel = heureSel = null; rendre();
+  });
+  $('effets').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-id]'); if (!b) return;
+    itemId = b.dataset.id; galIdx = 0; plus = false; jourSel = heureSel = null; rendre();
+  });
+  $('galThumbs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-g]'); if (!b) return; galIdx = +b.dataset.g; rendre();
+  });
+  $('plus').addEventListener('click', function () { plus = !plus; $('desc').classList.toggle('court', !plus); $('plus').textContent = plus ? 'Réduire' : 'Lire la suite'; });
+  document.querySelectorAll('.js-sheet').forEach(function (b) { b.addEventListener('click', ouvrir); });
+  document.querySelectorAll('.js-close').forEach(function (b) { b.addEventListener('click', fermer); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fermer(); });
+  $('bsJours').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-d]'); if (!b || b.disabled) return; jourSel = b.dataset.d; heureSel = null; rendreSheet();
+  });
+  $('bsHeures').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-h]'); if (!b) return; heureSel = b.dataset.h; rendreSheet();
+  });
+  $('effacer').addEventListener('click', function () { heureSel = null; rendreSheet(); });
+  document.querySelectorAll('.faq').forEach(function (f) {
+    var ds = f.querySelectorAll('details');
+    ds.forEach(function (d) { d.addEventListener('toggle', function () { if (d.open) ds.forEach(function (o) { if (o !== d) o.open = false; }); }); });
+  });
+
+  // ---- Démarrage : prix, durées et acomptes lus en base ----
+  fetch('/api/services').then(function (r) { return r.json(); }).then(function (rows) {
+    rows.forEach(function (s) { services[s.id] = s; });
+    if (!services[itemId]) { var dispo = C[cat].items.filter(function (i) { return services[i.id]; })[0]; if (dispo) itemId = dispo.id; }
+    rendre();
+  }).catch(function () {
+    $('dispos').innerHTML = '<div class="dispo-vide">Impossible de charger les prestations. Réessayez dans un instant, ou écrivez-moi sur <a href="https://wa.me/33770211399" style="text-decoration:underline">WhatsApp</a>.</div>';
+  });
+})();
+</script>
+</body>
+</html>

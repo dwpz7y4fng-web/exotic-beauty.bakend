@@ -7,9 +7,11 @@
 ## 0. Maquette
 - **Accueil : finalisé** dans Claude Design (export « Accueil hors ligne ») avec les vraies
   photos, avis, horaires, vidéos stories. → Codé fidèlement dans `public/index.html`.
-- Écrans prestation et réservation : maquettes Claude Design reçues le 30 sept.
-  (`maquettes/prestation.dc.html`, `maquettes/reservation.dc.html`, catalogue complet
-  dedans). Pas encore codées : prochaine grosse étape si Malorie les valide.
+- Écrans prestation, rendez-vous, acompte, merci : **codés le 30 sept.** d'après les
+  maquettes (`maquettes/prestation.dc.html`, `maquettes/reservation.dc.html`).
+  Écarts volontaires : acompte réel (≈ 1/3, pas 50 %), pas de minuteur (pas encore de
+  « hold » côté serveur), paiement sur la page Stripe (pas de champs carte sur le site),
+  pas d'e-mail demandé (non stocké), rappel par SMS (pas encore WhatsApp).
   En attendant, `public/reserver.html` reprend le parcours existant (qui marche) avec la
   peau « clinique » : choix de la prestation → bottom sheet jour/heure → récap + acompte →
   Stripe. À remplacer écran par écran quand les maquettes seront validées.

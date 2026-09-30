@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Votre rendez-vous — Exotic Beauty</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="parcours.css">
+</head>
+<body class="parcours" style="padding-bottom:170px">
+
+<!-- ÉTAPE 1 : votre rendez-vous -->
+<section id="e1">
+  <div class="r-hdr"><div class="r-hdr-in">
+    <a class="r-back" id="retour1" href="prestation.html" aria-label="Retour"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></a>
+    <div class="t">Votre rendez-vous</div><div></div>
+  </div></div>
+  <div class="r-wrap">
+    <div class="r-carte">
+      <img id="img" src="" alt="">
+      <div class="txt"><div class="n" id="nom"></div><div class="w" id="quand"></div><div class="mono">Studio · Ducos</div></div>
+      <a id="modifier" href="prestation.html">Modifier</a>
+    </div>
+    <div class="r-inclus"><div class="mono">✓ Déjà inclus</div><div>Diagnostic du regard · conseils d'entretien</div></div>
+
+    <div class="r-bloc" id="question" hidden>
+      <div class="mono">01 — Une petite question</div>
+      <div class="r-q">Avez-vous déjà des extensions posées ailleurs ?</div>
+      <div class="r-opts">
+        <button type="button" class="r-opt" id="non">Non, cils naturels</button>
+        <button type="button" class="r-opt" id="oui">Oui</button>
+      </div>
+      <div class="r-note" id="noteOui" hidden>Pas de souci : j'ajoute la dépose (+25 min) pour repartir sur une base saine.</div>
+    </div>
+
+    <div class="r-bloc" id="blocAddons">
+      <div class="mono" id="addonsKicker">Ajouter une prestation</div>
+      <div class="r-q">Profitez du rendez-vous pour ajouter un soin.</div>
+      <div class="addons" id="addons"></div>
+      <div class="r-duree" id="duree"></div>
+    </div>
+
+    <div class="r-prix" id="prix1"></div>
+    <div class="r-pill"><span id="report1"></span></div>
+  </div>
+
+  <div class="r-bas"><div class="r-bas-in">
+    <div class="progress"><i class="on"></i><i></i></div>
+    <div class="r-bas-row">
+      <div class="txt"><div class="l1" id="bas1"></div><div class="mono" id="bas1b"></div></div>
+      <button type="button" class="btn btn-ardoise" id="versE2">Aller au paiement</button>
+    </div>
+  </div></div>
+</section>
+
+<!-- ÉTAPE 2 : acompte -->
+<section id="e2" hidden>
+  <div class="r-hdr"><div class="r-hdr-in">
+    <button type="button" class="r-back" id="retour2" aria-label="Retour"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <div class="t">Acompte</div>
+    <div style="display:flex;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" aria-label="Paiement sécurisé"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>
+  </div></div>
+  <div class="r-wrap">
+    <div class="champs2">
+      <div class="ligne2">
+        <label class="chp"><span class="mono">Prénom</span><input id="prenom" autocomplete="given-name" required></label>
+        <label class="chp"><span class="mono">Nom</span><input id="nomF" autocomplete="family-name"></label>
+      </div>
+      <label class="chp"><span class="mono">Téléphone</span><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0696 12 34 56" required></label>
+      <div class="r-aide">Pour la confirmation et le rappel la veille de votre rendez-vous.</div>
+    </div>
+
+    <div class="r-prix" id="prix2" style="margin-top:24px"></div>
+    <div class="r-pill"><span id="report2"></span></div>
+
+    <div class="r-secu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+      <div>Paiement sécurisé par Stripe : vous allez être redirigée vers leur page de paiement. L'acompte bloque votre créneau, rien d'autre n'est prélevé.</div>
+    </div>
+  </div>
+
+  <div class="r-bas"><div class="r-bas-in">
+    <div class="progress"><i class="on"></i><i class="on"></i></div>
+    <div class="err" id="err" hidden></div>
+    <button type="button" class="btn btn-ardoise btn-full" id="payer">Confirmer et payer</button>
+    <div class="petit">En confirmant, j'accepte les conditions de report et d'annulation.</div>
+  </div></div>
+</section>
+
+<script src="catalogue.js"></script>
+<script>
+(function () {
+  var U = EB.U, $ = function (id) { return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+  var f = EB.trouver(q.get('p'));
+  var date = /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') || '') ? q.get('d') : null;
+  var heure = /^\d{2}:\d{2}$/.test(q.get('h') || '') ? q.get('h') : null;
+  if (!f || !date || !heure) { location.replace('prestation.html'); return; }
+  var it = f.item, services = {}, on = {}, prev = null, dispoOk = true, envoi = false, verif = 0;
+  var retour = 'prestation.html?c=' + f.cat + '&p=' + it.id;
+  $('retour1').href = retour; $('modifier').href = retour;
+
+  function choisis() { return EB.complementsPour(it).filter(function (k) { return on[k] && services[k]; }); }
+  function totaux() {
+    return [it.id].concat(choisis()).reduce(function (t, id) {
+      var s = services[id]; t.prix += s.price_cents; t.acompte += s.deposit_cents; t.duree += s.duration_minutes; return t;
+    }, { prix: 0, acompte: 0, duree: 0 });
+  }
+  // Date limite de report gratuit (48 h avant). Si elle est déjà passée, on n'affiche rien.
+  function reportJusquau() {
+    var d = U.ajouter(date, -2), p = {};
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Martinique', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+    var maintenant = p.year + '-' + p.month + '-' + p.day + ' ' + p.hour + ':' + p.minute;
+    if (d + ' ' + heure <= maintenant) return '';
+    return '✓ Report gratuit jusqu\'au ' + U.court(d) + ', ' + heure;
+  }
+
+  function rendre() {
+    var s = services[it.id], t = totaux(), fin = U.hm(U.min(heure) + t.duree);
+    $('img').src = it.gallery[0]; $('img').alt = it.name;
+    $('nom').textContent = it.name;
+    $('quand').textContent = U.court(date) + ' · ' + heure + ' → ' + fin;
+
+    var pose = it.kind === 'pose' || it.kind === 'offre';
+    $('question').hidden = !pose;
+    $('non').classList.toggle('on', prev === 'non'); $('oui').classList.toggle('on', prev === 'oui');
+    $('noteOui').hidden = prev !== 'oui';
+    $('addonsKicker').textContent = (pose ? '02' : '01') + ' — Ajouter une prestation';
+
+    var liste = EB.complementsPour(it).filter(function (k) { return services[k]; });
+    $('blocAddons').hidden = !liste.length;
+    $('addons').innerHTML = liste.map(function (k) {
+      var a = services[k];
+      return '<button type="button" class="addon' + (on[k] ? ' on' : '') + '" data-k="' + k + '" aria-pressed="' + !!on[k] + '">'
+        + '<span class="mono">+' + U.duree(a.duration_minutes) + '</span><span class="n">' + U.esc(EB.COMPLEMENTS[k]) + '</span>'
+        + '<span class="p">' + U.euros(a.price_cents) + '</span><span class="tog"><i></i></span></button>';
+    }).join('');
+    $('duree').textContent = 'Durée totale ' + U.duree(t.duree) + (dispoOk ? ' · ✓ créneau toujours disponible' : ' · ✕ trop long pour ce créneau : retirez un soin ou choisissez une autre heure (Modifier)');
+    $('duree').classList.toggle('ko', !dispoOk);
+
+    var lignes = [[it.name, s.price_cents]].concat(choisis().map(function (k) { return [EB.COMPLEMENTS[k], services[k].price_cents]; }));
+    $('prix1').innerHTML = lignes.map(function (l) { return '<div><span>' + U.esc(l[0]) + '</span><span>' + U.euros(l[1]) + '</span></div>'; }).join('')
+      + '<div class="b"><span>Total</span><span>' + U.euros(t.prix) + '</span></div>'
+      + '<div class="b"><span>Acompte aujourd\'hui</span><span>' + U.euros(t.acompte) + '</span></div>'
+      + '<div class="g"><span>Reste à régler au studio</span><span>' + U.euros(t.prix - t.acompte) + '</span></div>';
+    $('prix2').innerHTML = '<div style="font-weight:600;font-size:17px"><span>À payer aujourd\'hui</span><span>' + U.euros(t.acompte) + '</span></div>'
+      + '<div class="g"><span>Au studio le ' + U.court(date) + '</span><span>' + U.euros(t.prix - t.acompte) + '</span></div>'
+      + '<div class="b g" style="font-weight:400"><span>' + U.esc([it.name].concat(choisis().map(function (k) { return EB.COMPLEMENTS[k].toLowerCase(); })).join(' + ')) + '</span><span>' + U.euros(t.prix) + '</span></div>';
+    var rep = reportJusquau();
+    $('report1').textContent = $('report2').textContent = rep;
+    $('report1').parentNode.hidden = $('report2').parentNode.hidden = !rep;
+    $('bas1').textContent = U.euros(t.acompte) + ' aujourd\'hui';
+    $('bas1b').textContent = 'Total ' + U.euros(t.prix);
+    $('versE2').disabled = !dispoOk;
+    $('payer').textContent = 'Confirmer et payer ' + U.euros(t.acompte);
+  }
+
+  // Le créneau tient-il toujours avec les compléments (la durée change) ?
+  function verifier() {
+    var n = ++verif, ids = [it.id].concat(choisis());
+    fetch('/api/availability?date=' + date + '&services=' + encodeURIComponent(ids.join(',')))
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (n !== verif) return; dispoOk = (d.available || []).indexOf(heure) !== -1; rendre(); })
+      .catch(function () {});
+  }
+
+  $('addons').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-k]'); if (!b) return;
+    on[b.dataset.k] = !on[b.dataset.k];
+    if (b.dataset.k === 'depose' && !on.depose && prev === 'oui') prev = null;
+    rendre(); verifier();
+  });
+  $('non').addEventListener('click', function () { prev = 'non'; on.depose = false; rendre(); verifier(); });
+  $('oui').addEventListener('click', function () { prev = 'oui'; on.depose = true; rendre(); verifier(); });
+  $('versE2').addEventListener('click', function () { $('e1').hidden = true; $('e2').hidden = false; window.scrollTo(0, 0); });
+  $('retour2').addEventListener('click', function () { $('e2').hidden = true; $('e1').hidden = false; window.scrollTo(0, 0); });
+
+  $('payer').addEventListener('click', async function () {
+    if (envoi) return;
+    var prenom = $('prenom').value.trim(), nom = $('nomF').value.trim(), tel = $('tel').value.trim();
+    if (!prenom || tel.replace(/\D/g, '').length < 9) {
+      $('err').textContent = 'Indiquez au moins votre prénom et un numéro de téléphone valide.'; $('err').hidden = false; return;
+    }
+    $('err').hidden = true; envoi = true; $('payer').disabled = true; $('payer').textContent = 'Redirection vers le paiement…';
+    try {
+      var r = await fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel }) });
+      var data = await r.json();
+      if (!r.ok) {
+        $('err').textContent = r.status === 409 ? 'Ce créneau vient d\'être pris. Revenez au calendrier pour en choisir un autre.' : 'Une erreur est survenue : ' + (data.error || 'merci de réessayer.');
+        $('err').hidden = false; return;
+      }
+      location.href = data.checkoutUrl;
+    } catch (e) {
+      $('err').textContent = 'Une erreur est survenue. Vérifiez votre connexion et réessayez.'; $('err').hidden = false;
+    } finally {
+      envoi = false; $('payer').disabled = false; rendre();
+    }
+  });
+
+  fetch('/api/services').then(function (r) { return r.json(); }).then(function (rows) {
+    rows.forEach(function (s) { services[s.id] = s; });
+    if (!services[it.id]) { location.replace('prestation.html'); return; }
+    rendre(); verifier();
+  });
+})();
+</script>
+</body>
+</html>

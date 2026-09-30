@@ -432,6 +432,46 @@ app.get('/api/availability', async (req, res) => {
   res.json({ date, duration: duration.minutes, available, taken: rows.map(r => r.slot_time.slice(0, 5)) });
 });
 
+// GET /api/availability-range?days=14&services=volume_russe[&from=2026-10-01]
+// Les heures libres jour par jour (calendrier + « Prochaines disponibilités »).
+app.get('/api/availability-range', async (req, res) => {
+  const from = ISO_DATE.test(req.query.from || '') ? req.query.from : nowInMartinique().date;
+  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 14, 1), 31);
+  const serviceIds = String(req.query.services || '').split(',').map(s => s.trim()).filter(Boolean);
+  const duration = await totalDuration(pool, serviceIds);
+  if (!duration.ok) return res.status(404).json({ error: 'prestation inconnue' });
+
+  const out = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(from + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + i);
+    const date = d.toISOString().slice(0, 10);
+    const open = (SCHEDULE[dayOfWeek(date)] || []).length > 0;
+    out.push({ date, open, available: open ? await computeAvailableTimes(pool, date, duration.minutes) : [] });
+  }
+  res.json({ duration: duration.minutes, days: out });
+});
+
+// GET /api/booking/:id — résumé pour la page « Merci » (l'identifiant est impossible à deviner).
+app.get('/api/booking/:id', async (req, res) => {
+  if (!/^[0-9a-f-]{36}$/i.test(req.params.id)) return res.status(404).json({ error: 'réservation introuvable' });
+  const { rows } = await pool.query(
+    `select to_char(b.slot_date, 'YYYY-MM-DD') as date, to_char(b.slot_time, 'HH24:MI') as time, b.status, b.client_name,
+       coalesce(json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents,
+         'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes)) filter (where s.id is not null), '[]') as services
+     from bookings b left join services s on s.id = any(b.service_ids)
+     where b.id = $1 group by b.id`,
+    [req.params.id]
+  );
+  const b = rows[0];
+  if (!b) return res.status(404).json({ error: 'réservation introuvable' });
+  res.json({
+    date: b.date, time: b.time, status: b.status,
+    firstName: (b.client_name || '').trim().split(/\s+/)[0] || '',
+    services: b.services,
+  });
+});
+
 app.post('/api/book', async (req, res) => {
   const { serviceIds, date, time, name, phone } = req.body;
   if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
