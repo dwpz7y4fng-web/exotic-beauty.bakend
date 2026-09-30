@@ -24,7 +24,7 @@
 - **Offre regard (30 sept.)** : 3 prestations dédiées en base — cil à cil + brow lift 1 h 45
   · 80 € · acompte 25 € ; mixte + brow lift 2 h 30 · 90 € · 30 € ; volume russe + brow lift
   2 h 45 · 110 € · 35 € (acompte ≈ 1/3, comme les autres). Wispy mixte : 1 h 40.
-  → Script `migrations/001_offre_regard_et_wispy_mixte.sql` à exécuter à la main.
+  → Script `migrations/001_offre_regard_et_wispy_mixte.sql` **exécuté sur Railway le 30 sept.** ✅
 - **Horaires (30 sept.)** : lun., mar., jeu., ven. 9h–12h / 12h30–17h · mer. 9h–10h30 /
   12h–14h30 (pour le moment) · sam. 9h–12h / 12h30–18h · dim. fermé. Réglés dans
   `SCHEDULE` (`server.js`) + affichage sur l'accueil.
@@ -67,4 +67,4 @@
 
 ## 5. Prochaine action concrète
 Tester la PR `refonte-accueil-maquette` sur iPhone (navigation privée), la valider,
-exécuter le script `migrations/001_…sql` sur la base Railway, puis merger.
+merger la PR (script 001 déjà exécuté). ⚠️ Railway en essai gratuit : passer en payant avant l'expiration pour que le site reste en ligne.
