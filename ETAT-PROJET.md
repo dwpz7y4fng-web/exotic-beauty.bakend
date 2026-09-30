@@ -45,8 +45,6 @@
   Next.js/Supabase/Vercel comme le prévoit le kit.
 
 ## 3. Points ouverts (à décider par Malorie)
-- **Téléphone** : enregistré tel que tapé (pas en +596…). Nécessaire pour fiabiliser les
-  SMS/WhatsApp — attention, la relance des inactives compare les numéros : à migrer proprement.
 - **CGV / mentions légales** : liens présents dans le pied de page mais pages inexistantes
   — obligatoires puisque le site encaisse déjà des acomptes.
 - **Politique d'annulation / report** : pas encore affichée au paiement.
@@ -62,7 +60,9 @@
 - [~] 3. Site vitrine : accueil ✅ (PR) · pages prestation à faire (après maquette)
 - [~] 4. Créneaux + mini-admin : durée prise en compte ✅ · horaires en base (modifiables sans code) à faire
 - [x] 5. Acompte Stripe (existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
-- [~] 6. Automatisations : SMS J-1 + relance inactives existants · WhatsApp/e-mail à faire
+- [~] 6. Automatisations WhatsApp codées (30 sept.) : confirmation, notif Malorie, rappel J-1 18h,
+  avis Google J+1, remplissage J+18, relance inactives. **À activer** : migration 002 + compte
+  Whapi + variable `WHAPI_TOKEN` sur Railway. Pas d'e-mail (choix de Malorie).
 - [ ] 7. Tracking Meta (Pixel + CAPI) + bandeau cookies
 - [ ] 8. Mise en ligne + sortie de Planity
 - [ ] 9. Pubs Meta

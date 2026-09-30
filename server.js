@@ -6,7 +6,7 @@ const multer = require('multer');
 const ExcelJS = require('exceljs');
 const { Pool } = require('pg');
 const Stripe = require('stripe');
-const twilio = require('twilio');
+const notif = require('./notifications');
 const cron = require('node-cron');
 
 // A single request throwing an unhandled async error (e.g. a failing external API call)
@@ -19,7 +19,6 @@ const app = express();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 const SITE_URL = process.env.SITE_URL || 'http://localhost:3000';
 
@@ -101,7 +100,6 @@ async function totalDuration(db, serviceIds) {
   if (rows.length !== new Set(serviceIds).size) return { ok: false };
   return { ok: true, minutes: rows.reduce((sum, s) => sum + s.duration_minutes, 0), rows };
 }
-const STUDIO_ADDRESS = '722 route de la Chasse, quartier Rivage, Ducos';
 
 // Seuils de la relance des clientes inactives — ajustables ici.
 const INACTIVE_MONTHS = 2; // délai sans rendez-vous avant de considérer une cliente comme inactive
@@ -146,10 +144,12 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    await pool.query(
-      `update bookings set status = 'paid' where stripe_session_id = $1`,
+    const { rows } = await pool.query(
+      `update bookings set status = 'paid' where stripe_session_id = $1 returning id`,
       [session.id]
     );
+    // Confirmation à la cliente + notification à Malorie (sans bloquer la réponse à Stripe).
+    for (const r of rows) notifyBookingPaid(r.id).catch(err => console.error('[notif] confirmation', r.id, err.message));
   }
   res.json({ received: true });
 });
@@ -479,6 +479,8 @@ app.post('/api/book', async (req, res) => {
   }
 
   if (!ISO_DATE.test(date) || !HH_MM.test(time)) return res.status(400).json({ error: 'date ou heure invalide' });
+  const phoneE164 = notif.toE164(phone);
+  if (!phoneE164) return res.status(400).json({ error: 'numéro de téléphone invalide (ex. 0696 12 34 56)' });
   if (new Set(serviceIds).size !== serviceIds.length) return res.status(400).json({ error: 'prestation en double' });
 
   const svcRes = await pool.query('select * from services where id = any($1)', [serviceIds]);
@@ -501,11 +503,15 @@ app.post('/api/book', async (req, res) => {
       await client.query('rollback');
       return res.status(409).json({ error: 'ce créneau vient d\'être réservé' });
     }
-    const insertRes = await client.query(
-      `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone)
-       values ($1, $2, $3, $4, $5) returning id`,
-      [serviceIds, date, time, name, phone]
-    );
+    const insertRes = automationReady
+      ? await client.query(
+        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, client_phone_e164)
+         values ($1, $2, $3, $4, $5, $6) returning id`,
+        [serviceIds, date, time, name, phone, phoneE164])
+      : await client.query(
+        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone)
+         values ($1, $2, $3, $4, $5) returning id`,
+        [serviceIds, date, time, name, phone]);
     await client.query('commit');
     booking = insertRes.rows[0];
   } catch (err) {
@@ -544,33 +550,10 @@ app.post('/api/book', async (req, res) => {
   res.json({ checkoutUrl: session.url });
 });
 
-cron.schedule('0 10 * * *', async () => {
-  const { rows } = await pool.query(`
-    select b.*, to_char(b.slot_date, 'DD/MM') as date_str,
-      (select string_agg(s.label, ' + ' order by s.label) from services s where s.id = any(b.service_ids)) as label
-    from bookings b
-    where b.status in ('paid', 'confirmed')
-      and b.reminder_sent = false
-      and b.slot_date = (current_date + interval '1 day')::date
-  `);
-
-  for (const b of rows) {
-    try {
-      await twilioClient.messages.create({
-        to: b.client_phone,
-        from: process.env.TWILIO_FROM_NUMBER,
-        body: `Exotic Beauty — rappel : rendez-vous demain ${b.date_str} à ${b.slot_time.slice(0,5)} pour ${b.label}. ${STUDIO_ADDRESS}. À très vite !`,
-      });
-      await pool.query('update bookings set reminder_sent = true where id = $1', [b.id]);
-    } catch (err) {
-      console.error('Échec envoi SMS pour', b.id, err.message);
-    }
-  }
-});
-
 // Relance hebdomadaire des clientes inactives (aucun rendez-vous depuis INACTIVE_MONTHS,
-// et aucun déjà programmé) — chaque lundi à 10h.
+// et aucun déjà programmé) — chaque lundi à 10h (heure de Martinique).
 cron.schedule('0 10 * * 1', async () => {
+  if (!notif.isEnabled()) return console.log('[notif] relance inactives : envois désactivés');
   const { rows } = await pool.query(`
     with norm_bookings as (
       select regexp_replace(client_phone, '\\D', '', 'g') as phone_norm, slot_date, status
@@ -598,19 +581,132 @@ cron.schedule('0 10 * * 1', async () => {
   `, [INACTIVE_MONTHS, REENGAGEMENT_COOLDOWN_WEEKS]);
 
   for (const c of rows) {
-    try {
-      const firstName = (c.name || '').trim().split(/\s+/)[0] || '';
-      await twilioClient.messages.create({
-        to: c.phone,
-        from: process.env.TWILIO_FROM_NUMBER,
-        body: `Coucou ${firstName} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
-      });
+    if (await notif.send(c.phone, notif.textes.relance(c.name), 'relance ' + c.id)) {
       await pool.query('update clients set last_reengagement_sms_at = now() where id = $1', [c.id]);
-    } catch (err) {
-      console.error('Échec envoi SMS de relance pour', c.id, err.message);
     }
   }
-});
+}, { timezone: TIMEZONE });
+
+// ─── Messages automatiques (WhatsApp) ────────────────────────────────────────
+// Nécessite la migration 002 (colonnes *_sent_at). Tant qu'elle n'est pas passée,
+// le site fonctionne normalement et les automatisations restent en veille.
+const AUTOMATION_COLUMNS = ['client_phone_e164', 'confirmation_sent_at', 'owner_notified_at', 'review_sent_at', 'refill_sent_at'];
+let automationReady = false;
+async function checkAutomationSchema() {
+  const { rows } = await pool.query(
+    `select column_name from information_schema.columns where table_name = 'bookings' and column_name = any($1)`,
+    [AUTOMATION_COLUMNS]
+  );
+  automationReady = rows.length === AUTOMATION_COLUMNS.length;
+  console.log(automationReady
+    ? `[notif] automatisations prêtes (${notif.isEnabled() ? 'envois ACTIVÉS' : 'envois désactivés : WHAPI_TOKEN manquant'})`
+    : '[notif] automatisations en veille : exécuter migrations/002 sur la base');
+}
+checkAutomationSchema().catch(err => console.error('[notif] vérification du schéma', err.message));
+
+const OWNER_WHATSAPP = process.env.OWNER_WHATSAPP || '+33770211399';
+const GOOGLE_REVIEW_URL = process.env.GOOGLE_REVIEW_URL || 'https://share.google/yrCwNb4M34qAONocz';
+const POSE_IDS = ['cil_a_cil', 'mixte', 'volume_russe', 'wispy_volume_russe', 'wispy_mixte', 'wispy_cil_a_cil', 'wet_volume_russe',
+  'offre_cil_a_cil', 'offre_mixte', 'offre_volume_russe'];
+const REFILL_FOR = {
+  cil_a_cil: 'remplissage_cil_a_cil', wispy_cil_a_cil: 'remplissage_cil_a_cil', offre_cil_a_cil: 'remplissage_cil_a_cil',
+  mixte: 'remplissage_mixte', wispy_mixte: 'remplissage_mixte', offre_mixte: 'remplissage_mixte',
+  volume_russe: 'remplissage_volume_russe', wispy_volume_russe: 'remplissage_volume_russe', wet_volume_russe: 'remplissage_volume_russe', offre_volume_russe: 'remplissage_volume_russe',
+};
+const REFILL_AFTER_DAYS = 18;
+
+// Réservations avec leurs prestations (libellé, total, acompte, durée).
+function bookingSelect(where) {
+  return `
+    select b.id, b.client_name, b.client_phone, b.client_phone_e164, b.service_ids,
+      to_char(b.slot_date, 'YYYY-MM-DD') as date, to_char(b.slot_time, 'HH24:MI') as time,
+      coalesce(string_agg(s.label, ' + ' order by s.duration_minutes desc), '') as label,
+      coalesce(sum(s.price_cents), 0)::int as total, coalesce(sum(s.deposit_cents), 0)::int as deposit,
+      coalesce(sum(s.duration_minutes), 0)::int as duration
+    from bookings b left join services s on s.id = any(b.service_ids)
+    where ${where}
+    group by b.id`;
+}
+
+// Envoi « une seule fois » : on réserve le drapeau AVANT d'envoyer (un seul processus gagne),
+// et on le remet à zéro si l'envoi échoue, pour réessayer au prochain passage.
+async function sendOnce(bookingId, column, to, text, tag) {
+  const claimed = await pool.query(`update bookings set ${column} = now() where id = $1 and ${column} is null returning id`, [bookingId]);
+  if (!claimed.rowCount) return false;
+  const ok = await notif.send(to, text, tag);
+  if (!ok) await pool.query(`update bookings set ${column} = null where id = $1`, [bookingId]);
+  return ok;
+}
+
+async function notifyBookingPaid(id) {
+  if (!automationReady || !notif.isEnabled()) return;
+  const { rows } = await pool.query(bookingSelect('b.id = $1'), [id]);
+  const b = rows[0];
+  if (!b) return;
+  if (b.client_phone_e164) await sendOnce(b.id, 'confirmation_sent_at', b.client_phone_e164, notif.textes.confirmation(b), 'confirmation ' + b.id);
+  await sendOnce(b.id, 'owner_notified_at', OWNER_WHATSAPP, notif.textes.proprietaire(b), 'notif Malorie ' + b.id);
+}
+
+function isoShift(isoDate, days) {
+  const d = new Date(isoDate + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+// Seules les réservations faites sur le site (numéro au format international) reçoivent
+// ces messages : les rendez-vous importés de Planity ne sont pas relancés en double.
+async function runReminders() {
+  if (!automationReady || !notif.isEnabled()) return;
+  const tomorrow = isoShift(nowInMartinique().date, 1);
+  const { rows } = await pool.query(bookingSelect(`b.slot_date = $1 and b.status in ('paid', 'confirmed') and b.reminder_sent = false and b.client_phone_e164 is not null`), [tomorrow]);
+  for (const b of rows) {
+    const claimed = await pool.query('update bookings set reminder_sent = true where id = $1 and reminder_sent = false returning id', [b.id]);
+    if (!claimed.rowCount) continue;
+    if (!await notif.send(b.client_phone_e164, notif.textes.rappel(b), 'rappel ' + b.id)) {
+      await pool.query('update bookings set reminder_sent = false where id = $1', [b.id]);
+    }
+  }
+}
+
+async function runReviewRequests() {
+  if (!automationReady || !notif.isEnabled()) return;
+  const yesterday = isoShift(nowInMartinique().date, -1);
+  const { rows } = await pool.query(bookingSelect(`b.slot_date = $1 and b.status in ('paid', 'confirmed') and b.review_sent_at is null and b.client_phone_e164 is not null`), [yesterday]);
+  for (const b of rows) await sendOnce(b.id, 'review_sent_at', b.client_phone_e164, notif.textes.avis(b, GOOGLE_REVIEW_URL), 'avis ' + b.id);
+}
+
+async function runRefillReminders() {
+  if (!automationReady || !notif.isEnabled()) return;
+  const today = nowInMartinique().date;
+  const poseDay = isoShift(today, -REFILL_AFTER_DAYS);
+  const { rows } = await pool.query(bookingSelect(
+    `b.slot_date = $1 and b.status in ('paid', 'confirmed') and b.refill_sent_at is null and b.client_phone_e164 is not null
+     and b.service_ids && $2::text[]
+     and not exists (select 1 from bookings o where o.client_phone_e164 = b.client_phone_e164 and o.status != 'cancelled' and o.slot_date > b.slot_date)`
+  ), [poseDay, POSE_IDS]);
+  for (const b of rows) {
+    const pose = b.service_ids.find(id => REFILL_FOR[id]);
+    const lien = `${SITE_URL}/prestation.html?c=remplissage&p=${REFILL_FOR[pose]}`;
+    await sendOnce(b.id, 'refill_sent_at', b.client_phone_e164, notif.textes.remplissage(b, lien), 'remplissage ' + b.id);
+  }
+}
+
+const logErr = (tag) => (err) => console.error(`[notif] ${tag}`, err.message);
+cron.schedule('0 18 * * *', () => runReminders().catch(logErr('rappels J-1')), { timezone: TIMEZONE });
+cron.schedule('0 10 * * *', () => {
+  runReviewRequests().catch(logErr('avis J+1'));
+  runRefillReminders().catch(logErr('remplissage J+18'));
+}, { timezone: TIMEZONE });
+// Filet de sécurité : si une confirmation a échoué (Whapi indisponible…), on réessaie toutes les 15 min.
+cron.schedule('*/15 * * * *', async () => {
+  if (!automationReady) await checkAutomationSchema().catch(logErr('vérification du schéma'));
+  if (!automationReady || !notif.isEnabled()) return;
+  const { rows } = await pool.query(
+    `select id from bookings where status = 'paid' and created_at > now() - interval '2 days'
+     and (owner_notified_at is null or (confirmation_sent_at is null and client_phone_e164 is not null))`
+  );
+  for (const r of rows) await notifyBookingPaid(r.id).catch(logErr('reprise confirmation'));
+}, { timezone: TIMEZONE });
 
 // Libère les créneaux bloqués par un paiement Stripe jamais abouti (carte refusée, paiement
 // abandonné) : une réservation "en attente" trop ancienne est annulée automatiquement.
@@ -629,3 +725,6 @@ cron.schedule('*/10 * * * *', () => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Exotic Beauty server running on port ${PORT}`));
+
+// Pour les tests manuels (node -e "require('./server').runReminders()").
+module.exports = { runReminders, runReviewRequests, runRefillReminders, notifyBookingPaid };

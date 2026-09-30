@@ -43,6 +43,11 @@ create table bookings (
   status text not null default 'pending',
   stripe_session_id text,
   reminder_sent boolean not null default false,
+  client_phone_e164 text,
+  confirmation_sent_at timestamptz,
+  owner_notified_at timestamptz,
+  review_sent_at timestamptz,
+  refill_sent_at timestamptz,
   created_at timestamptz not null default now()
 );
 

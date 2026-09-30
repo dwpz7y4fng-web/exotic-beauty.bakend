@@ -13,7 +13,13 @@ est différent** — pars toujours de ce qui existe :
   `clients`, `blocked_slots`) — lis-le avant de nommer une colonne.
 - Paiement : **Stripe Checkout** (acompte = `deposit_cents` de chaque service, en base) ;
   le webhook `checkout.session.completed` passe la résa en `paid`.
-- Rappels : **SMS Twilio** (cron J-1 à 10h) + relance des clientes inactives (lundi 10h).
+- Messages automatiques : `notifications.js` (WhatsApp via **Whapi**, SMS Twilio en secours,
+  rien n'est envoyé sans `WHAPI_TOKEN`). Confirmation + notif à Malorie depuis le webhook
+  Stripe ; crons en heure de Martinique : rappel J-1 18h, avis Google J+1 10h, remplissage
+  J+18 10h, relance inactives lundi 10h, reprise des confirmations ratées toutes les 15 min.
+  Anti-doublon : colonnes `*_sent_at` / `reminder_sent` réservées avant l'envoi, remises à
+  zéro si échec. Téléphone stocké aussi en E.164 (`client_phone_e164`, migration 002) ;
+  `client_phone` reste tel que saisi (la relance des inactives compare ces numéros).
 - Site public en HTML/CSS/JS simple dans `public/`, fidèle aux maquettes de `maquettes/` :
   `index.html` (accueil) → `prestation.html` (fiche prestation + calendrier en bottom sheet)
   → `rendez-vous.html` (compléments, récap, coordonnées → Stripe) → `confirmation.html`.

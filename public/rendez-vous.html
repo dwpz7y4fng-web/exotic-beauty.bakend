@@ -70,8 +70,8 @@
         <label class="chp"><span class="mono">Prénom</span><input id="prenom" autocomplete="given-name" required></label>
         <label class="chp"><span class="mono">Nom</span><input id="nomF" autocomplete="family-name"></label>
       </div>
-      <label class="chp"><span class="mono">Téléphone</span><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0696 12 34 56" required></label>
-      <div class="r-aide">Pour la confirmation et le rappel la veille de votre rendez-vous.</div>
+      <label class="chp"><span class="mono">Téléphone WhatsApp</span><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0696 12 34 56" required></label>
+      <div class="r-aide" id="telAide">On vous accompagne par WhatsApp : confirmation, rappel la veille, conseils.</div>
     </div>
 
     <div class="r-prix" id="prix2" style="margin-top:24px"></div>
@@ -180,11 +180,18 @@
   $('versE2').addEventListener('click', function () { $('e1').hidden = true; $('e2').hidden = false; window.scrollTo(0, 0); });
   $('retour2').addEventListener('click', function () { $('e2').hidden = true; $('e1').hidden = false; window.scrollTo(0, 0); });
 
+  $('tel').addEventListener('blur', function () {
+    var v = $('tel').value.trim(), e = U.e164(v);
+    $('telAide').textContent = !v ? 'On vous accompagne par WhatsApp : confirmation, rappel la veille, conseils.'
+      : e ? '✓ ' + e.replace(/^(\+\d{2,3})(\d{3})(\d{2})(\d{2})(\d{2})$/, '$1 $2 $3 $4 $5') + ' · confirmation et rappel par WhatsApp.'
+      : 'Numéro incomplet ou invalide. Exemple : 0696 12 34 56.';
+  });
   $('payer').addEventListener('click', async function () {
     if (envoi) return;
     var prenom = $('prenom').value.trim(), nom = $('nomF').value.trim(), tel = $('tel').value.trim();
-    if (!prenom || tel.replace(/\D/g, '').length < 9) {
-      $('err').textContent = 'Indiquez au moins votre prénom et un numéro de téléphone valide.'; $('err').hidden = false; return;
+    if (!prenom || !U.e164(tel)) {
+      $('err').textContent = !prenom ? 'Indiquez au moins votre prénom.' : 'Ce numéro ne semble pas valide. Exemple : 0696 12 34 56 (ou +33 6… pour un numéro de métropole).';
+      $('err').hidden = false; return;
     }
     $('err').hidden = true; envoi = true; $('payer').disabled = true; $('payer').textContent = 'Redirection vers le paiement…';
     try {

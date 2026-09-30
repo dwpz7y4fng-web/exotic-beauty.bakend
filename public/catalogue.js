@@ -140,6 +140,22 @@
     court: function (iso) { var d = U.jour(iso); return JOURS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MOIS[d.getUTCMonth()]; },
     long: function (iso) { var d = U.jour(iso); return JOURS_L[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MOIS_L[d.getUTCMonth()]; },
     ajouter: function (iso, n) { var d = U.jour(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); },
+    // Même règle que le serveur (notifications.js) : numéro → format international.
+    e164: function (raw) {
+      var s = String(raw || '').trim().replace(/[\s.\-()]/g, '');
+      if (s.indexOf('00') === 0) s = '+' + s.slice(2);
+      if (s[0] === '+') { var x = s.slice(1).replace(/\D/g, ''); if (x.indexOf('330') === 0) return U.e164('0' + x.slice(3)); return x.length >= 8 && x.length <= 15 ? '+' + x : null; }
+      var d = s.replace(/\D/g, '');
+      if (d.length === 9 && /^69[67]/.test(d)) return '+596' + d;
+      if (d.length !== 10 || d[0] !== '0') return null;
+      var n = d.slice(1);
+      if (/^(69[67]|596)/.test(n)) return '+596' + n;
+      if (/^(69[01]|590)/.test(n)) return '+590' + n;
+      if (/^(694|594)/.test(n)) return '+594' + n;
+      if (/^(69[23]|262)/.test(n)) return '+262' + n;
+      if (/^[1-79]/.test(n)) return '+33' + n;
+      return null;
+    },
     esc: function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); },
     JOURS: JOURS, MOIS: MOIS, MOIS_L: MOIS_L
   };
