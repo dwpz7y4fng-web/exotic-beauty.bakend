@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #FFFFFF; }
+  * { box-sizing: border-box; }
+  a { color: #1E2B31; text-decoration: none; }
+  a:hover { color: #44525A; }
+  button, input { font-family: inherit; }
+  input::placeholder { color: #9AA6AB; }
+</style>
+</helmet>
+<div style="font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1E2B31; background: #FFFFFF; -webkit-font-smoothing: antialiased; min-height: 100vh;">
+
+  <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+    <div data-screen-label="Votre rendez-vous" style="padding-bottom: 150px;">
+      <div style="position: sticky; top: 0; z-index: 20; background: #FFFFFF; border-bottom: 1px solid #D9E0E3;">
+        <div style="max-width: 640px; margin: 0 auto; height: 60px; padding: 0 12px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center;">
+          <a href="{{ backHref }}" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg></a>
+          <div style="text-align: center; font-size: 17px; font-weight: 600;">Votre rendez-vous</div>
+          <div></div>
+        </div>
+      </div>
+      <div style="max-width: 640px; margin: 0 auto;">
+        <div style="margin: 16px 24px 0; background: #141D21; color: #FFFFFF; border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.75);">{{ timerLabel }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 500;">{{ timer }}</span>
+        </div>
+
+        <div style="margin: 20px 24px 0; border: 1px solid #D9E0E3; border-radius: 12px; padding: 14px; display: flex; gap: 14px; align-items: center;">
+          <img src="{{ item.img }}" alt="{{ item.name }}" style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+            <div style="font-weight: 600; font-size: 16px;">{{ item.name }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; color: #1E2B31;">{{ whenShort }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Studio · Ducos</div>
+          </div>
+          <a href="{{ backHref }}" style="font-size: 14px; font-weight: 600; text-decoration: underline;">Modifier</a>
+        </div>
+
+        <div style="margin: 12px 24px 0; background: #F3F6F7; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #1E2B31;">✓ Déjà inclus</div>
+          <div style="font-size: 14px; color: #44525A;">Diagnostic du regard · conseils d'entretien</div>
+        </div>
+
+        <sc-if value="{{ askPrev }}" hint-placeholder-val="{{ true }}">
+          <div style="margin: 32px 24px 0; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">01 — Une petite question</div>
+            <div style="font-size: 20px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2;">Avez-vous déjà des extensions posées ailleurs ?</div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" onClick="{{ prevNo }}" style="{{ prevNoStyle }}">Non, cils naturels</button>
+              <button type="button" onClick="{{ prevYes }}" style="{{ prevYesStyle }}">Oui</button>
+            </div>
+            <sc-if value="{{ prevIsYes }}" hint-placeholder-val="{{ false }}">
+              <div style="border-left: 2px solid #1E2B31; padding: 4px 0 4px 12px; font-size: 14px; line-height: 1.5; color: #44525A;">Pas de souci : j'ajoute la dépose (+25 min) pour repartir sur une base saine.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <div style="margin: 32px 24px 0; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ addonsKicker }}</div>
+          <div style="font-size: 20px; font-weight: 600; letter-spacing: -.02em;">Profitez du rendez-vous pour ajouter un soin.</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+            <sc-for list="{{ addons }}" as="a" hint-placeholder-count="3">
+              <button type="button" onClick="{{ a.onClick }}" aria-pressed="{{ a.on }}" style="{{ a.style }}">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ a.meta }}</span>
+                <span style="font-weight: 600; font-size: 15px; line-height: 1.25;">{{ a.name }}</span>
+                <span style="font-size: 14px; color: #44525A;">{{ a.price }}</span>
+                <span style="{{ a.tog }}"><span style="{{ a.knob }}"></span></span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #1E2B31;">{{ durLine }}</div>
+        </div>
+
+        <div style="margin: 32px 24px 0; border: 1px solid #1E2B31; border-radius: 12px; padding: 4px 16px;">
+          <sc-for list="{{ lines }}" as="l" hint-placeholder-count="2">
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: 15px;"><span>{{ l.k }}</span><span>{{ l.v }}</span></div>
+          </sc-for>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #D9E0E3; font-size: 15px; font-weight: 600;"><span>Total</span><span>{{ totalLabel }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #D9E0E3; font-size: 15px; font-weight: 600;"><span>Acompte aujourd'hui · 50 %</span><span>{{ depositLabel }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: 15px; color: #5F6B70;"><span>Reste à régler au studio</span><span>{{ restLabel }}</span></div>
+        </div>
+        <div style="margin: 12px 24px 0;"><span style="display: inline-flex; background: #F3F6F7; border-radius: 9999px; padding: 8px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; color: #1E2B31;">✓ Report gratuit jusqu'au {{ freeUntil }}</span></div>
+      </div>
+
+      <div style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #FFFFFF; border-top: 1px solid #D9E0E3; box-shadow: 0 -6px 20px rgba(15,23,26,.06);">
+        <div style="max-width: 640px; margin: 0 auto; padding: 16px 24px 20px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; gap: 4px;"><div style="flex: 1; height: 3px; border-radius: 9999px; background: #1E2B31;"></div><div style="flex: 1; height: 3px; border-radius: 9999px; background: #D9E0E3;"></div></div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="flex-grow: 1;"><div style="font-weight: 600; font-size: 18px;">{{ depositLabel }} aujourd'hui</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Total {{ totalLabel }}</div></div>
+            <button type="button" onClick="{{ toStep2 }}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 9999px; border: none; background: #1E2B31; color: #FFFFFF; font-weight: 600; font-size: 15px; cursor: pointer;">Aller au paiement</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Acompte" style="padding-bottom: 170px;">
+      <div style="position: sticky; top: 0; z-index: 20; background: #FFFFFF; border-bottom: 1px solid #D9E0E3;">
+        <div style="max-width: 640px; margin: 0 auto; height: 60px; padding: 0 12px; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center;">
+          <button type="button" onClick="{{ toStep1 }}" aria-label="Retour" style="width: 44px; height: 44px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+          <div style="text-align: center; font-size: 17px; font-weight: 600;">Acompte</div>
+          <div style="display: flex; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" aria-label="Paiement sécurisé"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg></div>
+        </div>
+      </div>
+      <div style="max-width: 640px; margin: 0 auto;">
+        <div style="margin: 16px 24px 0; background: #141D21; color: #FFFFFF; border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.75);">{{ timerLabel }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 500;">{{ timer }}</span>
+        </div>
+
+        <div style="margin: 24px 24px 0; display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" onClick="{{ payWallet }}" style="height: 52px; border-radius: 9999px; border: none; background: #000000; color: #FFFFFF; font-weight: 600; font-size: 16px; cursor: pointer;">Apple Pay</button>
+          <button type="button" onClick="{{ payWallet }}" style="height: 52px; border-radius: 9999px; border: 1px solid #1E2B31; background: #FFFFFF; color: #1E2B31; font-weight: 600; font-size: 16px; cursor: pointer;">Google Pay</button>
+        </div>
+
+        <div style="margin: 22px 24px 0; display: flex; align-items: center; gap: 12px;"><div style="flex: 1; height: 1px; background: #D9E0E3;"></div><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Ou par carte</span><div style="flex: 1; height: 1px; background: #D9E0E3;"></div></div>
+
+        <div style="margin: 20px 24px 0; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <label style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-height: 56px; padding: 8px 14px; border: 1px solid #D9E0E3; border-radius: 10px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Prénom</span><input value="{{ f.prenom }}" onChange="{{ onPrenom }}" autocomplete="given-name" style="border: none; outline: none; font-size: 16px; padding: 0; color: #1E2B31; background: transparent;" /></label>
+            <label style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-height: 56px; padding: 8px 14px; border: 1px solid #D9E0E3; border-radius: 10px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Nom</span><input value="{{ f.nom }}" onChange="{{ onNom }}" autocomplete="family-name" style="border: none; outline: none; font-size: 16px; padding: 0; color: #1E2B31; background: transparent;" /></label>
+          </div>
+          <label style="display: flex; flex-direction: column; gap: 2px; min-height: 56px; padding: 8px 14px; border: 1px solid #D9E0E3; border-radius: 10px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">E-mail</span><input type="email" value="{{ f.email }}" onChange="{{ onEmail }}" autocomplete="email" style="border: none; outline: none; font-size: 16px; padding: 0; color: #1E2B31; background: transparent;" /></label>
+          <div style="display: flex; min-height: 56px; border: 1px solid #D9E0E3; border-radius: 10px; overflow: hidden;">
+            <div style="width: 32%; border-right: 1px solid #D9E0E3; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px;">MQ +596</div>
+            <label style="flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 8px 14px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Téléphone WhatsApp</span><input type="tel" value="{{ f.tel }}" onChange="{{ onTel }}" autocomplete="tel-national" style="border: none; outline: none; font-size: 16px; padding: 0; color: #1E2B31; background: transparent;" /></label>
+          </div>
+          <div style="font-size: 13px; color: #5F6B70; line-height: 1.5;">On vous accompagne par WhatsApp : confirmation, rappel la veille, conseils d'entretien.</div>
+          <div style="border: 1px solid #D9E0E3; border-radius: 10px; overflow: hidden;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #9AA6AB;">1234 1234 1234 1234</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #5F6B70;">VISA · MC</span></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr;"><span style="padding: 12px 14px; border-right: 1px solid #D9E0E3; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #9AA6AB;">MM / AA</span><span style="padding: 12px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #9AA6AB;">CVC</span></div>
+          </div>
+        </div>
+
+        <div style="margin: 24px 24px 0; border: 1px solid #1E2B31; border-radius: 12px; padding: 4px 16px;">
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-weight: 600; font-size: 17px;"><span>À payer aujourd'hui</span><span>{{ depositLabel }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; font-size: 15px; color: #5F6B70;"><span>Au studio le {{ dayShort }}</span><span>{{ restLabel }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid #D9E0E3; font-size: 15px; color: #5F6B70;"><span>{{ bundleName }}</span><span>{{ totalLabel }}</span></div>
+        </div>
+        <div style="margin: 12px 24px 0;"><span style="display: inline-flex; background: #F3F6F7; border-radius: 9999px; padding: 8px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; color: #1E2B31;">✓ Report gratuit jusqu'au {{ freeUntil }}</span></div>
+
+        <div style="margin: 24px 24px 0; display: flex; gap: 10px; align-items: flex-start;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" style="flex-shrink: 0;"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 018 0v3"></path></svg>
+          <div style="font-size: 13px; color: #44525A; line-height: 1.5;">Paiement sécurisé par Stripe. L'acompte bloque votre créneau, rien d'autre n'est prélevé.</div>
+        </div>
+      </div>
+
+      <div style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #FFFFFF; border-top: 1px solid #D9E0E3; box-shadow: 0 -6px 20px rgba(15,23,26,.06);">
+        <div style="max-width: 640px; margin: 0 auto; padding: 16px 24px 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 4px;"><div style="flex: 1; height: 3px; border-radius: 9999px; background: #1E2B31;"></div><div style="flex: 1; height: 3px; border-radius: 9999px; background: #1E2B31;"></div></div>
+          <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; color: #A23B2A; text-align: center;">Indiquez au moins votre prénom et votre téléphone.</div></sc-if>
+          <button type="button" onClick="{{ confirm }}" style="min-height: 56px; border-radius: 9999px; border: none; background: #1E2B31; color: #FFFFFF; font-weight: 600; font-size: 16px; cursor: pointer;">Confirmer et payer {{ depositLabel }}</button>
+          <div style="font-size: 12px; color: #5F6B70; text-align: center;">En confirmant, j'accepte les CGV et la politique de report.</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Merci" style="padding-bottom: 48px;">
+      <div style="height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #D9E0E3;"><a href="Exotic%20Beauty%20v2%20-%20Accueil.dc.html" style="font-weight: 700; font-size: 15px; letter-spacing: .14em;">EXOTIC BEAUTY</a></div>
+      <div style="max-width: 640px; margin: 0 auto;">
+        <div style="padding: 40px 24px 0; display: flex; flex-direction: column; gap: 14px;">
+          <div style="width: 56px; height: 56px; border-radius: 9999px; background: #1E2B31; display: flex; align-items: center; justify-content: center;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Réservation confirmée · n° {{ ref }}</div>
+          <h1 style="margin: 0; font-size: clamp(32px, 6vw, 44px); font-weight: 600; line-height: 1.02; letter-spacing: -.03em;">C'est réservé{{ hello }}. <span style="color: #7F8B90;">Votre regard vous attend.</span></h1>
+        </div>
+
+        <div style="margin: 28px 24px 0;">
+          <sc-for list="{{ recap }}" as="r" hint-placeholder-count="6">
+            <div style="display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ r.k }}</span><span style="font-weight: 600; font-size: 15px; text-align: right;">{{ r.v }}</span></div>
+          </sc-for>
+          <div style="border-top: 1px solid #D9E0E3;"></div>
+        </div>
+
+        <div style="margin: 16px 24px 0; display: flex; gap: 10px;">
+          <a href="{{ icsHref }}" download="exotic-beauty.ics" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 9999px; border: 1px solid #1E2B31; font-weight: 600; font-size: 14px; text-align: center; padding: 0 12px;">Ajouter à l'agenda</a>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" style="flex: 1; display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 9999px; border: 1px solid #1E2B31; font-weight: 600; font-size: 14px;">Itinéraire</a>
+        </div>
+
+        <div style="margin: 20px 24px 0; background: #F3F6F7; border-radius: 12px; padding: 16px; display: flex; gap: 14px; align-items: center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M4 20l1.4-4A8 8 0 1112 20a8 8 0 01-3.9-1z"></path></svg>
+          <div><div style="font-weight: 600; font-size: 15px;">Confirmation envoyée sur WhatsApp</div><div style="font-size: 13px; color: #5F6B70;">Et par e-mail, au cas où.</div></div>
+        </div>
+
+        <div style="margin: 36px 24px 0;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70; margin-bottom: 12px;">Pour le jour J</div>
+          <div style="display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-top: 3px;">01</span><span style="font-size: 15px;">Venez sans maquillage sur les yeux.</span></div>
+          <div style="display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-top: 3px;">02</span><span style="font-size: 15px;">Pas de crème contour des yeux.</span></div>
+          <div style="display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-top: 3px;">03</span><span style="font-size: 15px;">Évitez le café juste avant.</span></div>
+          <div style="display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding-top: 3px;">04</span><span style="font-size: 15px;">Un rappel vous arrive la veille.</span></div>
+        </div>
+
+        <sc-if value="{{ hasRefill }}" hint-placeholder-val="{{ true }}">
+          <div style="margin: 36px 24px 0; background: #141D21; color: #FFFFFF; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65);">Pour garder l'effet</div>
+            <div style="font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15;">Réservez déjà votre remplissage.</div>
+            <div style="border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div><div style="font-weight: 600; font-size: 15px;">{{ refill.when }}</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .06em; color: rgba(255,255,255,.65);">{{ refill.meta }}</div></div>
+              <a href="{{ refill.other }}" style="color: #FFFFFF; font-size: 13px; font-weight: 600; text-decoration: underline; flex-shrink: 0;">Autre date</a>
+            </div>
+            <a href="{{ refill.href }}" style="display: flex; align-items: center; justify-content: center; min-height: 50px; border-radius: 9999px; background: #FFFFFF; color: #1E2B31; font-weight: 600; font-size: 15px;">Bloquer ce créneau</a>
+            <div style="font-size: 12px; color: rgba(255,255,255,.65);">Dans 3 semaines, même heure. Acompte 50 % en un clic.</div>
+          </div>
+        </sc-if>
+
+        <div style="margin: 24px 24px 0; display: flex; flex-direction: column; gap: 10px;">
+          <a href="https://wa.me/" style="display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 9999px; border: 1px solid #1E2B31; font-weight: 600; font-size: 14px;">Nous écrire sur WhatsApp</a>
+          <a href="Exotic%20Beauty%20v2%20-%20Accueil.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 9999px; background: #DCE6EA; font-weight: 600; font-size: 14px;">Retour à l'accueil</a>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  ITEMS = {
+    'cil-a-cil': ['Cil à cil', 60, 60, 'images/cil-a-cil.jpg', 'rem-cil-a-cil', 'pose'],
+    'mixte': ['Pose mixte', 90, 70, 'images/mixte.jpg', 'rem-mixte', 'pose'],
+    'russe': ['Volume russe', 120, 90, 'images/volume-russe.jpg', 'rem-russe', 'pose'],
+    'wispy-russe': ['Wispy volume russe', 130, 95, 'images/volume-russe.jpg', 'rem-russe', 'pose'],
+    'wispy-mixte': ['Wispy pose mixte', 100, 75, 'images/mixte.jpg', 'rem-mixte', 'pose'],
+    'wispy-cil': ['Wispy cil à cil', 70, 55, 'images/cil-a-cil.jpg', 'rem-cil-a-cil', 'pose'],
+    'wet': ['Wet volume russe', 130, 95, 'images/volume-russe.jpg', 'rem-russe', 'pose'],
+    'offre-cil': ['Cil à cil + brow lift', 105, 80, 'images/brow-lift-2.jpg', 'rem-cil-a-cil', 'offre'],
+    'offre-mixte': ['Pose mixte + brow lift', 150, 90, 'images/mixte.jpg', 'rem-mixte', 'offre'],
+    'offre-russe': ['Volume russe + brow lift', 165, 110, 'images/volume-russe.jpg', 'rem-russe', 'offre'],
+    'lash-lift': ['Lash lift avec teinture', 45, 60, 'images/cil-a-cil.jpg', null, 'lift'],
+    'rem-cil-a-cil': ['Remplissage cil à cil', 45, 30, 'images/cil-a-cil.jpg', null, 'rem'],
+    'rem-mixte': ['Remplissage mixte', 75, 35, 'images/mixte.jpg', null, 'rem'],
+    'rem-russe': ['Remplissage volume russe', 105, 45, 'images/volume-russe.jpg', null, 'rem'],
+    'depose': ['Dépose', 25, 20, 'images/cil-a-cil.jpg', null, 'rem'],
+    'brow-lift': ['Brow lift', 30, 35, 'images/brow-lift.jpg', null, 'brow'],
+    'brow-lift-teinture': ['Brow lift avec teinture', 90, 60, 'images/brow-lift.jpg', null, 'brow'],
+    'teinture': ['Teinture hybride', 45, 35, 'images/sourcil-apres.jpg', null, 'brow'],
+    'fil': ['Épilation au fil', 15, 15, 'images/sourcil-apres.jpg', null, 'brow'],
+    'fil-entretien': ['Épilation au fil (entretien)', 10, 10, 'images/sourcil-apres.jpg', null, 'brow'],
+    'levre': ['Épilation lèvre supérieure', 5, 10, 'images/sourcil-apres.jpg', null, 'brow'],
+    'powder': ['Ombré powder brow', 90, 200, 'images/brow-lift.jpg', null, 'brow']
+  };
+  ADDONS = {
+    depose: { name: 'Dépose des anciennes extensions', meta: '+25 min', min: 25, prix: 20, short: 'dépose' },
+    fil: { name: 'Épilation sourcils au fil', meta: '+10 min', min: 10, prix: 10, short: 'épilation au fil' },
+    levre: { name: 'Épilation lèvre supérieure', meta: '+5 min', min: 5, prix: 10, short: 'lèvre' },
+    'brow-lift': { name: 'Brow lift', meta: '+30 min', min: 30, prix: 35, short: 'brow lift' },
+    'teinture': { name: 'Teinture hybride sourcils', meta: '+45 min', min: 45, prix: 35, short: 'teinture' },
+    'brow-lift-teinture': { name: 'Brow lift avec teinture', meta: '+1 h 30', min: 90, prix: 60, short: 'brow lift + teinture' },
+    'lash-lift': { name: 'Lash lift avec teinture', meta: '+45 min', min: 45, prix: 60, short: 'lash lift' }
+  };
+
+  constructor(p) {
+    super(p);
+    let id = 'russe', d = null, h = '10:00';
+    try {
+      const q = new URLSearchParams(window.location.search);
+      if (this.ITEMS[q.get('p')]) id = q.get('p');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(q.get('d') || '')) d = q.get('d');
+      if (/^\d{2}:\d{2}$/.test(q.get('h') || '')) h = q.get('h');
+    } catch (e) {}
+    if (!d) {
+      const x = new Date(); x.setHours(0, 0, 0, 0);
+      do { x.setDate(x.getDate() + 1); } while (x.getDay() === 0 || x.getDay() === 6);
+      d = x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+    }
+    this.state = { id, d, h, step: 1, prev: null, on: {}, left: 600, f: { prenom: '', nom: '', email: '', tel: '' }, err: false, ref: '' };
+  }
+  componentDidMount() {
+    this.t = setInterval(() => this.setState(s => ({ left: Math.max(0, s.left - 1) })), 1000);
+  }
+  componentWillUnmount() { clearInterval(this.t); }
+
+  dur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? (h + ' h' + (r ? ' ' + String(r).padStart(2, '0') : '')) : (r + ' min'); }
+  hm(t) { return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+  iso(x) { return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+
+  renderVals() {
+    const WD = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+    const WDL = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const MO = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    const MOL = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    const st = this.state;
+    const [name, min, prix, img, refillId, kind] = this.ITEMS[st.id];
+    const [y, mo, da] = st.d.split('-').map(Number);
+    const date = new Date(y, mo - 1, da);
+    const [hh, mm] = st.h.split(':').map(Number);
+    const start = hh * 60 + mm;
+
+    const avail = (kind === 'pose' ? ['depose', 'brow-lift', 'brow-lift-teinture', 'teinture', 'fil', 'levre'] : kind === 'offre' ? ['depose', 'levre'] : kind === 'rem' || kind === 'lift' ? ['brow-lift', 'brow-lift-teinture', 'teinture', 'fil', 'levre'] : ['lash-lift', 'brow-lift', 'teinture', 'fil', 'levre']).filter(k => k !== st.id && !(st.id === 'brow-lift-teinture' && (k === 'brow-lift' || k === 'teinture')) && !(st.id === 'lash-lift' && k === 'lash-lift') && !(k === 'fil' && /^brow-lift|^teinture/.test(st.id)));
+    const chosen = avail.filter(k => st.on[k]);
+    const extraMin = chosen.reduce((a, k) => a + this.ADDONS[k].min, 0);
+    const total = prix + chosen.reduce((a, k) => a + this.ADDONS[k].prix, 0);
+    const deposit = Math.round(total / 2);
+    const end = start + min + extraMin;
+
+    const free = new Date(date); free.setDate(free.getDate() - 2);
+    const ss = String(st.left % 60).padStart(2, '0');
+    const toggle = (k) => this.setState(s => ({ on: Object.assign({}, s.on, { [k]: !s.on[k] }) }));
+    const opt = (on) => ({ flex: 1, minHeight: '52px', borderRadius: '10px', fontSize: '15px', cursor: 'pointer', color: '#1E2B31', background: '#FFFFFF', border: on ? '1.5px solid #1E2B31' : '1px solid #D9E0E3', fontWeight: on ? 600 : 400 });
+    const setF = (k) => (e) => { const v = e.target.value; this.setState(s => ({ f: Object.assign({}, s.f, { [k]: v }), err: false })); };
+    const bundle = [name].concat(chosen.map(k => this.ADDONS[k].short)).join(' + ');
+
+    const refillItem = refillId ? this.ITEMS[refillId] : null;
+    const rd = new Date(date); rd.setDate(rd.getDate() + 21);
+    while (rd.getDay() === 0 || rd.getDay() === 6) rd.setDate(rd.getDate() + 1);
+    const fmtIcs = (x, t) => this.iso(x).replace(/-/g, '') + 'T' + this.hm(t).replace(':', '') + '00';
+    const ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Exotic Beauty · ' + name + '\nDTSTART:' + fmtIcs(date, start) + '\nDTEND:' + fmtIcs(date, end) + '\nLOCATION:Quartier Durivage, Ducos\nEND:VEVENT\nEND:VCALENDAR';
+
+    return {
+      isStep1: st.step === 1, isStep2: st.step === 2, isStep3: st.step === 3,
+      backHref: 'Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=' + (kind === 'brow' ? 'sourcils' : kind === 'rem' ? 'remplissage' : kind === 'offre' ? 'offre' : 'cils') + '&p=' + st.id,
+      item: { name, img },
+      timer: String(Math.floor(st.left / 60)).padStart(2, '0') + ':' + ss,
+      timerLabel: st.left > 0 ? 'Créneau réservé pendant' : 'Créneau libéré · revenez au calendrier',
+      whenShort: WD[date.getDay()] + ' ' + da + ' ' + MO[mo - 1] + ' · ' + this.hm(start) + ' → ' + this.hm(end),
+      dayShort: da + ' ' + MO[mo - 1],
+      askPrev: kind === 'pose' || kind === 'offre',
+      prevIsYes: st.prev === 'oui',
+      prevNo: () => this.setState(s => ({ prev: 'non', on: Object.assign({}, s.on, { depose: false }) })),
+      prevYes: () => this.setState(s => ({ prev: 'oui', on: Object.assign({}, s.on, { depose: true }) })),
+      prevNoStyle: opt(st.prev === 'non'), prevYesStyle: opt(st.prev === 'oui'),
+      addonsKicker: (kind === 'pose' || kind === 'offre' ? '02' : '01') + ' — Ajouter une prestation',
+      addons: avail.map(k => {
+        const a = this.ADDONS[k], on = !!st.on[k];
+        return {
+          name: a.name, meta: a.meta, price: a.prix + ' €', on: on ? 'true' : 'false', onClick: () => toggle(k),
+          style: { textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '6px', padding: '14px', borderRadius: '12px', background: '#FFFFFF', color: '#1E2B31', cursor: 'pointer', border: on ? '1.5px solid #1E2B31' : '1px solid #D9E0E3' },
+          tog: { position: 'relative', marginTop: '4px', width: '40px', height: '22px', borderRadius: '9999px', background: on ? '#1E2B31' : '#D9E0E3', transition: 'background .2s ease' },
+          knob: { position: 'absolute', top: '3px', left: on ? '21px' : '3px', width: '16px', height: '16px', borderRadius: '9999px', background: '#FFFFFF', transition: 'left .2s ease' }
+        };
+      }),
+      durLine: 'Durée totale ' + this.dur(min + extraMin) + ' · ✓ créneau toujours disponible',
+      lines: [{ k: name, v: prix + ' €' }].concat(chosen.map(k => ({ k: this.ADDONS[k].name, v: this.ADDONS[k].prix + ' €' }))),
+      totalLabel: total + ' €', depositLabel: deposit + ' €', restLabel: (total - deposit) + ' €',
+      freeUntil: WD[free.getDay()] + ' ' + free.getDate() + ' ' + MO[free.getMonth()] + ', ' + this.hm(start),
+      bundleName: bundle,
+      toStep1: () => this.setState({ step: 1 }),
+      toStep2: () => { this.setState({ step: 2 }); window.scrollTo(0, 0); },
+      f: st.f, onPrenom: setF('prenom'), onNom: setF('nom'), onEmail: setF('email'), onTel: setF('tel'),
+      hasError: st.err,
+      payWallet: () => { this.setState({ step: 3, ref: 'EB-' + y + '-' + String(Math.floor(1000 + Math.random() * 9000)) }); window.scrollTo(0, 0); },
+      confirm: () => {
+        if (!st.f.prenom.trim() || !st.f.tel.trim()) { this.setState({ err: true }); return; }
+        this.setState({ step: 3, ref: 'EB-' + y + '-' + String(Math.floor(1000 + Math.random() * 9000)) }); window.scrollTo(0, 0);
+      },
+      ref: st.ref,
+      hello: st.f.prenom.trim() ? ', ' + st.f.prenom.trim() : '',
+      recap: [
+        { k: 'Prestation', v: bundle },
+        { k: 'Date', v: WDL[date.getDay()] + ' ' + da + ' ' + MOL[mo - 1] },
+        { k: 'Heure', v: this.hm(start) + ' → ' + this.hm(end) },
+        { k: 'Adresse', v: 'Quartier Durivage, Ducos' },
+        { k: 'Acompte payé', v: deposit + ' €' },
+        { k: 'Au studio', v: (total - deposit) + ' €' }
+      ],
+      icsHref: 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics),
+      hasRefill: !!refillItem,
+      refill: refillItem ? {
+        when: WD[rd.getDay()].replace('.', '').replace(/^./, c => c.toUpperCase()) + '. ' + rd.getDate() + ' ' + MO[rd.getMonth()] + ' · ' + this.hm(start),
+        meta: refillItem[0] + ' · ' + this.dur(refillItem[1]) + ' · ' + refillItem[2] + ' €',
+        href: 'Exotic%20Beauty%20v2%20-%20Reservation.dc.html?p=' + refillId + '&d=' + this.iso(rd) + '&h=' + this.hm(start),
+        other: 'Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=remplissage&p=' + refillId
+      } : { when: '', meta: '', href: '#', other: '#' }
+    };
+  }
+}
+</script>
+</body>
+</html>

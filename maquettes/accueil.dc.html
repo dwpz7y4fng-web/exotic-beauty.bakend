@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #FFFFFF; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  section[id] { scroll-margin-top: 90px; }
+  a { color: #1E2B31; text-decoration: none; }
+  a:hover { color: #44525A; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .eb-plus { transform: rotate(45deg); }
+  @keyframes eb-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .eb-marq { animation: none !important; } }
+</style>
+</helmet>
+<div style="font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1E2B31; background: #FFFFFF; -webkit-font-smoothing: antialiased;">
+
+  <div style="{{ topStyle }}">
+    <div style="height: 34px; background: #0F171A; overflow: hidden; display: flex; align-items: center;">
+      <div class="eb-marq" style="display: flex; width: max-content; animation: eb-marquee 26s linear infinite;">
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); white-space: nowrap; padding-right: 28px;">Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé · Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé ·</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.8); white-space: nowrap; padding-right: 28px;">Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé · Diagnostic offert · Une cliente à la fois · Studio privé · Parking privé ·</span>
+      </div>
+    </div>
+    <header style="{{ hdrStyle }}">
+      <div style="max-width: 1180px; margin: 0 auto; height: 68px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <a href="#haut" style="display: flex; align-items: center; gap: 10px; color: inherit;">
+          <img src="images/logo-exotic-beauty.png" alt="Exotic Beauty & Spa" style="{{ logoImg }}" />
+        </a>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="{{ hdrBtn }}">Réserver</a>
+          <button type="button" onClick="{{ openMenu }}" aria-label="Ouvrir le menu" style="width: 44px; height: 44px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;">
+            <svg width="28" height="16" viewBox="0 0 30 18" fill="none" stroke="{{ inkColor }}" stroke-width="1.6" stroke-linecap="round"><path d="M2 3h26M2 15h26"></path></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div style="{{ menuStyle }}">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 0 20px; height: 102px; display: flex; align-items: center; justify-content: space-between;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.7);">Menu</span>
+      <button type="button" onClick="{{ closeMenu }}" aria-label="Fermer le menu" style="width: 44px; height: 44px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <nav style="max-width: 1180px; margin: 0 auto; padding: 10px 20px 40px; display: flex; flex-direction: column;">
+      <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Prestations et tarifs</a>
+      <a href="#methode" onClick="{{ closeMenu }}" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Le déroulement du rendez-vous</a>
+      <a href="#qui" onClick="{{ closeMenu }}" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Qui suis-je</a>
+      <a href="#avis" onClick="{{ closeMenu }}" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Avis</a>
+      <a href="#infos" onClick="{{ closeMenu }}" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Horaires et contact</a>
+      <a href="#faq" onClick="{{ closeMenu }}" style="padding: 16px 0; border-top: 1px solid rgba(255,255,255,.14); border-bottom: 1px solid rgba(255,255,255,.14); color: #FFFFFF; font-size: 30px; font-weight: 500; letter-spacing: -.02em;">Questions</a>
+      <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="margin-top: 28px; display: flex; align-items: center; justify-content: center; min-height: 56px; border-radius: 9999px; background: #FFFFFF; color: #1E2B31; font-weight: 600; font-size: 16px;">Réserver mon rendez-vous</a>
+    </nav>
+  </div>
+
+  <section id="haut" data-screen-label="Accueil" style="position: relative; min-height: max(620px, 100vh); overflow: hidden; background: #2A363C; color: #FFFFFF; display: flex; align-items: flex-end;">
+    <img src="images/hero.jpg" alt="Gros plan d'un regard avec extensions de cils" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%;" />
+    <div style="position: absolute; inset: 0; background: linear-gradient(rgba(15,23,26,.35) 0%, rgba(15,23,26,.2) 30%, rgba(15,23,26,.62) 62%, rgba(15,23,26,.9) 100%);"></div>
+    <div style="position: relative; width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 24px 48px;">
+      <div style="max-width: 640px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 17px; color: rgba(255,255,255,.9);">★ <span style="font-size: 20px; font-weight: 600; color: #FFFFFF;">4,9</span> sur Google · <a href="https://www.google.com/search?q=Exotic+beauty+cil+-+Extension+de+cils+et+sourcils+-+Ducos%2C+Martinique+Avis" target="_blank" rel="noopener" style="color: #FFFFFF; text-decoration: underline;">23 avis</a></div>
+        <h1 style="margin: 0; font-size: clamp(42px, 7vw, 76px); font-weight: 500; line-height: 1.02; letter-spacing: -.035em; text-wrap: pretty;">Un regard sur mesure, <span style="color: rgba(255,255,255,.6);">pensé avant d'être posé.</span></h1>
+        <p style="margin: 0; font-size: 17px; line-height: 1.5; color: rgba(255,255,255,.86); max-width: 460px;">Extensions de cils et sourcils à Ducos. Diagnostic offert avant chaque rendez-vous.</p>
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 0 28px; border-radius: 9999px; background: #FFFFFF; color: #1E2B31; font-weight: 600; font-size: 16px; max-width: 360px;" style-hover="background: #DCE6EA; color: #1E2B31;">Réserver mon rendez-vous</a>
+      </div>
+    </div>
+  </section>
+
+  <div style="border-bottom: 1px solid #D9E0E3;">
+    <div style="max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));">
+      <div style="padding: 24px 12px 22px 24px; border-right: 1px solid #D9E0E3; display: flex; flex-direction: column; gap: 6px;"><div style="font-size: clamp(26px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em;">5 ans</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Spécialiste du regard</div></div>
+      <div style="padding: 24px 12px 22px 24px; border-right: 1px solid #D9E0E3; display: flex; flex-direction: column; gap: 6px;"><div style="font-size: clamp(26px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em;">4,9</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Note Google</div></div>
+      <div style="padding: 24px 12px 22px 24px; display: flex; flex-direction: column; gap: 6px;"><div style="font-size: clamp(26px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em;">1</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Cliente à la fois</div></div>
+    </div>
+  </div>
+
+  <section id="prestations" data-screen-label="01 Prestations" style="max-width: 1180px; margin: 0 auto; padding: 56px 24px 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px 64px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">01 — Prestations</div>
+      <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Nos <span style="color: #7F8B90;">prestations.</span></h2>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column;">
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="display: flex; gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid #D9E0E3;" style-hover="background: #F3F6F7;">
+          <img src="images/mixte.jpg" alt="Pose mixte" style="width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;"><div style="font-weight: 600; font-size: 17px;">Mes extensions de cils</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Dès 55 € · 1 h – 2 h 10</div></div>
+          <span style="width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #1E2B31; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        </a>
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=remplissage" style="display: flex; gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid #D9E0E3;" style-hover="background: #F3F6F7;">
+          <img src="images/cil-a-cil.jpg" alt="Remplissage" style="width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;"><div style="font-weight: 600; font-size: 17px;">Mon remplissage</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Dès 30 € · toutes les 3 semaines</div></div>
+          <span style="width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #1E2B31; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        </a>
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=sourcils" style="display: flex; gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid #D9E0E3;" style-hover="background: #F3F6F7;">
+          <img src="images/brow-lift.jpg" alt="Sourcils" style="width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;"><div style="font-weight: 600; font-size: 17px;">Mes sourcils</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Dès 10 € · brow lift, fil, powder</div></div>
+          <span style="width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #1E2B31; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        </a>
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=offre" style="display: flex; gap: 14px; align-items: center; padding: 16px 0; border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;" style-hover="background: #F3F6F7;">
+          <img src="images/brow-lift-2.jpg" alt="Offre regard" style="width: 72px; height: 72px; border-radius: 10px; object-fit: cover; flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;"><div style="font-weight: 600; font-size: 17px;">L'offre regard</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Dès 80 € · cils + brow lift</div></div>
+          <span style="width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #1E2B31; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        </a>
+      </div>
+      <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 9999px; background: #DCE6EA; font-weight: 600; font-size: 14px;" style-hover="background: #CFDCE1;">Voir toutes les prestations et tarifs</a>
+    </div>
+  </section>
+
+  <section id="diagnostic" data-screen-label="02 Diagnostic" style="background: #F3F6F7;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 56px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 64px; align-items: center;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">02 — Le diagnostic</div>
+        <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em; text-wrap: pretty;">Un diagnostic <span style="color: #7F8B90;">avant chaque rendez-vous.</span></h2>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44525A; max-width: 440px;">Pour les cils : la forme de vos yeux, l'épaisseur de vos cils naturels et vos attentes. Pour les sourcils : leur épaisseur, s'ils sont disciplinés ou non, et vos attentes. La prestation est adaptée pour qu'elle vous aille au mieux.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: #FFFFFF; border: 1px solid #D9E0E3; border-radius: 12px; overflow: hidden;">
+          <div style="position: relative; height: 320px;">
+            <img src="images/diagnostic.jpg" alt="Cliente pendant le diagnostic" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 38%;" />
+          </div>
+          <div style="padding: 4px 16px 8px;">
+            <div style="padding: 14px 0 2px; font-size: 13px; font-weight: 600; color: #1E2B31;">Cils</div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Forme des yeux</span><span style="font-size: 14px; font-weight: 600;">Amande</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Épaisseur des cils</span><span style="font-size: 14px; font-weight: 600;">Moyenne</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Vos attentes</span><span style="font-size: 14px; font-weight: 600;">Effet naturel</span></div>
+            <div style="padding: 14px 0 2px; font-size: 13px; font-weight: 600; color: #1E2B31;">Sourcils</div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Épaisseur</span><span style="font-size: 14px; font-weight: 600;">Fine</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Disciplinés</span><span style="font-size: 14px; font-weight: 600;">Non</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 12px 0;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Vos attentes</span><span style="font-size: 14px; font-weight: 600;">Plus fournis</span></div>
+          </div>
+        </div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Exemple de diagnostic · offert avant chaque rendez-vous</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultats" data-screen-label="03 Réalisations" style="padding: 56px 0 48px;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 0 24px 20px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">03 — Réalisations</div>
+      <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Nos <span style="color: #7F8B90;">réalisations.</span></h2>
+    </div>
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 24px 8px; scrollbar-width: none;">
+      <figure style="margin: 0; flex: 0 0 min(360px, 84vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #F3F6F7;">
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-browlift-avant4.jpg" alt="Brow lift avant" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Avant</span></div>
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-browlift-apres.jpg" alt="Brow lift après" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Après</span></div>
+        </div>
+        <figcaption style="font-weight: 600; font-size: 14px;">Brow lift</figcaption>
+      </figure>
+      <figure style="margin: 0; flex: 0 0 min(360px, 84vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #F3F6F7;">
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-lashlift-avant3.jpg" alt="Rehaussement de cils avant" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Avant</span></div>
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-lashlift-apres.jpg" alt="Rehaussement de cils après" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Après</span></div>
+        </div>
+        <figcaption style="font-weight: 600; font-size: 14px;">Rehaussement de cils</figcaption>
+      </figure>
+      <figure style="margin: 0; flex: 0 0 min(360px, 84vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #F3F6F7;">
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-powder-avant3.jpg" alt="Ombré powder brow avant" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Avant</span></div>
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-powder-apres3.jpg" alt="Ombré powder brow après" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Après</span></div>
+        </div>
+        <figcaption style="font-weight: 600; font-size: 14px;">Ombré powder brow</figcaption>
+      </figure>
+      <figure style="margin: 0; flex: 0 0 min(360px, 84vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #F3F6F7;">
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-fil-avant.jpg" alt="Épilation au fil avant" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Avant</span></div>
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/ba-fil-apres.jpg" alt="Épilation au fil après" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Après</span></div>
+        </div>
+        <figcaption style="font-weight: 600; font-size: 14px;">Épilation au fil</figcaption>
+      </figure>
+      <figure style="margin: 0; flex: 0 0 min(360px, 84vw); scroll-snap-align: start; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #F3F6F7;">
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/sourcil-avant.jpg" alt="Ombré powder brow avant" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Avant</span></div>
+          <div style="position: relative; aspect-ratio: 4 / 3;"><img src="images/sourcil-apres.jpg" alt="Ombré powder brow après" style="width: 100%; height: 100%; object-fit: cover; display: block;" /><span style="position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 3px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">Après</span></div>
+        </div>
+        <figcaption style="font-weight: 600; font-size: 14px;">Ombré powder brow</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="methode" data-screen-label="04 Méthode" style="max-width: 1180px; margin: 0 auto; padding: 0 24px 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px 64px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">04 — Le déroulement</div>
+      <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Le déroulement <span style="color: #7F8B90;">de votre rendez-vous.</span></h2>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid #D9E0E3;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #1E2B31; width: 28px; flex-shrink: 0; padding-top: 3px;">01</div><div><div style="font-weight: 600; font-size: 16px;">Le diagnostic</div><div style="font-size: 14px; line-height: 1.6; color: #44525A;">Chaque rendez-vous commence par un diagnostic de vos cils ou de vos sourcils, pour choisir ensemble la prestation adaptée.</div></div></div>
+      <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid #D9E0E3;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #1E2B31; width: 28px; flex-shrink: 0; padding-top: 3px;">02</div><div><div style="font-weight: 600; font-size: 16px;">La prestation</div><div style="font-size: 14px; line-height: 1.6; color: #44525A;">Une fois le diagnostic fait, la prestation commence dans une ambiance calme et détendue.</div></div></div>
+      <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid #D9E0E3;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #1E2B31; width: 28px; flex-shrink: 0; padding-top: 3px;">03</div><div><div style="font-weight: 600; font-size: 16px;">L'entretien</div><div style="font-size: 14px; line-height: 1.6; color: #44525A;">Je vous donne des conseils d'entretien pour faire durer le résultat.</div></div></div>
+      <div style="display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #1E2B31; width: 28px; flex-shrink: 0; padding-top: 3px;">04</div><div><div style="font-weight: 600; font-size: 16px;">Le suivi</div><div style="font-size: 14px; line-height: 1.6; color: #44525A;">Vous revenez pour entretenir votre résultat : remplissage, retouche ou nouveau rendez-vous selon votre prestation.</div></div></div>
+    </div>
+  </section>
+
+  <section id="qui" data-screen-label="05 Qui suis-je" style="background: #F3F6F7;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 56px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 64px; align-items: center;">
+      <img src="images/malorie.jpg" alt="Portrait de Malorie" style="width: 100%; max-width: 440px; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 30%; border-radius: 12px; display: block;" />
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">05 — Qui suis-je</div>
+        <h2 style="margin: 0; font-size: clamp(26px, 3.4vw, 38px); font-weight: 600; line-height: 1.1; letter-spacing: -.025em; text-wrap: pretty;">Malorie, <span style="color: #7F8B90;">spécialiste du regard depuis 5 ans.</span></h2>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44525A;">Esthéticienne spécialisée en beauté du regard, je vous reçois dans mon studio privé à Ducos. Mes clientes me décrivent souvent comme calme, accueillante et à l'écoute de leurs envies.</p>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #44525A;">Mon objectif est de permettre aux femmes de se sentir plus confiantes et plus belles, grâce à la beauté du regard.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="avis" data-screen-label="06 Avis" style="padding: 56px 0;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 0 24px 20px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 12px;"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">06 — Avis</div><h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Avis clientes.</h2></div>
+      <div style="text-align: right;"><div style="font-size: clamp(26px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em;">4,9</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">23 avis Google</div></div>
+    </div>
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 24px 8px; scrollbar-width: none;">
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« J'ai essayé le rehaussement de cils chez Exotic Beauty cil et je dois dire que je suis ravie du résultat ! »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Karine J. · Lash lift</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Superbe prestation du début à la fin. Malorie m'a mise à l'aise tout au long, elle est vraiment douce. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Chloé N. · Teinture hybride</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Un agréable moment avec Malorie ! Au-delà d'être extrêmement douce, elle est très pédagogue et prend le temps d'expliquer chaque étape. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Gwenaëlle L. · Brow lift</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Une excellente expérience ! Malorie est une personne très accueillante et à l'écoute. Elle prend vraiment le temps de comprendre et de donner des conseils. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Rose B. · Sourcils</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Très satisfaite de la prestation de Malorie ! J'ai fait le lash lift et mes cils étaient on fleek durant 2 mois, même plus ! »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Livia B. · Lash lift</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« 100 % satisfaite de ma prestation ! Malorie a été à l'écoute concernant mes attentes, douce et rapide. Le résultat est comme je le souhaitais. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Fleur de miel · Extensions + fil</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★<span style="color: #C9D2D6;">★</span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Très professionnel, au petit soin et à l'écoute. Pour une première fois, j'ai été mise en confiance, bien conseillée. J'ai déjà pris mon prochain RDV. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Lydie J.-B. · Extensions de cils</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Le cadre du rendez-vous est très cocooning et relaxant. D'autant plus que les rendez-vous sont accompagnés de musiques douces :) »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Emma M. · Pose mixte</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Malorie est très professionnelle et cela se ressent dès les premiers échanges. Très douce et attentionnée durant l'épilation, on ne sent presque rien ! »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Dharyl E. · Épilation au fil</figcaption></figure>
+      <figure style="margin: 0; flex: 0 0 min(300px, 80vw); scroll-snap-align: start; border: 1px solid #D9E0E3; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12px; letter-spacing: 3px;">★★★★★<span style="color: #C9D2D6;"></span></div><blockquote style="margin: 0; font-size: 15px; line-height: 1.5;">« Excellente prestation, elle est très douce et à l'écoute. »</blockquote><figcaption style="margin-top: auto; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Marine J.-P. · Wispy volume russe</figcaption></figure>
+    </div>
+    <div style="max-width: 1180px; margin: 0 auto; padding: 32px 24px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Leurs retours en story</div>
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 24px 8px; scrollbar-width: none;">
+      <video data-vsrc="videos/v01.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v02.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v03.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v04.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v05.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v08.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v09.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v10.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v11.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+      <video data-vsrc="videos/v12.mp4" autoplay="" muted="" loop="" playsinline="" preload="metadata" style="flex: 0 0 180px; height: 320px; object-fit: cover; border-radius: 12px; background: #E6ECEE; scroll-snap-align: start;"></video>
+    </div>
+    <div style="max-width: 1180px; margin: 0 auto; padding: 20px 24px 0;">
+      <a href="https://www.google.com/search?q=Exotic+beauty+cil+-+Extension+de+cils+et+sourcils+-+Ducos%2C+Martinique+Avis" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 9999px; border: 1px solid #1E2B31; font-weight: 600; font-size: 14px;" style-hover="background: #F3F6F7;">Voir tous les avis sur Google<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M7 17L17 7M9 7h8v8"></path></svg></a>
+    </div>
+  </section>
+
+  <section id="faq" data-screen-label="07 Questions" style="max-width: 1180px; margin: 0 auto; padding: 0 24px 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px 64px; align-items: start;">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">07 — Questions</div>
+      <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Questions <span style="color: #7F8B90;">fréquentes.</span></h2>
+    </div>
+    <div>
+      <details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Les extensions abîment-elles les cils ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Non, si la pose est adaptée. Les extensions sont plus légères que vos cils naturels, et le cil suit son cycle de pousse normalement.</p></details>
+      <details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Combien de temps dure le résultat ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Cela dépend de la prestation : 3 à 4 semaines pour les extensions de cils, jusqu'à 8 semaines pour un lash lift ou un brow lift, 12 à 18 mois pour l'ombré powder brow.</p></details>
+      <details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Comment me préparer ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Venez sans maquillage sur la zone traitée. Les consignes propres à chaque prestation sont indiquées sur sa fiche.</p></details>
+      <details style="border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Et si j'ai la peau ou les yeux sensibles ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Signalez-le à la réservation. On en parle pendant le diagnostic, avant de commencer la prestation.</p></details>
+    </div>
+  </section>
+
+  <section id="infos" data-screen-label="08 Infos pratiques" style="background: #F3F6F7;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 56px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 64px; align-items: start;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">08 — Infos pratiques</div>
+        <h2 style="margin: 0; font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Horaires <span style="color: #7F8B90;">d'ouverture.</span></h2>
+        <div style="background: #FFFFFF; border: 1px solid #D9E0E3; border-radius: 12px; padding: 4px 16px;">
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-size: 15px;">Lundi</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; line-height: 1.7;">09:00 – 12:00<br />12:30 – 17:00</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-size: 15px;">Mardi</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; line-height: 1.7;">09:00 – 12:00<br />12:30 – 17:00</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-size: 15px;">Mercredi</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; line-height: 1.7;">09:00 – 12:00<br />12:30 – 17:00</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #E6ECEE;"><span style="font-size: 15px;">Jeudi</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; line-height: 1.7;">09:00 – 12:00<br />12:30 – 17:00</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 14px 0;"><span style="font-size: 15px;">Vendredi</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right; line-height: 1.7;">09:00 – 12:00<br />12:30 – 17:00</span></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <a href="tel:+33770211399" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; border-top: 1px solid #D9E0E3;" style-hover="color: #44525A;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Téléphone</span><span style="font-weight: 600; font-size: 16px;">07 70 21 13 99</span></a>
+        <a href="https://instagram.com/exotic_beautycil" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; border-top: 1px solid #D9E0E3;" style-hover="color: #44525A;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Instagram</span><span style="font-weight: 600; font-size: 16px;">@exotic_beautycil</span></a>
+        <a href="https://www.google.com/maps/search/?api=1&amp;query=Quartier+Durivage+Ducos+Martinique" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; border-top: 1px solid #D9E0E3;" style-hover="color: #44525A;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Adresse</span><span style="font-weight: 600; font-size: 16px; text-align: right;">Quartier Durivage, Ducos</span></a>
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Parking</span><span style="font-weight: 600; font-size: 16px;">Place privée</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer style="background: #141D21; color: #FFFFFF;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 56px 24px 130px; display: flex; flex-direction: column; gap: 20px;">
+      <div style="font-size: clamp(36px, 5vw, 56px); font-weight: 600; line-height: 1.02; letter-spacing: -.03em;">Un regard <span style="color: rgba(255,255,255,.5);">sur mesure.</span></div>
+      <div style="font-size: 15px; color: rgba(255,255,255,.78);">Quartier Durivage, Ducos · 07 70 21 13 99</div>
+      <a href="https://wa.me/" style="align-self: flex-start; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 24px; border-radius: 9999px; border: 1px solid rgba(255,255,255,.4); color: #FFFFFF; font-weight: 600; font-size: 15px;" style-hover="background: rgba(255,255,255,.08); color: #FFFFFF;">Nous contacter sur WhatsApp</a>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">
+        <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">Prestations</a>
+        <a href="#avis" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">Avis</a>
+        <a href="#faq" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">FAQ</a>
+        <a href="https://instagram.com/exotic_beautycil" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">Instagram</a>
+        <a href="#" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">CGV</a>
+        <a href="#" style="color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">Mentions légales</a>
+      </div>
+    </div>
+  </footer>
+
+  <div style="{{ stickyStyle }}">
+    <a href="Exotic%20Beauty%20v2%20-%20Prestation.dc.html?c=cils" style="display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; border-radius: 9999px; background: #1E2B31; color: #FFFFFF; font-weight: 600; font-size: 15px; box-shadow: 0 10px 28px rgba(15,23,26,.28);" style-hover="background: #2C3C43; color: #FFFFFF;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>Réserver mon rendez-vous</a>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { scrolled: false, pastHero: false, menu: false };
+
+  componentDidMount() {
+    this.onScroll = () => {
+      const y = window.scrollY || 0;
+      const h = window.innerHeight || 800;
+      const scrolled = y > 40, pastHero = y > h * 0.8;
+      if (scrolled !== this.state.scrolled || pastHero !== this.state.pastHero) this.setState({ scrolled, pastHero });
+    };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    document.querySelectorAll('video[data-vsrc]').forEach(v => {
+      v.muted = true; v.defaultMuted = true; v.loop = true; v.playsInline = true;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+      const go = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+      v.addEventListener('loadeddata', go);
+      v.addEventListener('click', () => (v.paused ? go() : v.pause()));
+      fetch(v.getAttribute('data-vsrc')).then(r => r.blob()).then(b => {
+        v.src = URL.createObjectURL(new Blob([b], { type: 'video/mp4' }));
+        v.load();
+      }).catch(() => {});
+    });
+    this.onScroll();
+  }
+  componentWillUnmount() { window.removeEventListener('scroll', this.onScroll); }
+
+  renderVals() {
+    const { scrolled, pastHero, menu } = this.state;
+    const ink = scrolled ? '#1E2B31' : '#FFFFFF';
+    return {
+      inkColor: ink,
+      openMenu: () => this.setState({ menu: true }),
+      closeMenu: () => this.setState({ menu: false }),
+      topStyle: { position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40 },
+      hdrStyle: {
+        color: ink,
+        background: scrolled ? 'rgba(255,255,255,.96)' : 'transparent',
+        borderBottom: scrolled ? '1px solid #D9E0E3' : '1px solid transparent',
+        backdropFilter: scrolled ? 'blur(10px)' : 'none',
+        transition: 'background .25s ease, color .25s ease, border-color .25s ease'
+      },
+      logoImg: {
+        height: '56px', width: 'auto', display: 'block',
+        filter: scrolled ? 'none' : 'brightness(0) invert(1)',
+        transition: 'filter .25s ease'
+      },
+      logoRing: {
+        width: '34px', height: '34px', borderRadius: '9999px', border: '1.5px solid ' + ink,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontWeight: 600, fontSize: '13px', letterSpacing: '.04em', color: ink
+      },
+      hdrBtn: {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '44px', padding: '0 18px',
+        borderRadius: '9999px', fontWeight: 600, fontSize: '14px',
+        background: scrolled ? '#1E2B31' : '#FFFFFF', color: scrolled ? '#FFFFFF' : '#1E2B31'
+      },
+      menuStyle: {
+        position: 'fixed', inset: 0, zIndex: 60, background: '#141D21', overflowY: 'auto',
+        opacity: menu ? 1 : 0, pointerEvents: menu ? 'auto' : 'none', transition: 'opacity .25s ease'
+      },
+      stickyStyle: {
+        position: 'fixed', left: '16px', right: '16px', bottom: '16px', zIndex: 35, maxWidth: '420px', margin: '0 auto',
+        opacity: pastHero && !menu ? 1 : 0, transform: pastHero ? 'none' : 'translateY(16px)',
+        pointerEvents: pastHero ? 'auto' : 'none', transition: 'opacity .25s ease, transform .25s ease'
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #FFFFFF; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  a { color: #1E2B31; text-decoration: none; }
+  a:hover { color: #44525A; }
+  button { font-family: inherit; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .eb-plus { transform: rotate(45deg); }
+</style>
+</helmet>
+<div style="font-family: 'Hanken Grotesk', system-ui, sans-serif; color: #1E2B31; background: #FFFFFF; -webkit-font-smoothing: antialiased; padding-bottom: 100px;">
+
+  <div style="position: sticky; top: 0; z-index: 30; background: #FFFFFF;">
+    <div style="height: 34px; background: #0F171A; display: flex; align-items: center; justify-content: center; padding: 0 12px;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Diagnostic offert · Une cliente à la fois · Parking privé</span></div>
+    <div style="border-bottom: 1px solid #D9E0E3;">
+      <div style="max-width: 1180px; margin: 0 auto; height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;">
+        <a href="Exotic%20Beauty%20v2%20-%20Accueil.dc.html" style="font-weight: 700; font-size: 15px; letter-spacing: .14em;">EXOTIC BEAUTY</a>
+        <div style="display: flex; gap: 8px;">
+          <a href="Exotic%20Beauty%20v2%20-%20Accueil.dc.html" aria-label="Accueil" style="width: 44px; height: 44px; border-radius: 9999px; border: 1px solid #D9E0E3; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M4 16h16"></path></svg></a>
+          <button type="button" onClick="{{ openSheet }}" aria-label="Voir les créneaux" style="width: 44px; height: 44px; border-radius: 9999px; border: 1px solid #D9E0E3; background: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 1180px; margin: 0 auto; padding: 16px 16px 0;">
+    <div style="display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="3">
+        <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 0 48px; align-items: start;">
+
+    <div style="padding: 12px 16px 0; display: flex; flex-direction: column; gap: 6px;">
+      <div style="position: relative; aspect-ratio: 4 / 4.2; max-height: 560px; width: 100%; border-radius: 14px; overflow: hidden; background: #CFD9DE;">
+        <img src="{{ galMain }}" alt="{{ it.name }}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;" />
+        <span style="position: absolute; right: 12px; bottom: 12px; background: rgba(255,255,255,.92); border-radius: 9999px; padding: 6px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #1E2B31;">{{ galCount }}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;">
+        <sc-for list="{{ gal }}" as="g" hint-placeholder-count="4">
+          <button type="button" onClick="{{ g.onClick }}" aria-label="Voir la photo" style="{{ g.style }}"><img src="{{ g.src }}" alt="" style="width: 100%; height: 100%; object-fit: cover; display: block;" /></button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div>
+      <div style="padding: 28px 24px 0; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ catLabel }}</div>
+        <h1 style="margin: 0; font-size: clamp(34px, 5vw, 48px); font-weight: 600; line-height: 1; letter-spacing: -.03em;">{{ it.name }}</h1>
+        <div style="font-size: 18px; line-height: 1.35; color: #7F8B90; font-weight: 500;">{{ it.tagline }}</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #1E2B31;">★ 4,9 · 23 avis Google</div>
+      </div>
+
+      <div style="padding: 24px 0 0 24px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Choisissez votre effet</div>
+        <div style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-right: 24px; padding-bottom: 4px;">
+          <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="5">
+            <button type="button" onClick="{{ ch.onClick }}" style="{{ ch.style }}">{{ ch.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="padding: 28px 24px 0;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70; margin-bottom: 8px;">Fiche technique</div>
+        <sc-for list="{{ specs }}" as="s" hint-placeholder-count="5">
+          <div style="display: flex; justify-content: space-between; gap: 16px; padding: 13px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ s.k }}</span><span style="font-weight: 600; font-size: 15px; text-align: right;">{{ s.v }}</span></div>
+        </sc-for>
+        <div style="border-top: 1px solid #D9E0E3;"></div>
+      </div>
+
+      <div style="margin: 40px 24px 0; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
+          <h2 style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Prochaines <span style="color: #7F8B90;">disponibilités</span></h2>
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;"><span style="width: 8px; height: 8px; border-radius: 9999px; background: #2F8F5B;"></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;">En direct</span></div>
+        </div>
+        <a href="{{ first.href }}" style="background: #141D21; color: #FFFFFF; border-radius: 14px; padding: 18px; display: flex; align-items: center; gap: 14px;" style-hover="background: #1E2B31; color: #FFFFFF;">
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65);">La plus proche</span>
+            <span style="font-size: 20px; font-weight: 600; letter-spacing: -.02em;">{{ first.day }}</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: rgba(255,255,255,.85);">{{ first.range }}</span>
+          </div>
+          <span style="display: flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 9999px; background: #FFFFFF; color: #1E2B31; font-weight: 600; font-size: 14px;">Réserver</span>
+        </a>
+        <sc-for list="{{ nextSlots }}" as="n" hint-placeholder-count="2">
+          <a href="{{ n.href }}" style="border: 1px solid #D9E0E3; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;" style-hover="border-color: #1E2B31;">
+            <div style="display: flex; flex-direction: column; gap: 3px;"><span style="font-weight: 600; font-size: 15px;">{{ n.day }}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #5F6B70;">{{ n.range }}</span></div>
+            <span style="width: 36px; height: 36px; border-radius: 9999px; border: 1px solid #1E2B31; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </a>
+        </sc-for>
+        <button type="button" onClick="{{ openSheet }}" style="align-self: center; background: none; border: none; font-size: 14px; font-weight: 600; text-decoration: underline; padding: 8px 0; cursor: pointer; color: #1E2B31;">Voir tout le calendrier</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 820px; margin: 0 auto;">
+    <div style="padding: 40px 24px 0; display: flex; flex-direction: column; gap: 14px;">
+      <h2 style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Le résultat</h2>
+      <p style="{{ descStyle }}">{{ it.desc }}</p>
+      <button type="button" onClick="{{ toggleMore }}" style="align-self: flex-start; display: flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 9999px; border: none; background: #DCE6EA; font-weight: 600; font-size: 14px; cursor: pointer; color: #1E2B31;">{{ moreLabel }}</button>
+    </div>
+
+    <sc-if value="{{ showMap }}" hint-placeholder-val="{{ true }}">
+      <div style="margin: 40px 24px 0; background: #F3F6F7; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Cartographie des cils · exemple</div>
+        <div style="position: relative; height: 160px; background: #FFFFFF; border: 1px solid #D9E0E3; border-radius: 10px;">
+          <svg viewBox="0 0 302 150" preserveAspectRatio="none" fill="none" style="position: absolute; inset: 0; width: 100%; height: 100%;">
+            <path d="M30 110 Q151 30 272 110" stroke="#1E2B31" stroke-width="1.5"></path>
+            <path d="M60 90 L52 58 M100 72 L96 36 M151 64 L151 24 M202 72 L208 34 M242 90 L254 52" stroke="#1E2B31" stroke-width="1" stroke-linecap="round"></path>
+            <path d="M101 120 L101 130 M201 120 L201 130" stroke="#9AA6AB" stroke-width="1" stroke-dasharray="2 3"></path>
+          </svg>
+          <span style="position: absolute; left: 6%; bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5F6B70;">8–9 mm</span>
+          <span style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5F6B70;">10–11 mm</span>
+          <span style="position: absolute; right: 6%; bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5F6B70;">12 mm</span>
+        </div>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #44525A;">Les longueurs sont définies pendant votre diagnostic, selon la forme de votre œil.</p>
+      </div>
+    </sc-if>
+
+    <div style="padding: 40px 24px 0; display: flex; flex-direction: column; gap: 14px;">
+      <h2 style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Recommandé si…</h2>
+      <div>
+        <sc-for list="{{ pour }}" as="p" hint-placeholder-count="3">
+          <div style="display: flex; gap: 14px; padding: 12px 0; border-top: 1px solid #D9E0E3;"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; padding-top: 3px;">{{ p.n }}</span><span style="font-size: 15px; line-height: 1.5;">{{ p.t }}</span></div>
+        </sc-for>
+        <div style="border-top: 1px solid #D9E0E3;"></div>
+      </div>
+    </div>
+
+    <div style="padding: 40px 24px 0; display: flex; flex-direction: column; gap: 14px;">
+      <h2 style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Inclus dans <span style="color: #7F8B90;">chaque rendez-vous.</span></h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+        <div style="border: 1px solid #D9E0E3; border-radius: 12px; padding: 14px 10px; display: flex; flex-direction: column; gap: 10px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><div style="font-weight: 600; font-size: 13px; line-height: 1.3;">Diagnostic offert</div></div>
+        <div style="border: 1px solid #D9E0E3; border-radius: 12px; padding: 14px 10px; display: flex; flex-direction: column; gap: 10px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4 4-6 8-6s7 2 8 6"></path></svg><div style="font-weight: 600; font-size: 13px; line-height: 1.3;">Une cliente à la fois</div></div>
+        <div style="border: 1px solid #D9E0E3; border-radius: 12px; padding: 14px 10px; display: flex; flex-direction: column; gap: 10px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round"><path d="M5 5h14v14H5z"></path><path d="M9 10h6M9 14h4"></path></svg><div style="font-weight: 600; font-size: 13px; line-height: 1.3;">Conseils d'entretien</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background: #F3F6F7; margin-top: 40px; padding: 40px 0;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 0 24px 16px;"><h2 style="margin: 0; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Le studio</h2></div>
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 24px 4px; scrollbar-width: none;">
+      <img src="images/studio-cabine.jpg" alt="La cabine de pose" style="flex: 0 0 200px; height: 340px; object-fit: cover; border-radius: 12px; scroll-snap-align: start;" />
+      <img src="images/studio-soin.jpg" alt="Une pose en cours" style="flex: 0 0 200px; height: 340px; object-fit: cover; border-radius: 12px; scroll-snap-align: start;" />
+      <img src="images/studio-enseigne.jpg" alt="L'accueil du studio" style="flex: 0 0 200px; height: 340px; object-fit: cover; border-radius: 12px; scroll-snap-align: start;" />
+    </div>
+  </div>
+
+  <div style="max-width: 820px; margin: 0 auto;">
+    <div style="padding: 40px 24px 0;">
+      <h2 style="margin: 0 0 14px; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">À savoir</h2>
+      <details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Comment me préparer<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">{{ prepa }}</p></details>
+      <details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">L'entretien au quotidien<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">{{ entretien }}</p></details>
+      <details style="border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Report, retard, annulation<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Le report est gratuit jusqu'à 48 h avant le rendez-vous. Au-delà, ou en cas d'absence, l'acompte est conservé. Au-delà de 15 minutes de retard, la prestation peut être raccourcie ou reportée.</p></details>
+    </div>
+
+    <sc-if value="{{ hasRefill }}" hint-placeholder-val="{{ true }}">
+      <div style="margin: 40px 24px 0; border: 1px solid #D9E0E3; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Pour garder l'effet</div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;"><div style="font-weight: 600; font-size: 17px;">{{ refill.name }}</div><div style="font-weight: 600; font-size: 17px;">{{ refill.prix }}</div></div>
+        <div style="font-size: 14px; line-height: 1.5; color: #44525A;">Toutes les 3 semaines · {{ refill.duree }}. Proposé en un clic juste après votre réservation.</div>
+      </div>
+    </sc-if>
+
+    <div style="margin: 40px 24px 0; background: #141D21; color: #FFFFFF; border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-weight: 600; font-size: 20px; letter-spacing: -.02em;">Besoin d'un conseil avant de réserver ?</div>
+      <div style="font-size: 14px; color: rgba(255,255,255,.78); line-height: 1.5;">{{ conseilTxt }}</div>
+      <a href="https://wa.me/" style="align-self: flex-start; display: flex; align-items: center; min-height: 48px; padding: 0 22px; border-radius: 9999px; border: 1px solid rgba(255,255,255,.4); color: #FFFFFF; font-weight: 600; font-size: 14px;" style-hover="background: rgba(255,255,255,.08); color: #FFFFFF;">Nous contacter sur WhatsApp</a>
+    </div>
+
+    <div style="padding: 40px 24px 0;">
+      <h2 style="margin: 0 0 14px; font-size: 30px; font-weight: 600; line-height: 1.08; letter-spacing: -.025em;">Questions fréquentes</h2>
+      <sc-if value="{{ isPowder }}" hint-placeholder-val="{{ false }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Comment le dessin est-il choisi ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Je dessine le sourcil en fonction de la morphologie de votre visage et de vos attentes : une ligne plus épaissie, plus arquée… Je vous conseille au mieux pour que le résultat vous corresponde et vous aille. Le dessin est validé avec vous avant de commencer la pigmentation.</p></details></sc-if>
+      <sc-if value="{{ isPowder }}" hint-placeholder-val="{{ false }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">J'ai une maladie, puis-je quand même le faire ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Oui, avec l'accord de votre médecin.</p></details></sc-if>
+      <sc-if value="{{ showPainFaq }}" hint-placeholder-val="{{ false }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Est-ce douloureux ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">{{ faqPain }}</p></details></sc-if>
+      <sc-if value="{{ showEyeFaq }}" hint-placeholder-val="{{ true }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Est-ce que ça abîme mes cils ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">{{ faqAbime }}</p></details></sc-if>
+      <sc-if value="{{ showMakeupFaq }}" hint-placeholder-val="{{ true }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Puis-je me maquiller ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">{{ faqMaquillage }}</p></details></sc-if>
+      <sc-if value="{{ showEyeFaq }}" hint-placeholder-val="{{ true }}"><details style="border-top: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Et si j'ai les yeux sensibles ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Signalez-le à la réservation. On en parle pendant le diagnostic, avant de commencer la pose.</p></details></sc-if>
+      <details style="border-top: 1px solid #D9E0E3; border-bottom: 1px solid #D9E0E3;"><summary style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 0; font-weight: 500; font-size: 15px;">Pourquoi un acompte ?<span class="eb-plus" style="font-size: 22px; font-weight: 400; transition: transform .2s ease;">+</span></summary><p style="margin: 0 0 18px; font-size: 15px; line-height: 1.6; color: #44525A;">Je ne reçois qu'une cliente à la fois : un rendez-vous manqué, c'est une demi-journée perdue. L'acompte de 50 % bloque votre créneau et il est déduit du total le jour J.</p></details>
+    </div>
+  </div>
+
+  <footer style="background: #141D21; color: #FFFFFF; margin-top: 48px;">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 40px 24px 60px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-size: clamp(32px, 5vw, 52px); font-weight: 600; line-height: 1.02; letter-spacing: -.03em;">Un regard <span style="color: rgba(255,255,255,.5);">sur mesure.</span></div>
+      <a href="Exotic%20Beauty%20v2%20-%20Accueil.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.65);" style-hover="color: #FFFFFF;">← Retour à l'accueil</a>
+    </div>
+  </footer>
+
+  <div style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 35; background: #FFFFFF; border-top: 1px solid #D9E0E3; box-shadow: 0 -6px 20px rgba(15,23,26,.06);">
+    <div style="max-width: 1180px; margin: 0 auto; padding: 14px 16px 18px; display: flex; align-items: center; gap: 12px;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+        <div style="font-weight: 600; font-size: 17px;">{{ barPrice }}</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ barMeta }}</div>
+      </div>
+      <button type="button" onClick="{{ openSheet }}" style="display: flex; align-items: center; justify-content: center; min-height: 56px; padding: 0 22px; border-radius: 9999px; border: none; background: #1E2B31; color: #FFFFFF; font-weight: 600; font-size: 14px; cursor: pointer;">Voir les disponibilités</button>
+    </div>
+  </div>
+
+  <div style="{{ sheetWrap }}">
+    <div onClick="{{ closeSheet }}" style="position: absolute; inset: 0; background: rgba(15,23,26,.72);"></div>
+    <div style="{{ sheetPanel }}">
+      <div style="display: flex; justify-content: center; padding-top: 10px;"><div style="width: 40px; height: 4px; border-radius: 9999px; background: #D9E0E3;"></div></div>
+      <div style="padding: 6px 16px 0; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" onClick="{{ closeSheet }}" aria-label="Fermer" style="width: 44px; height: 44px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+        <button type="button" onClick="{{ clearTime }}" style="background: none; border: none; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; text-decoration: underline; color: #1E2B31; padding: 10px 4px;">Effacer</button>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding-bottom: 12px;">
+        <div style="padding: 0 24px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">{{ sheetKicker }}</div>
+          <div style="font-size: 28px; font-weight: 600; letter-spacing: -.03em;">Choisissez votre jour</div>
+        </div>
+        <div style="padding: 16px 24px 0; font-size: 16px; font-weight: 600;">{{ monthLabel }}</div>
+        <div style="padding: 12px 24px 0; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;">
+          <sc-for list="{{ days }}" as="d" hint-placeholder-count="6">
+            <button type="button" onClick="{{ d.onClick }}" style="{{ d.style }}"><span style="{{ d.wdStyle }}">{{ d.wd }}</span><span style="{{ d.ddStyle }}">{{ d.dd }}</span></button>
+          </sc-for>
+        </div>
+        <div style="margin: 22px 24px 0; border-top: 1px solid #D9E0E3;"></div>
+        <div style="padding: 20px 24px 0; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 20px; font-weight: 600; letter-spacing: -.02em;">Choisissez votre heure</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70;">Matin</div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+            <sc-for list="{{ am }}" as="t" hint-placeholder-count="4">
+              <button type="button" onClick="{{ t.onClick }}" disabled="{{ t.off }}" style="{{ t.style }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #5F6B70; margin-top: 4px;">Après-midi</div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+            <sc-for list="{{ pm }}" as="t" hint-placeholder-count="3">
+              <button type="button" onClick="{{ t.onClick }}" disabled="{{ t.off }}" style="{{ t.style }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="border-top: 1px solid #D9E0E3; padding: 14px 20px 22px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+          <div style="font-weight: 600; font-size: 18px;">{{ it.prixLabel }}</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #5F6B70;">{{ pickLabel }}</div>
+        </div>
+        <a href="{{ contHref }}" style="{{ contStyle }}">Continuer</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dureeWispyMixte&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 100, &quot;min&quot;: 30, &quot;max&quot;: 240, &quot;step&quot;: 10, &quot;unit&quot;: &quot;min&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Durées&quot;}}">
+class Component extends DCLogic {
+  DATA = {
+    cils: {
+      label: 'Extensions de cils', kicker: 'Extensions de cils / pose complète',
+      gallery: ['images/volume-russe.jpg', 'images/mixte.jpg', 'images/cil-a-cil.jpg', 'images/hero.jpg'],
+      items: [
+        { id: 'cil-a-cil', gallery: ['images/cil-a-cil-2.jpg'], chip: 'Cil à cil', name: 'Cil à cil', tagline: 'Effet mascara, très discret.', min: 60, prix: 60, technique: '1 extension par cil', tenue: '3 à 4 semaines', refill: 'rem-cil-a-cil',
+          desc: "La pose complète cil à cil consiste à poser une extension de cil sur tous les cils naturels. Effet mascara, très discret.",
+          pour: ["C'est votre première pose.", 'Vous voulez un regard réveillé, sans effet maquillé.', 'Vos cils naturels sont déjà bien fournis.'] },
+        { id: 'mixte', gallery: ['images/pose-mixte.jpg'], chip: 'Mixte', name: 'Pose mixte', tagline: 'Plus de volume, tout aussi naturel.', min: 90, prix: 70, technique: 'Cil à cil + bouquets', tenue: '3 à 4 semaines', refill: 'rem-mixte',
+          desc: "Aussi appelé pose mixte, elle consiste à alterner entre le cil à cil et la pose volume russe. Convient à celles qui souhaitent un résultat un peu plus volumineux et sophistiqué, pour un résultat tout aussi naturel.",
+          pour: ['Le cil à cil vous paraît trop léger.', 'Vous cherchez un effet naturel mais visible.'] },
+        { id: 'russe', gallery: ['images/volume-russe.jpg'], chip: 'Volume russe', name: 'Volume russe', tagline: 'Intense, sophistiqué, et pourtant naturel.', min: 120, prix: 90, technique: 'Bouquets 3D à 5D', tenue: '3 à 4 semaines', refill: 'rem-russe',
+          desc: "Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). Convient à celles qui souhaitent un résultat intense, très volumineux et sophistiqué.",
+          pour: ['Vous souhaitez un effet intense.', 'Votre base de cils naturels est peu fournie, mais vous souhaitez tout de même du volume.'] },
+        { id: 'wispy-russe', gallery: ['images/mixte.jpg'], chip: 'Wispy russe', name: 'Wispy volume russe', tagline: 'Léger, aérien, texturé.', min: 130, prix: 95, technique: 'Volume russe + pics', tenue: '3 à 4 semaines', refill: 'rem-russe',
+          desc: "En utilisant la méthode volume russe, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.",
+          pour: ['Vous aimez le volume mais pas une ligne trop uniforme.', 'Vous voulez un regard qui a du relief.'] },
+        { id: 'wispy-mixte', gallery: ['images/wispy-mixte-teinture.jpg'], chip: 'Wispy mixte', name: 'Wispy pose mixte', tagline: 'Des pics subtils, un volume modéré.', min: 100, prix: 75, technique: 'Mixte + pics', tenue: '3 à 4 semaines', refill: 'rem-mixte',
+          desc: "En utilisant la méthode mixte, la pose wispy se caractérise par un rendu léger, aérien et texturé, combinant différentes longueurs d'extensions afin de créer de subtils pics qui apportent du relief et de la dimension au regard. L'effet est volontairement irrégulier pour un résultat inspiré des cils naturels, tout en étant intensifié.",
+          pour: ['Vous voulez un effet wispy, sans trop de densité.', 'Vous aimez un regard texturé.'] },
+        { id: 'wispy-cil', gallery: ['images/wispy-cil.jpg'], chip: 'Wispy cil à cil', name: 'Wispy cil à cil', tagline: 'Le wispy, en version légère.', min: 70, prix: 55, technique: 'Cil à cil + pics', tenue: '3 à 4 semaines', refill: 'rem-cil-a-cil',
+          desc: "La pose wispy en cil à cil : une extension par cil naturel, avec des longueurs alternées pour créer de subtils pics et donner du relief au regard, en restant très naturel.",
+          pour: ['Vous voulez un effet wispy très discret.', "C'est votre première pose.", 'Vos cils naturels sont déjà denses.'] },
+        { id: 'wet', gallery: ['images/wet.jpg'], chip: 'Wet', name: 'Wet volume russe', tagline: 'Effet cils mouillés, très graphique.', min: 130, prix: 95, technique: 'Bouquets fermés', tenue: '3 à 4 semaines', refill: 'rem-russe',
+          desc: "Appelé pose volume russe, cette pose consiste à appliquer des « bouquets » de cils sur chaque cil naturel (3D, 4D, 5D). En version wet, les bouquets sont plus fermés pour un effet cils mouillés. Convient à celles qui souhaitent un résultat intense et sophistiqué.",
+          pour: ['Vous aimez les regards graphiques.', 'Vous voulez un effet visible de loin.'] },
+        { id: 'lash-lift', gallery: ['images/lash-lift-1.jpg', 'images/lash-lift-2.jpg'], chip: 'Lash lift', name: 'Lash lift avec teinture', tagline: 'Vos cils, recourbés et intensifiés.', min: 45, prix: 60, technique: 'Rehaussement + teinture', tenue: '6 à 8 semaines', refill: null,
+          desc: "Le Lash Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des cils afin de leur donner un effet plus courbé et lifté. Cette technique permet de recourber les cils naturels vers le haut, depuis leur base, pour leur donner un effet allongé et lifté. Ce soin est idéal pour des cils fins à épais, frisés, très longs ou indisciplinés. La teinture est comprise dans la prestation pour donner plus d'intensité au regard.",
+          pour: ['Vous souhaitez un effet mascara naturel, avec vos propres cils.', 'Vous ne supportez pas les extensions de cils.', 'Vos cils sont droits ou très recourbés.'] }
+      ]
+    },
+    remplissage: {
+      label: 'Remplissage', kicker: 'Extensions de cils / remplissage',
+      gallery: ['images/cil-a-cil.jpg', 'images/mixte.jpg', 'images/volume-russe.jpg', 'images/studio-soin.jpg'],
+      items: [
+        { id: 'rem-cil-a-cil', gallery: ['images/cil-a-cil-2.jpg'], chip: 'Cil à cil', name: 'Remplissage cil à cil', tagline: 'Une ligne pleine, sans repartir de zéro.', min: 45, prix: 30, technique: 'Cil à cil', tenue: '3 à 4 semaines', refill: null,
+          desc: "Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose. Les extensions qui ont suivi la pousse sont retirées, puis la ligne est complétée.",
+          pour: ['Votre pose date de moins de 4 semaines.', 'Votre pose a été réalisée chez Exotic Beauty.', 'Vous voulez garder le même effet.'] },
+        { id: 'rem-mixte', gallery: ['images/pose-mixte.jpg'], chip: 'Mixte', name: 'Remplissage mixte', tagline: 'Une ligne pleine, sans repartir de zéro.', min: 75, prix: 35, technique: 'Mixte', tenue: '3 à 4 semaines', refill: null,
+          desc: "Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose. Les extensions qui ont suivi la pousse sont retirées, puis la ligne est complétée.",
+          pour: ['Votre pose date de moins de 4 semaines.', 'Votre pose a été réalisée chez Exotic Beauty.', 'Vous voulez garder le même effet.'] },
+        { id: 'rem-russe', gallery: ['images/volume-russe.jpg'], chip: 'Volume russe', name: 'Remplissage volume russe', tagline: 'Une ligne pleine, sans repartir de zéro.', min: 105, prix: 45, technique: 'Volume russe', tenue: '3 à 4 semaines', refill: null,
+          desc: "Le remplissage doit être effectué dans la limite de 3 à 4 semaines suivant la pose. Les extensions qui ont suivi la pousse sont retirées, puis la ligne est complétée.",
+          pour: ['Votre pose date de moins de 4 semaines.', 'Votre pose a été réalisée chez Exotic Beauty.', 'Vous voulez garder le même effet.'] },
+        { id: 'depose', gallery: ['images/studio-soin.jpg'], chip: 'Dépose', name: 'Dépose', tagline: 'Un retrait doux, sans casser le cil.', min: 25, prix: 20, technique: 'Dissolvant doux', tenue: '—', refill: null,
+          desc: "Retrait complet des extensions avec un dissolvant doux, sans tirer sur le cil naturel. Uniquement pour les poses réalisées chez Exotic Beauty.",
+          pour: ['Vous voulez faire une pause.', 'Votre pose a été réalisée chez Exotic Beauty.', 'Vous voulez changer de technique.'] }
+      ]
+    },
+    sourcils: {
+      label: 'Sourcils', kicker: 'Sourcils',
+      gallery: ['images/brow-lift-2.jpg', 'images/brow-lift.jpg', 'images/sourcil-apres.jpg', 'images/sourcil-avant.jpg'],
+      items: [
+        { id: 'brow-lift', gallery: ['images/brow-lift-3.jpg'], chip: 'Brow lift', name: 'Brow lift', tagline: 'Des sourcils disciplinés, plus épais.', min: 30, prix: 35, technique: 'Rehaussement du poil', tenue: "Jusqu'à 8 semaines", refill: null,
+          desc: "Le Brow Lift est un soin qui modifie temporairement (jusqu'à 8 semaines) la texture des poils afin de leur donner un effet plus épais. Il permet de rendre les poils plus souples et disciplinés. Ce soin est idéal pour les sourcils frisés, très longs ou indisciplinés. L'épilation au fil est comprise dans la prestation.",
+          pour: ['Vos sourcils sont indisciplinés.', 'Vous voulez un effet plus fourni sans maquillage.', 'Vous voulez une ligne nette chaque matin.'] },
+        { id: 'brow-lift-teinture', gallery: ['images/brow-lift-teinture.jpg'], chip: 'Brow lift + teinture', name: 'Brow lift avec teinture', tagline: 'Forme, densité et couleur.', min: 90, prix: 60, technique: 'Rehaussement + teinture hybride', tenue: 'Peau 2 sem. · poils 7 sem.', refill: null,
+          desc: "Le Brow Lift est cumulé à la teinture hybride, une technique qui colore temporairement la peau et les poils du sourcil. Durée : jusqu'à 2 semaines sur la peau et jusqu'à 7 semaines sur les poils. L'épilation est comprise dans cette prestation.",
+          pour: ['Vos sourcils sont indisciplinés et vous souhaitez restructurer votre regard.', 'Vos sourcils sont un peu clairs.', 'Vous souhaitez vous projeter avant un maquillage permanent.'] },
+        { id: 'teinture', gallery: ['images/wispy-mixte-teinture.jpg'], chip: 'Teinture hybride', name: 'Teinture hybride', tagline: 'La couleur qui comble les trous.', min: 45, prix: 35, technique: 'Teinture peau + poils', tenue: 'Peau 10 j · poils 7 sem.', refill: null,
+          desc: "La teinture hybride est une technique qui va venir colorer la peau et les poils du sourcil temporairement. Durée : jusqu'à 10 jours sur la peau et jusqu'à 7 semaines sur les poils. L'épilation au fil est comprise dans cette prestation.",
+          pour: ['Vos sourcils sont clairs ou clairsemés.', 'Vous voulez tester avant une micro-pigmentation.', 'Vous voulez moins de maquillage le matin.'] },
+        { id: 'fil', gallery: ['images/epilation-fil.jpg'], chip: 'Fil · restructuration', name: 'Épilation au fil', tagline: 'Une ligne redessinée, précise.', min: 15, prix: 15, technique: 'Fil de coton', tenue: '3 à 4 semaines', refill: null,
+          desc: "L'épilation au fil est une méthode traditionnelle et naturelle pour éliminer les poils. Originaire d'Asie et du Moyen-Orient, elle permet une épilation beaucoup plus précise, et plus douce pour la peau car sans produit chimique ni chaleur.",
+          pour: ['Vous voulez redessiner votre ligne.', 'Vous avez la peau sensible à la cire.', "C'est votre premier rendez-vous sourcils."] },
+        { id: 'fil-entretien', gallery: ['images/epilation-fil.jpg'], chip: 'Fil · entretien', name: 'Épilation au fil (entretien)', tagline: 'Garder la ligne entre deux rendez-vous.', min: 10, prix: 10, technique: 'Fil de coton', tenue: '3 à 4 semaines', refill: null,
+          desc: "Cette prestation est réservable pour les clientes qui souhaitent juste entretenir leur ligne. Épilation au fil, précise et douce pour la peau.",
+          pour: ['Votre ligne a déjà été dessinée.', 'Vous voulez un entretien rapide.', 'Vous avez la peau sensible à la cire.'] },
+        { id: 'levre', chip: 'Lèvre supérieure', name: 'Épilation lèvre supérieure', tagline: 'Rapide et précise.', min: 5, prix: 10, technique: 'Fil de coton', tenue: '3 à 4 semaines', refill: null,
+          desc: "Épilation au fil de la zone moustache. Méthode précise et plus douce pour la peau, sans produit chimique ni chaleur.",
+          pour: ['Vous avez la peau sensible à la cire.', 'Vous voulez un résultat net.', "Vous l'ajoutez à un autre soin."] },
+        { id: 'powder', gallery: ['images/powder-1.jpg', 'images/powder-2.jpg', 'images/powder-3.jpg'], chip: 'Ombré powder', name: 'Ombré powder brow', tagline: 'Maquillage permanent, effet poudré.', min: 90, prix: 200, technique: 'Micro-pigmentation', tenue: '12 à 18 mois', refill: null,
+          desc: "Technique de maquillage permanent permettant de restructurer les sourcils clairsemés, fins, ou dont la queue ou la tête est inexistante. Avant de réserver, prenez connaissance des conditions ou réservez une consultation. Contre-indications : allergies, maladies de peau évolutives, grossesse ou allaitement, diabète non contrôlé, maladie auto-immune, hémophilie, cicatrisation difficile, entre autres. Pas de soleil pendant 30 jours, pas d'eau pendant 48 h, pas de sport pendant 10 jours.",
+          pour: ['Votre ligne de sourcils est mal définie.', 'Vos sourcils sont clairsemés ou présentent des trous.', 'Vous souhaitez un résultat qui dure, environ 12 à 18 mois.'] }
+      ]
+    },
+    offre: {
+      label: 'Offre regard', kicker: 'Offre regard / cils + sourcils',
+      gallery: ['images/brow-lift-2.jpg', 'images/mixte.jpg', 'images/volume-russe.jpg', 'images/brow-lift.jpg'],
+      items: [
+        { id: 'offre-cil', gallery: ['images/brow-lift-3.jpg', 'images/cil-a-cil-2.jpg'], chip: 'Cil à cil + brow lift', name: 'Cil à cil + brow lift', tagline: 'Le regard complet, en version discrète.', min: 105, prix: 80, technique: 'Cil à cil + rehaussement sourcils', tenue: 'Cils 3–4 sem. · sourcils 8 sem.', refill: 'rem-cil-a-cil',
+          desc: "Une pose de cils cil à cil, accompagnée d'un brow lift. Sans teinture. Cils et sourcils sont traités dans le même rendez-vous, à un tarif combiné.",
+          pour: ['Vous voulez un regard complet en un seul rendez-vous.', 'Vous aimez les effets naturels.', 'Vous voulez un regard plus discipliné, grâce au brow lift.'] },
+        { id: 'offre-mixte', gallery: ['images/pose-mixte.jpg', 'images/brow-lift-teinture.jpg'], chip: 'Mixte + brow lift', name: 'Pose mixte + brow lift', tagline: 'Plus de volume, des sourcils disciplinés.', min: 150, prix: 90, technique: 'Mixte + rehaussement sourcils', tenue: 'Cils 3–4 sem. · sourcils 8 sem.', refill: 'rem-mixte',
+          desc: "Une pose de cils mixte, accompagnée d'un brow lift. Sans teinture. Cils et sourcils sont traités dans le même rendez-vous, à un tarif combiné.",
+          pour: ['Vous voulez un regard complet en un seul rendez-vous.', 'Le cil à cil vous paraît trop léger.', 'Vous voulez un regard plus discipliné, grâce au brow lift.'] },
+        { id: 'offre-russe', gallery: ['images/brow-lift-teinture.jpg', 'images/volume-russe.jpg'], chip: 'Volume russe + brow lift', name: 'Volume russe + brow lift', tagline: 'Le regard intense, de bout en bout.', min: 165, prix: 110, technique: 'Volume russe + rehaussement sourcils', tenue: 'Cils 3–4 sem. · sourcils 8 sem.', refill: 'rem-russe',
+          desc: "Une pose de cils volume russe, accompagnée d'un brow lift. Sans teinture. Cils et sourcils sont traités dans le même rendez-vous, à un tarif combiné.",
+          pour: ['Vous voulez un effet intense, sans mascara.', 'Vous voulez un regard complet en un seul rendez-vous.', 'Vous voulez des sourcils structurés et disciplinés, grâce au brow lift.'] }
+      ]
+    }
+  };
+
+  constructor(p) {
+    super(p);
+    let c = 'cils', pid = null;
+    try {
+      const q = new URLSearchParams(window.location.search);
+      if (this.DATA[q.get('c')]) c = q.get('c');
+      pid = q.get('p');
+    } catch (e) {}
+    const items = this.DATA[c].items;
+    const item = items.find(i => i.id === pid) || (c === 'cils' ? items[2] : items[0]);
+    this.state = { cat: c, itemId: item.id, gal: this.galFor(item, this.DATA[c].gallery), more: false, sheet: false, dayIdx: 0, time: null };
+  }
+
+  galFor(i, gallery) {
+    const m = { 'cil-a-cil': 'cil-a-cil', 'wispy-cil': 'cil-a-cil', 'rem-cil-a-cil': 'cil-a-cil', 'mixte': 'mixte', 'wispy-mixte': 'mixte', 'rem-mixte': 'mixte', 'russe': 'volume-russe', 'wispy-russe': 'volume-russe', 'wet': 'volume-russe', 'rem-russe': 'volume-russe' }[i.id];
+    const k = m ? gallery.indexOf('images/' + m + '.jpg') : -1;
+    return k < 0 ? 0 : k;
+  }
+  findItem(id) {
+    for (const k in this.DATA) { const f = this.DATA[k].items.find(i => i.id === id); if (f) return f; }
+    return null;
+  }
+  dur(m) { const h = Math.floor(m / 60), r = m % 60; return h ? (h + ' h' + (r ? ' ' + String(r).padStart(2, '0') : '')) : (r + ' min'); }
+  hm(t) { return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+  iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  hash(s) { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+
+  openDays() {
+    if (this._days) return this._days;
+    const out = []; const d = new Date(); d.setHours(0, 0, 0, 0);
+    while (out.length < 14) { d.setDate(d.getDate() + 1); const wd = d.getDay(); if (wd >= 1 && wd <= 5) out.push(new Date(d)); }
+    return (this._days = out);
+  }
+  slots(date, min) {
+    const res = []; const key = this.iso(date);
+    for (let t = 9 * 60; t + min <= 17 * 60; t += 30) {
+      if (t < 12 * 60 + 30 && t + min > 12 * 60) continue;
+      res.push({ t, off: this.hash(key + ':' + t) % 10 < 4 });
+    }
+    return res;
+  }
+  href(item, date, t) {
+    return 'Exotic%20Beauty%20v2%20-%20Reservation.dc.html?p=' + item.id + '&d=' + this.iso(date) + '&h=' + this.hm(t);
+  }
+
+  renderVals() {
+    const wm = this.DATA.cils.items.find(i => i.id === 'wispy-mixte'); if (wm) wm.min = Number(this.props.dureeWispyMixte ?? 100) || 100;
+    const WD = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+    const MO = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+    const MOL = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const st = this.state;
+    const cat = this.DATA[st.cat];
+    const item = cat.items.find(i => i.id === st.itemId) || cat.items[0];
+    const acompte = Math.round(item.prix / 2);
+    const refill = item.refill ? this.findItem(item.refill) : null;
+    const days = this.openDays();
+    const dayLabel = (d, i) => (i === 0 && (new Date(d) - new Date().setHours(0,0,0,0)) < 2 * 864e5 ? 'Demain, ' : '') + WD[d.getDay()] + ' ' + d.getDate() + ' ' + MO[d.getMonth()];
+
+    const found = [];
+    for (let i = 0; i < days.length && found.length < 3; i++) {
+      for (const s of this.slots(days[i], item.min)) {
+        if (!s.off) { found.push({ day: dayLabel(days[i], i), range: this.hm(s.t) + ' → ' + this.hm(s.t + item.min), href: this.href(item, days[i], s.t) }); break; }
+      }
+    }
+    const first = found[0] || { day: '—', range: '', href: '#' };
+
+    const pill = (on) => ({
+      flexShrink: 0, minHeight: '44px', padding: '0 18px', borderRadius: '9999px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+      border: '1px solid ' + (on ? '#1E2B31' : '#D9E0E3'), background: on ? '#1E2B31' : '#FFFFFF', color: on ? '#FFFFFF' : '#1E2B31'
+    });
+
+    const selDay = days[st.dayIdx];
+    const daySlots = this.slots(selDay, item.min);
+    const slotBtn = (s) => {
+      const on = st.time === s.t;
+      return {
+        label: this.hm(s.t), off: s.off,
+        onClick: () => this.setState({ time: s.t }),
+        style: {
+          minHeight: '48px', borderRadius: '10px', fontFamily: "'IBM Plex Mono', monospace", fontSize: '14px', cursor: s.off ? 'default' : 'pointer',
+          border: '1px solid ' + (on ? '#1E2B31' : s.off ? '#F3F6F7' : '#D9E0E3'),
+          background: on ? '#1E2B31' : s.off ? '#F3F6F7' : '#FFFFFF',
+          color: on ? '#FFFFFF' : s.off ? '#9AA6AB' : '#1E2B31', textDecoration: s.off ? 'line-through' : 'none'
+        }
+      };
+    };
+
+    const gal = item.gallery || cat.gallery;
+    const galIdx = Math.min(st.gal, gal.length - 1);
+    const ok = st.time !== null;
+
+    return {
+      it: Object.assign({}, item, { prixLabel: item.prix + ' €' }),
+      catLabel: cat.kicker,
+      cats: Object.keys(this.DATA).map(k => ({
+        label: this.DATA[k].label, style: pill(k === st.cat),
+        onClick: () => { const its = this.DATA[k].items; this.setState({ cat: k, itemId: (k === 'cils' ? its[2] : its[0]).id, gal: 0, time: null, more: false }); }
+      })),
+      chips: cat.items.map(i => ({ label: i.chip, style: pill(i.id === item.id), onClick: () => { const k = i.gallery ? 0 : this.galFor(i, cat.gallery); this.setState({ itemId: i.id, time: null, more: false, gal: k }); } })),
+      galMain: gal[galIdx],
+      galCount: (galIdx + 1) + ' / ' + gal.length,
+      gal: gal.map((src, i) => ({
+        src, onClick: () => this.setState({ gal: i }),
+        style: { height: '64px', borderRadius: '8px', overflow: 'hidden', padding: 0, cursor: 'pointer', background: '#CFD9DE', border: i === galIdx ? '1.5px solid #1E2B31' : '1.5px solid transparent', opacity: i === galIdx ? 1 : .75 }
+      })),
+      specs: [
+        { k: 'Durée', v: this.dur(item.min) },
+        { k: 'Prix', v: item.prix + ' €' },
+        { k: 'Acompte en ligne', v: acompte + ' € (50 %)' },
+        { k: 'Technique', v: item.technique },
+        { k: 'Tenue', v: item.tenue }
+      ].concat(refill ? [{ k: 'Remplissage conseillé', v: 'Toutes les 3 semaines' }] : []),
+      first, nextSlots: found.slice(1),
+      descStyle: Object.assign({ margin: 0, fontSize: '15px', lineHeight: 1.6, color: '#44525A' },
+        st.more ? {} : { display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }),
+      moreLabel: st.more ? 'Réduire' : 'Lire la suite',
+      toggleMore: () => this.setState(s => ({ more: !s.more })),
+      showMap: false,
+      pour: item.pour.map((t, i) => ({ n: '0' + (i + 1), t })),
+      prepa: item.id === 'powder' ? "Évitez le café avant le rendez-vous : il favorise les saignements." : ['fil', 'fil-entretien', 'levre'].includes(item.id) ? "Venez simplement sans maquillage." : (item.id === 'brow-lift' || item.id === 'brow-lift-teinture')
+        ? "Pas de préparation particulière, venez simplement sans maquillage."
+        : "Venez sans maquillage sur les yeux et sans crème contour. Évitez le café juste avant, cela limite les tremblements de paupière.",
+      entretien: item.id === 'powder'
+        ? "Achetez en pharmacie, avant le rendez-vous, le soin cicatrisant Cicaplast Gel B5. Pas d'eau pendant 48 heures, pas de soleil pendant un mois, et ne grattez pas les croûtes. Une retouche est parfois possible après la cicatrisation, selon les clientes."
+        : ['fil', 'fil-entretien', 'levre'].includes(item.id)
+        ? "Pas de soin particulier à prévoir entre deux rendez-vous."
+        : item.id === 'teinture'
+        ? "Une fois la teinture partie de la peau, appliquez chaque jour le soin fourni."
+        : item.id === 'brow-lift-teinture'
+        ? "Ne mouillez pas vos sourcils pendant 48 heures. Une fois la teinture partie de la peau, appliquez chaque jour le soin fourni."
+        : item.id === 'brow-lift'
+        ? "Appliquez chaque jour le soin fourni. Ne mouillez pas la zone pendant les 48 premières heures."
+        : item.id === 'lash-lift'
+        ? "Appliquez chaque jour le soin fourni. Ne mouillez pas vos cils pendant les 48 premières heures."
+        : "Démaquillant sans huile, pas de mascara waterproof, et un coup de brosse chaque matin. Évitez l'eau et la vapeur pendant les 24 premières heures."
+          + ((st.cat === 'cils' || (st.cat === 'remplissage' && item.id !== 'depose')) ? " Il est important de revenir toutes les 3 semaines pour entretenir votre pose." : ''),
+      faqAbime: item.id === 'lash-lift'
+        ? "Non. Le rehaussement est toutefois un soin qui assèche les cils : il est important d'appliquer chaque jour le soin fourni."
+        : "Non, si la pose est adaptée. Les extensions sont plus légères que vos cils naturels et le cil suit son cycle de pousse normalement.",
+      isPowder: item.id === 'powder',
+      conseilTxt: st.cat === 'sourcils' ? "Envoyez une photo de vos sourcils : nous vous orientons vers l'effet le plus adapté." : "Envoyez une photo de vos cils : nous vous orientons vers l'effet le plus adapté.",
+      faqPain: item.id === 'powder' ? "Très peu. La première étape se fait sans anesthésiant et peut être plus ou moins sensible selon les clientes. Un anesthésiant est ensuite appliqué : la suite est quasiment indolore." : "Cela reste une épilation. La tolérance à la douleur est différente pour chaque cliente.",
+      showEyeFaq: !['powder', 'brow-lift', 'brow-lift-teinture', 'teinture', 'fil', 'fil-entretien', 'levre'].includes(item.id),
+      showMakeupFaq: !['powder', 'fil', 'fil-entretien', 'levre'].includes(item.id),
+      showPainFaq: ['powder', 'fil', 'fil-entretien', 'levre'].includes(item.id),
+      faqMaquillage: ['brow-lift', 'brow-lift-teinture', 'teinture'].includes(item.id)
+        ? "Évitez le maquillage sur la zone. Une fois la teinture partie de la peau, appliquez le soin fourni."
+        : item.id === 'lash-lift'
+        ? "Oui, vous pouvez vous maquiller et mettre du mascara sans problème."
+        : "Oui, le maquillage autour des yeux est possible, il ne fragilise pas la pose. Le mascara, en revanche, est à proscrire.",
+      hasRefill: !!refill,
+      refill: refill ? { name: refill.name, prix: refill.prix + ' €', duree: this.dur(refill.min) } : { name: '', prix: '', duree: '' },
+      barPrice: 'À partir de ' + item.prix + ' €',
+      barMeta: this.dur(item.min) + ' · ★ 4,9',
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      clearTime: () => this.setState({ time: null }),
+      sheetKicker: item.name + ' · ' + this.dur(item.min),
+      monthLabel: MOL[selDay.getMonth()] + ' ' + selDay.getFullYear(),
+      days: days.map((d, i) => {
+        const on = i === st.dayIdx;
+        const any = this.slots(d, item.min).some(s => !s.off);
+        return {
+          wd: WD[d.getDay()].replace('.', ''), dd: String(d.getDate()),
+          onClick: () => any && this.setState({ dayIdx: i, time: null }),
+          style: { flex: '0 0 56px', height: '72px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: any ? 'pointer' : 'default', border: '1px solid ' + (on ? '#1E2B31' : any ? '#D9E0E3' : '#F3F6F7'), background: on ? '#1E2B31' : any ? '#FFFFFF' : '#F3F6F7' },
+          wdStyle: { fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.08em', color: on ? 'rgba(255,255,255,.7)' : '#5F6B70' },
+          ddStyle: { fontSize: '18px', fontWeight: 600, color: on ? '#FFFFFF' : any ? '#1E2B31' : '#9AA6AB', textDecoration: any ? 'none' : 'line-through' }
+        };
+      }),
+      am: daySlots.filter(s => s.t < 12 * 60 + 30).map(slotBtn),
+      pm: daySlots.filter(s => s.t >= 12 * 60 + 30).map(slotBtn),
+      pickLabel: ok ? (WD[selDay.getDay()] + ' ' + selDay.getDate() + ' ' + MO[selDay.getMonth()] + ' · ' + this.hm(st.time) + ' → ' + this.hm(st.time + item.min)) : 'Choisissez une heure',
+      contHref: ok ? this.href(item, selDay, st.time) : '#',
+      contStyle: {
+        display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '52px', padding: '0 26px', borderRadius: '9999px', fontWeight: 600, fontSize: '15px',
+        background: ok ? '#1E2B31' : '#DCE6EA', color: ok ? '#FFFFFF' : '#7F8B90', pointerEvents: ok ? 'auto' : 'none'
+      },
+      sheetWrap: { position: 'fixed', inset: 0, zIndex: 60, pointerEvents: st.sheet ? 'auto' : 'none', opacity: st.sheet ? 1 : 0, transition: 'opacity .25s ease' },
+      sheetPanel: {
+        position: 'absolute', left: 0, right: 0, bottom: 0, margin: '0 auto', maxWidth: '560px', height: 'min(92vh, 780px)', background: '#FFFFFF',
+        borderRadius: '22px 22px 0 0', display: 'flex', flexDirection: 'column',
+        transform: st.sheet ? 'translateY(0)' : 'translateY(40px)', transition: 'transform .3s ease'
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

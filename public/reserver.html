@@ -85,8 +85,8 @@
 <div class="barre" id="barre">
   <div class="barre-in">
     <div class="barre-txt">
-      <div class="barre-l1" id="barreL1">Aucune prestation</div>
-      <div class="barre-l2 mono" id="barreL2">★ 4,9 sur Google</div>
+      <div class="barre-l1" id="barreL1">Choisissez</div>
+      <div class="barre-l2 mono" id="barreL2">une prestation</div>
     </div>
     <button type="button" class="btn btn-ardoise" id="voirDispos" disabled>Voir les disponibilités</button>
   </div>
@@ -120,14 +120,17 @@
     remplissage: ['remplissage_cil_a_cil', 'remplissage_mixte', 'remplissage_volume_russe'],
     sourcils: ['brow_lift', 'brow_lift_teinture', 'teinture_hybride', 'ombre_powder_brow', 'epilation_restructuration', 'epilation_entretien', 'epilation_levres']
   };
-  // L'offre regard = une pose de cils + un brow lift, dans le même rendez-vous.
-  CATS.offre = CATS.cils.filter(function (id) { return id !== 'depose'; }).concat(['brow_lift', 'brow_lift_teinture']);
+  // L'offre regard = une pose de cils + un brow lift, à prix réduit (3 lignes dédiées en base).
+  CATS.offre = ['offre_cil_a_cil', 'offre_mixte', 'offre_volume_russe'];
   var NOTES = {
-    offre: 'Choisissez une pose de cils et un brow lift : ils seront faits dans le même rendez-vous.',
+    offre: 'Une pose de cils et un brow lift dans le même rendez-vous, à prix doux.',
     remplissage: 'Le remplissage se fait dans les 3 à 4 semaines après votre pose.'
   };
   // Corrections d'affichage (le nom en base reste inchangé pour ne rien casser côté admin).
-  var LABELS = { epilation_levres: 'Épilation lèvre supérieure', lash_lift: 'Lash lift + teinture' };
+  var LABELS = {
+    epilation_levres: 'Épilation lèvre supérieure', lash_lift: 'Lash lift + teinture',
+    offre_cil_a_cil: 'Cil à cil + brow lift', offre_mixte: 'Pose mixte + brow lift', offre_volume_russe: 'Volume russe + brow lift'
+  };
   var JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
   var MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   var NB_JOURS = 16;
@@ -176,6 +179,7 @@
   function afficherListe() {
     document.querySelectorAll('#tabs button').forEach(function (b) {
       var on = b.dataset.c === cat; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on));
+      if (on) $('tabs').scrollLeft = b.offsetLeft - 24; // l'onglet choisi reste visible
     });
     $('tabNote').hidden = !NOTES[cat];
     $('tabNote').textContent = NOTES[cat] || '';
@@ -205,8 +209,8 @@
   function majBarre() {
     var t = totaux();
     if (!choisis.length) {
-      $('barreL1').textContent = 'Aucune prestation';
-      $('barreL2').textContent = '★ 4,9 sur Google';
+      $('barreL1').textContent = 'Choisissez';
+      $('barreL2').textContent = 'une prestation';
       $('voirDispos').disabled = true;
       $('voirDispos').textContent = 'Voir les disponibilités';
       return;

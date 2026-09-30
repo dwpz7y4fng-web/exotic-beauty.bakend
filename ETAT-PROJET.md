@@ -7,8 +7,9 @@
 ## 0. Maquette
 - **Accueil : finalisé** dans Claude Design (export « Accueil hors ligne ») avec les vraies
   photos, avis, horaires, vidéos stories. → Codé fidèlement dans `public/index.html`.
-- Écrans 2 à 6 (prestation, créneau, rendez-vous, acompte, merci) : seulement le
-  **wireframe** (`maquettes/wireframe-6-ecrans.html`), pas encore personnalisés/validés.
+- Écrans prestation et réservation : maquettes Claude Design reçues le 30 sept.
+  (`maquettes/prestation.dc.html`, `maquettes/reservation.dc.html`, catalogue complet
+  dedans). Pas encore codées : prochaine grosse étape si Malorie les valide.
   En attendant, `public/reserver.html` reprend le parcours existant (qui marche) avec la
   peau « clinique » : choix de la prestation → bottom sheet jour/heure → récap + acompte →
   Stripe. À remplacer écran par écran quand les maquettes seront validées.
@@ -20,6 +21,10 @@
 - Direction visuelle : « clinique premium » (ardoise #1E2B31, brume #DCE6EA, Hanken
   Grotesk + IBM Plex Mono).
 - WhatsApp : le numéro est un **07 → +33**. Liens corrigés en `wa.me/33770211399`.
+- **Offre regard (30 sept.)** : 3 prestations dédiées en base — cil à cil + brow lift 1 h 45
+  · 80 € · acompte 25 € ; mixte + brow lift 2 h 30 · 90 € · 30 € ; volume russe + brow lift
+  2 h 45 · 110 € · 35 € (acompte ≈ 1/3, comme les autres). Wispy mixte : 1 h 40.
+  → Script `migrations/001_offre_regard_et_wispy_mixte.sql` à exécuter à la main.
 - **Horaires (30 sept.)** : lun., mar., jeu., ven. 9h–12h / 12h30–17h · mer. 9h–10h30 /
   12h–14h30 (pour le moment) · sam. 9h–12h / 12h30–18h · dim. fermé. Réglés dans
   `SCHEDULE` (`server.js`) + affichage sur l'accueil.
@@ -38,8 +43,6 @@
   Next.js/Supabase/Vercel comme le prévoit le kit.
 
 ## 3. Points ouverts (à décider par Malorie)
-- **Offre regard « dès 80 € »** : aucune remise n'existe en base ; cil à cil + brow lift
-  = 95 € au paiement. Soit créer la vraie offre (prestation à 80 €), soit changer le texte.
 - **Téléphone** : enregistré tel que tapé (pas en +596…). Nécessaire pour fiabiliser les
   SMS/WhatsApp — attention, la relance des inactives compare les numéros : à migrer proprement.
 - **Prix à vérifier** (audit) : wispy cil à cil 55 € < cil à cil 60 € ; wispy mixte
@@ -66,4 +69,4 @@
 
 ## 5. Prochaine action concrète
 Tester la PR `refonte-accueil-maquette` sur iPhone (navigation privée), la valider,
-puis trancher le point ouvert « offre regard ».
+exécuter le script `migrations/001_…sql` sur la base Railway, puis merger.

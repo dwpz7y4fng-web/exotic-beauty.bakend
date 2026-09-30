@@ -17,8 +17,11 @@ est différent** — pars toujours de ce qui existe :
 - Site public en HTML/CSS/JS simple dans `public/` : `index.html` (accueil, maquette
   « direction clinique »), `reserver.html` (réservation), `confirmation.html`,
   styles partagés `styles.css` + `reserver.css`. Admin : `admin/admin.html` (Basic Auth).
-- Créneaux fixes : `OPEN_HOURS` dans `server.js`. Anti-doublon : index unique
-  `(slot_date, slot_time)` hors `cancelled`.
+- Créneaux : horaires par jour dans `SCHEDULE` (`server.js`), début toutes les 30 min,
+  calcul selon la **durée totale** des prestations (`computeAvailableTimes`), re-vérifié dans
+  `/api/book` sous verrou par jour. Index unique `(slot_date, slot_time)` hors `cancelled`.
+- Offre regard = 3 lignes dédiées dans `services` (`offre_cil_a_cil`, `offre_mixte`,
+  `offre_volume_russe`) avec leur propre prix / durée / acompte.
 - Pas de TypeScript ni de lint configurés : la règle 13 ci-dessous devient
   « `node --check server.js` + test manuel des pages à 390 px ».
 - La migration vers la stack cible (Next.js/Supabase/Vercel) est une **décision à prendre
@@ -45,8 +48,8 @@ Si la maquette d'un écran n'existe pas ou n'est pas validée, **ne le code pas*
 2. **Branche dédiée → PR** : jamais de push direct sur `main`. Résume la PR en français
    simple (ce qui change, comment tester).
 3. **Vérifie le schéma** de la base avant d'utiliser un nom de colonne. N'invente jamais.
-4. **Migrations SQL** : fichiers numérotés dans `supabase/migrations/`, que Malorie exécute
-   **à la main** dans le SQL Editor. Ne les applique pas toi-même.
+4. **Migrations SQL** : fichiers numérotés dans `migrations/`, que Malorie exécute
+   **à la main** dans la console SQL de Railway. Ne les applique pas toi-même.
 5. **Jamais de DELETE sur une réservation** → `status = 'cancelled'`.
 6. **Secrets** : jamais en dur dans le code, jamais affichés. Uniquement via variables
    d'environnement. Si Malorie en colle un dans la conversation, rappelle-lui de ne pas le

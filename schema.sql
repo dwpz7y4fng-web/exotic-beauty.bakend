@@ -15,7 +15,7 @@ insert into services (id, label, duration_minutes, price_cents, deposit_cents) v
   ('volume_russe', 'Volume russe', 120, 9000, 3000),
   ('lash_lift', 'Lash lift avec teinture', 45, 6000, 2000),
   ('wispy_volume_russe', 'Wispy volume russe', 130, 9500, 3000),
-  ('wispy_mixte', 'Wispy pose mixte', 140, 7500, 2500),
+  ('wispy_mixte', 'Wispy pose mixte', 100, 7500, 2500),
   ('wet_volume_russe', 'Wet volume russe', 130, 9500, 3000),
   ('wispy_cil_a_cil', 'Wispy pose cil à cil', 70, 5500, 1800),
   ('remplissage_cil_a_cil', 'Remplissage cil à cil', 45, 3000, 1000),
@@ -28,7 +28,10 @@ insert into services (id, label, duration_minutes, price_cents, deposit_cents) v
   ('epilation_levres', 'Épilation lèvres supérieur', 5, 1000, 400),
   ('brow_lift', 'Brow lift (sans teinture)', 30, 3500, 1000),
   ('brow_lift_teinture', 'Brow lift avec teinture', 90, 6000, 2000),
-  ('teinture_hybride', 'Teinture hybride', 45, 3500, 1200);
+  ('teinture_hybride', 'Teinture hybride', 45, 3500, 1200),
+  ('offre_cil_a_cil', 'Offre regard : cil à cil + brow lift', 105, 8000, 2500),
+  ('offre_mixte', 'Offre regard : mixte + brow lift', 150, 9000, 3000),
+  ('offre_volume_russe', 'Offre regard : volume russe + brow lift', 165, 11000, 3500);
 
 create table bookings (
   id uuid primary key default gen_random_uuid(),
