@@ -41,6 +41,8 @@
 - Déjà fonctionnel : calendrier de réservation, acompte Stripe, admin (réservations,
   blocage de créneaux, import clientes et RDV Planity), rappel SMS J-1, relance des
   clientes inactives, libération des résas « en attente » non payées (30 min).
+- Hébergement : le site tourne sur le projet Railway **reliable-vitality** ; la base Postgres est
+  dans **adventurous-dedication** (scripts SQL à lancer là).
 - **À trancher** : rester sur Express/Railway (et l'améliorer) ou migrer vers
   Next.js/Supabase/Vercel comme le prévoit le kit.
 
@@ -61,8 +63,8 @@
 - [~] 4. Créneaux + mini-admin : durée prise en compte ✅ · horaires en base (modifiables sans code) à faire
 - [x] 5. Acompte Stripe (existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
 - [~] 6. Automatisations WhatsApp codées (30 sept.) : confirmation, notif Malorie, rappel J-1 18h,
-  avis Google J+1, remplissage J+18, relance inactives. **À activer** : migration 002 + compte
-  Whapi + variable `WHAPI_TOKEN` sur Railway. Pas d'e-mail (choix de Malorie).
+  avis Google J+1, remplissage J+18, relance inactives. Migration 002 exécutée et `WHAPI_TOKEN`
+  ajouté sur Railway (projet reliable-vitality) le 1er oct. ✅ — reste le test réel. Pas d'e-mail (choix de Malorie).
 - [ ] 7. Tracking Meta (Pixel + CAPI) + bandeau cookies
 - [ ] 8. Mise en ligne + sortie de Planity
 - [ ] 9. Pubs Meta
