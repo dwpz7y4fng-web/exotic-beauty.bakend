@@ -61,10 +61,10 @@
 - [ ] 2. Onboarding (blocs 1-5) + comptes + connecteurs
 - [~] 3. Site vitrine : accueil ✅ (PR) · pages prestation à faire (après maquette)
 - [~] 4. Créneaux + mini-admin : durée prise en compte ✅ · horaires en base (modifiables sans code) à faire
-- [x] 5. Acompte Stripe (existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
+- [x] 5. Acompte Stripe (testé en réel le 1er oct. ; existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
 - [~] 6. Automatisations WhatsApp codées (30 sept.) : confirmation, notif Malorie, rappel J-1 18h,
   avis Google J+1, remplissage J+18, relance inactives. Migration 002 exécutée et `WHAPI_TOKEN`
-  ajouté sur Railway (projet reliable-vitality) le 1er oct. ✅ — reste le test réel. Pas d'e-mail (choix de Malorie).
+  ajouté sur Railway (projet reliable-vitality) le 1er oct. ✅ — test réel validé par Malorie le 1er oct. ✅ Pas d'e-mail (choix de Malorie).
 - [ ] 7. Tracking Meta (Pixel + CAPI) + bandeau cookies
 - [ ] 8. Mise en ligne + sortie de Planity
 - [ ] 9. Pubs Meta
