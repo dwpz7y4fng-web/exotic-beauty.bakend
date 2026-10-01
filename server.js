@@ -116,23 +116,113 @@ function safeEqual(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-function requireAdmin(req, res, next) {
-  const header = req.headers.authorization || '';
-  const [scheme, encoded] = header.split(' ');
-  if (scheme === 'Basic' && encoded) {
-    const [user, pass] = Buffer.from(encoded, 'base64').toString().split(':');
-    if (
-      process.env.ADMIN_USER && process.env.ADMIN_PASSWORD &&
-      user && pass &&
-      safeEqual(user, process.env.ADMIN_USER) &&
-      safeEqual(pass, process.env.ADMIN_PASSWORD)
-    ) {
-      return next();
-    }
-  }
-  res.set('WWW-Authenticate', 'Basic realm="Exotic Beauty Admin"');
-  res.status(401).send('Authentification requise');
+// ─── Connexion à l'admin : « se souvenir de cet appareil » pendant 1 an ─────────
+// On se connecte une fois (identifiant + mot de passe = ADMIN_USER / ADMIN_PASSWORD sur
+// Railway), puis un cookie signé garde l'appareil connecté 1 an.
+// Déconnecter TOUS les appareils d'un coup = changer ADMIN_PASSWORD sur Railway.
+const ADMIN_COOKIE = 'eb_admin';
+const ADMIN_SESSION_DAYS = 365;
+
+function adminKey() {
+  return crypto.createHash('sha256')
+    .update(`${process.env.ADMIN_USER}:${process.env.ADMIN_PASSWORD}:${process.env.ADMIN_SESSION_SECRET || ''}`)
+    .digest();
 }
+function signAdminSession(expiresAt) {
+  return expiresAt + '.' + crypto.createHmac('sha256', adminKey()).update(String(expiresAt)).digest('base64url');
+}
+function readCookie(req, name) {
+  const found = (req.headers.cookie || '').split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+  return found ? decodeURIComponent(found.slice(name.length + 1)) : null;
+}
+function hasValidAdminSession(req) {
+  if (!process.env.ADMIN_USER || !process.env.ADMIN_PASSWORD) return false;
+  const value = readCookie(req, ADMIN_COOKIE);
+  if (!value || !value.includes('.')) return false;
+  const expiresAt = Number(value.split('.')[0]);
+  if (!expiresAt || expiresAt < Date.now()) return false;
+  return safeEqual(value, signAdminSession(expiresAt));
+}
+function hasValidBasicAuth(req) {
+  const [scheme, encoded] = (req.headers.authorization || '').split(' ');
+  if (scheme !== 'Basic' || !encoded) return false;
+  const decoded = Buffer.from(encoded, 'base64').toString();
+  const sep = decoded.indexOf(':');
+  const user = decoded.slice(0, sep), pass = decoded.slice(sep + 1);
+  return !!(process.env.ADMIN_USER && process.env.ADMIN_PASSWORD && sep > 0 && pass &&
+    safeEqual(user, process.env.ADMIN_USER) && safeEqual(pass, process.env.ADMIN_PASSWORD));
+}
+
+function requireAdmin(req, res, next) {
+  if (hasValidAdminSession(req) || hasValidBasicAuth(req)) return next();
+  if (req.originalUrl.startsWith('/api/')) return res.status(401).json({ error: 'connexion requise' });
+  res.redirect('/admin/login');
+}
+
+// Anti-essais en rafale : 10 tentatives ratées max par adresse IP et par quart d'heure.
+const loginFailures = new Map();
+function tooManyFailures(ip) {
+  const now = Date.now(), recent = (loginFailures.get(ip) || []).filter(t => now - t < 15 * 60 * 1000);
+  loginFailures.set(ip, recent);
+  return recent.length >= 10;
+}
+
+function loginPage(message) {
+  return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex"><title>Connexion — Admin Exotic Beauty</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F3F6F7;font-family:'Hanken Grotesk',system-ui,sans-serif;color:#1E2B31;padding:24px}
+form{width:100%;max-width:380px;background:#fff;border:1px solid #D9E0E3;border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;gap:14px}
+.k{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5F6B70}
+h1{margin:0 0 6px;font-size:26px;letter-spacing:-.02em}
+label{display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=password]{height:52px;border-radius:12px;border:1.5px solid #D9E0E3;padding:0 14px;font:inherit;font-size:16px}
+input:focus{outline:none;border-color:#1E2B31}
+button{min-height:52px;border:none;border-radius:9999px;background:#1E2B31;color:#fff;font:inherit;font-weight:600;font-size:16px;cursor:pointer;margin-top:6px}
+.err{background:#F8ECEC;color:#A33A3A;border-radius:10px;padding:10px 12px;font-size:14px}
+.aide{font-size:13px;color:#5F6B70;line-height:1.5;margin:0}
+</style></head><body>
+<form method="post" action="/admin/login">
+  <div class="k">Exotic Beauty · Admin</div>
+  <h1>Connexion</h1>
+  ${message ? `<div class="err">${message}</div>` : ''}
+  <label><span class="k">Identifiant</span><input type="text" name="username" autocomplete="username" autocapitalize="none" required></label>
+  <label><span class="k">Mot de passe</span><input type="password" name="password" autocomplete="current-password" required></label>
+  <button type="submit">Se connecter</button>
+  <p class="aide">Vous resterez connectée sur cet appareil pendant 1 an.</p>
+</form></body></html>`;
+}
+
+app.get('/admin/login', (req, res) => {
+  if (hasValidAdminSession(req)) return res.redirect('/admin');
+  res.send(loginPage(''));
+});
+
+app.post('/admin/login', express.urlencoded({ extended: false }), (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || '?';
+  if (tooManyFailures(ip)) return res.status(429).send(loginPage('Trop de tentatives. Réessayez dans 15 minutes.'));
+  const { username = '', password = '' } = req.body || {};
+  const ok = process.env.ADMIN_USER && process.env.ADMIN_PASSWORD && password &&
+    safeEqual(String(username).trim(), process.env.ADMIN_USER) && safeEqual(String(password), process.env.ADMIN_PASSWORD);
+  if (!ok) {
+    loginFailures.get(ip).push(Date.now());
+    return res.status(401).send(loginPage('Identifiant ou mot de passe incorrect.'));
+  }
+  loginFailures.delete(ip);
+  const expiresAt = Date.now() + ADMIN_SESSION_DAYS * 24 * 3600 * 1000;
+  res.cookie(ADMIN_COOKIE, signAdminSession(expiresAt), {
+    httpOnly: true, secure: req.secure || req.headers['x-forwarded-proto'] === 'https' || req.hostname === 'localhost',
+    sameSite: 'lax', maxAge: ADMIN_SESSION_DAYS * 24 * 3600 * 1000, path: '/',
+  });
+  res.redirect('/admin');
+});
+
+app.get('/admin/logout', (req, res) => {
+  res.clearCookie(ADMIN_COOKIE, { path: '/' });
+  res.redirect('/admin/login');
+});
 
 app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
   let event;

@@ -25,7 +25,9 @@ est différent** — pars toujours de ce qui existe :
   → `rendez-vous.html` (compléments, récap, coordonnées → Stripe) → `confirmation.html`.
   Textes/photos du catalogue : `catalogue.js` (les prix/durées/acomptes viennent de
   `/api/services`, jamais du front). `reserver.html` = simple redirection (anciens liens).
-  Styles : `styles.css` + `parcours.css`. Admin : `admin/admin.html` (Basic Auth).
+  Styles : `styles.css` + `parcours.css`. Admin : `admin/admin.html`, connexion par
+  `/admin/login` (ADMIN_USER / ADMIN_PASSWORD) puis cookie signé 1 an (« se souvenir de cet
+  appareil ») ; changer ADMIN_PASSWORD déconnecte tous les appareils. Basic Auth toujours accepté.
 - API publiques en lecture : `/api/services`, `/api/availability`, `/api/availability-range`,
   `/api/booking/:id` (résumé pour la page Merci).
 - Créneaux : horaires par jour dans `SCHEDULE` (`server.js`), début toutes les 30 min,
