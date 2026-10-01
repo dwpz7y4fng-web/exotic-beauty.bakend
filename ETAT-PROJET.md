@@ -64,7 +64,7 @@
 - [x] 5. Acompte Stripe (testé en réel le 1er oct. ; existant — webhook à renforcer : re-vérif du créneau, paiements orphelins)
 - [~] 6. Automatisations WhatsApp codées (30 sept.) : confirmation, notif Malorie, rappel J-1 18h,
   avis Google J+1, remplissage J+18, relance inactives. Migration 002 exécutée et `WHAPI_TOKEN`
-  ajouté sur Railway (projet reliable-vitality) le 1er oct. ✅ — test réel validé par Malorie le 1er oct. ✅ Pas d'e-mail (choix de Malorie).
+  ajouté sur Railway (projet reliable-vitality) le 1er oct. ✅ — test réel : réservation OK, WhatsApp NON reçu (diagnostic en cours) Pas d'e-mail (choix de Malorie).
 - [ ] 7. Tracking Meta (Pixel + CAPI) + bandeau cookies
 - [ ] 8. Mise en ligne + sortie de Planity
 - [ ] 9. Pubs Meta
