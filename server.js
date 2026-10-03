@@ -360,6 +360,22 @@ app.delete('/api/admin/blocked-slots/:id', requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Outil de diagnostic : envoie un WhatsApp de test vers n'importe quel numéro et renvoie la
+// réponse brute de Whapi. Avec ?bookingId=<uuid>, envoie la vraie confirmation de ce RDV
+// (pratique pour prévisualiser le message sans attendre une vraie réservation).
+app.get('/api/admin/test-notif', requireAdmin, async (req, res) => {
+  const to = req.query.to;
+  if (!to) return res.status(400).json({ error: 'paramètre ?to=+33… requis' });
+  let text = 'Test Exotic Beauty ✅ Si vous recevez ce message, WhatsApp fonctionne.';
+  let bookingId = null;
+  if (req.query.bookingId && /^[0-9a-f-]{36}$/i.test(req.query.bookingId)) {
+    const { rows } = await pool.query(bookingSelect('b.id = $1'), [req.query.bookingId]);
+    if (rows[0]) { bookingId = rows[0].id; text = notif.textes.confirmation(rows[0], `${SITE_URL}/api/calendar/${rows[0].id}.ics`); }
+  }
+  const result = await notif.sendDetailed(to, text, 'test-notif');
+  res.json({ to, bookingId, whapiActif: notif.isEnabled(), result });
+});
+
 app.get('/api/admin/clients', requireAdmin, async (req, res) => {
   const { rows } = await pool.query(
     'select id, name, phone, email, comments, gender, planity_created_at, planity_deleted_at from clients order by name'
@@ -562,6 +578,49 @@ app.get('/api/booking/:id', async (req, res) => {
   });
 });
 
+// Fichier .ics « Ajouter à mon agenda » (lien mis dans le WhatsApp de confirmation).
+// Public : identifiant UUID impossible à deviner, comme /api/booking/:id.
+function icsEscape(s) {
+  return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+function icsStampUTC(d) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
+}
+function buildIcs(b) {
+  // Martinique = UTC-4 toute l'année (pas d'heure d'été) → offset fixe, pas de VTIMEZONE.
+  const start = new Date(`${b.date}T${b.time}:00-04:00`);
+  const end = new Date(start.getTime() + (b.duration || 60) * 60000);
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Exotic Beauty//Reservation//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${b.id}@exotic-beauty`,
+    `DTSTAMP:${icsStampUTC(new Date())}`,
+    `DTSTART:${icsStampUTC(start)}`,
+    `DTEND:${icsStampUTC(end)}`,
+    `SUMMARY:${icsEscape((b.label || 'Rendez-vous') + ' — Exotic Beauty')}`,
+    `LOCATION:${icsEscape(notif.STUDIO)}`,
+    `DESCRIPTION:${icsEscape('Rendez-vous chez Exotic Beauty.\nItinéraire : ' + notif.STUDIO_MAPS + '\nUn empêchement ? Répondez au WhatsApp de confirmation.')}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n') + '\r\n';
+}
+
+app.get('/api/calendar/:id.ics', async (req, res) => {
+  const id = String(req.params.id).replace(/\.ics$/i, '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return res.status(404).send('réservation introuvable');
+  const { rows } = await pool.query(bookingSelect('b.id = $1'), [id]);
+  const b = rows[0];
+  if (!b) return res.status(404).send('réservation introuvable');
+  res.set('Content-Type', 'text/calendar; charset=utf-8');
+  res.set('Content-Disposition', 'attachment; filename="rendez-vous-exotic-beauty.ics"');
+  res.send(buildIcs(b));
+});
+
 app.post('/api/book', async (req, res) => {
   const { serviceIds, date, time, name, phone } = req.body;
   if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
@@ -733,7 +792,7 @@ async function notifyBookingPaid(id) {
   const { rows } = await pool.query(bookingSelect('b.id = $1'), [id]);
   const b = rows[0];
   if (!b) return;
-  if (b.client_phone_e164) await sendOnce(b.id, 'confirmation_sent_at', b.client_phone_e164, notif.textes.confirmation(b), 'confirmation ' + b.id);
+  if (b.client_phone_e164) await sendOnce(b.id, 'confirmation_sent_at', b.client_phone_e164, notif.textes.confirmation(b, `${SITE_URL}/api/calendar/${b.id}.ics`), 'confirmation ' + b.id);
   await sendOnce(b.id, 'owner_notified_at', OWNER_WHATSAPP, notif.textes.proprietaire(b), 'notif Malorie ' + b.id);
 }
 

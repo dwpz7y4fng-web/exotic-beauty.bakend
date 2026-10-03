@@ -3,7 +3,8 @@
 // sur Railway : les messages sont alors seulement écrits dans les logs.
 
 const WHAPI_URL = (process.env.WHAPI_API_URL || 'https://gate.whapi.cloud').replace(/\/$/, '');
-const STUDIO = 'Quartier Durivage, Ducos (parking privé)';
+const STUDIO = '722 route de la Chasse, quartier Rivage, Ducos (parking privé)';
+const STUDIO_MAPS = 'https://maps.app.goo.gl/3n1DRgjkgk2LMgx88'; // lien de partage Google Maps du studio
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
@@ -50,11 +51,11 @@ function twilio() {
 
 function isEnabled() { return !!process.env.WHAPI_TOKEN || !!twilio(); }
 
-// Envoie un message. Renvoie true si c'est parti, false sinon (jamais d'exception).
-// Garde-fou : aucun envoi vers un numéro qui n'est pas au format international.
-async function send(toE164Number, text, tag) {
+// Envoie un message et renvoie le détail de ce qui s'est passé (statut + réponse Whapi).
+// Jamais d'exception. Garde-fou : aucun envoi vers un numéro qui n'est pas au format international.
+async function sendDetailed(toE164Number, text, tag) {
   const to = toE164(toE164Number);
-  if (!to) { console.warn(`[notif] ${tag} : numéro invalide (${toE164Number}) — rien envoyé`); return false; }
+  if (!to) { console.warn(`[notif] ${tag} : numéro invalide (${toE164Number}) — rien envoyé`); return { ok: false, via: 'none', reason: 'numéro invalide', input: toE164Number }; }
   if (process.env.WHAPI_TOKEN) {
     try {
       const r = await fetch(`${WHAPI_URL}/messages/text`, {
@@ -63,31 +64,44 @@ async function send(toE164Number, text, tag) {
         body: JSON.stringify({ to: to.slice(1), body: text }),
         signal: AbortSignal.timeout(15000),
       });
-      if (!r.ok) { console.error(`[notif] ${tag} → ${to} : Whapi a répondu ${r.status} ${(await r.text()).slice(0, 200)}`); return false; }
+      const raw = await r.text();
+      let response; try { response = JSON.parse(raw); } catch { response = raw.slice(0, 300); }
+      if (!r.ok) { console.error(`[notif] ${tag} → ${to} : Whapi a répondu ${r.status} ${raw.slice(0, 200)}`); return { ok: false, via: 'whapi', status: r.status, response, to }; }
       console.log(`[notif] ${tag} → ${to} : WhatsApp envoyé`);
-      return true;
-    } catch (err) { console.error(`[notif] ${tag} → ${to} : échec Whapi`, err.message); return false; }
+      return { ok: true, via: 'whapi', status: r.status, response, to };
+    } catch (err) { console.error(`[notif] ${tag} → ${to} : échec Whapi`, err.message); return { ok: false, via: 'whapi', reason: 'exception', message: err.message, to }; }
   }
   const tw = twilio();
   if (tw) {
     try {
       await tw.messages.create({ to, from: process.env.TWILIO_FROM_NUMBER, body: text });
       console.log(`[notif] ${tag} → ${to} : SMS envoyé`);
-      return true;
-    } catch (err) { console.error(`[notif] ${tag} → ${to} : échec SMS`, err.message); return false; }
+      return { ok: true, via: 'twilio', to };
+    } catch (err) { console.error(`[notif] ${tag} → ${to} : échec SMS`, err.message); return { ok: false, via: 'twilio', reason: 'exception', message: err.message, to }; }
   }
   console.log(`[notif] ${tag} → ${to} : (envois désactivés — renseigner WHAPI_TOKEN) « ${text.slice(0, 80)}… »`);
-  return false;
+  return { ok: false, via: 'none', reason: 'WHAPI_TOKEN manquant', to };
+}
+
+// Renvoie true si c'est parti, false sinon (utilisé par les crons et le webhook).
+async function send(toE164Number, text, tag) {
+  return (await sendDetailed(toE164Number, text, tag)).ok;
 }
 
 // ─── Les textes (modifiables ici) ────────────────────────────────────────────
 const textes = {
-  confirmation: (b) =>
-    `Bonjour ${prenom(b.client_name)} ! C'est Malorie, d'Exotic Beauty 🌿\n\n` +
-    `Votre rendez-vous est confirmé : ${b.label}, le ${dateLongue(b.date)} à ${heure(b.time)}.\n` +
-    `Adresse : ${STUDIO}.\n\n` +
-    `Pensez à venir sans maquillage sur la zone traitée. Acompte réglé : ${euros(b.deposit)}, reste au studio : ${euros(b.total - b.deposit)}.\n\n` +
-    `Un empêchement ? Répondez simplement à ce message. À très vite !`,
+  confirmation: (b, ics) =>
+    `Hello ${prenom(b.client_name)} 🌿\n\n` +
+    `Votre rendez-vous chez Exotic Beauty est confirmé ✅\n\n` +
+    `📋 ${b.label}\n` +
+    `📅 ${dateLongue(b.date)} à ${heure(b.time)} (≈ ${b.duration} min)\n` +
+    `📍 ${STUDIO}\n` +
+    `🧭 Itinéraire : ${STUDIO_MAPS}\n` +
+    (ics ? `➕ Ajouter à mon agenda : ${ics}\n` : '') +
+    `\nAcompte réglé : ${euros(b.deposit)} · reste à régler au studio : ${euros(b.total - b.deposit)}.\n` +
+    `Pensez à venir sans maquillage sur la zone traitée 😉\n\n` +
+    `Je reste dispo pour toute question, répondez simplement à ce message.\n` +
+    `À très vite ! Malorie — Exotic Beauty`,
 
   proprietaire: (b) =>
     `🗓️ Nouvelle réservation\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
@@ -110,4 +124,4 @@ const textes = {
     `Coucou ${prenom(nom)} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
 };
 
-module.exports = { toE164, send, textes, isEnabled };
+module.exports = { toE164, send, sendDetailed, textes, isEnabled, STUDIO, STUDIO_MAPS };
