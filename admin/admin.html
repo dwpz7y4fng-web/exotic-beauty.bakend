@@ -56,6 +56,7 @@ tr:last-child td{border-bottom:none;}
 .badge.confirmed{background:#E4EAF0; color:#3A5F8A;}
 .badge.pending{background:#F5EAD8; color:var(--warn);}
 .badge.cancelled{background:#F0E4E4; color:var(--err);}
+.badge.absente{background:#EDE7E0; color:#8A6D3B;}
 .empty, .loading{padding:40px 20px; text-align:center; color:var(--gris); font-size:14px;}
 .price{white-space:nowrap;}
 .row-actions{display:flex; gap:12px; white-space:nowrap;}
@@ -168,6 +169,26 @@ tr:last-child td{border-bottom:none;}
 .cal-month-cell .num{font-size:13px; margin-bottom:6px;}
 .cal-month-cell .more{font-size:11px; color:var(--gris);}
 @media(max-width:800px){ .cal-month{grid-template-columns:repeat(7,minmax(70px,1fr)); overflow-x:auto;} .cal-month-cell{min-height:70px;} }
+
+/* Fiches de conseils */
+.care-panel{background:var(--blanc); border:1px solid var(--line-2); border-radius:10px; padding:20px; margin-bottom:18px;}
+.care-toggle-row{display:flex; align-items:flex-start; justify-content:space-between; gap:20px;}
+.care-toggle-title{font-size:15px; font-weight:500; margin-bottom:4px;}
+.care-toggle-sub{font-size:13px; color:var(--gris); max-width:60ch; line-height:1.5;}
+.care-status{margin-top:12px; font-size:13px; color:var(--gris);}
+.care-status.warn{color:var(--warn);}
+.care-test-row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:12px;}
+.care-test-row input, .care-test-row select{padding:10px 12px; border:1px solid var(--line-2); border-radius:8px; font-size:14px; font-family:inherit;}
+.care-test-row input{flex:1; min-width:200px;}
+.care-test-msg{margin-top:10px; font-size:13px;}
+.care-test-msg.ok{color:var(--ok);} .care-test-msg.err{color:var(--err);}
+.care-history-title{font-size:15px; font-weight:500; margin:24px 0 12px;}
+.switch{position:relative; display:inline-block; width:50px; height:28px; flex:none;}
+.switch input{opacity:0; width:0; height:0;}
+.switch .slider{position:absolute; cursor:pointer; inset:0; background:#cfcac3; border-radius:999px; transition:0.2s;}
+.switch .slider:before{content:""; position:absolute; height:22px; width:22px; left:3px; top:3px; background:#fff; border-radius:50%; transition:0.2s;}
+.switch input:checked + .slider{background:var(--ok);}
+.switch input:checked + .slider:before{transform:translateX(22px);}
 </style>
 </head>
 <body>
@@ -187,6 +208,7 @@ tr:last-child td{border-bottom:none;}
     <button type="button" class="active" data-tab="bookings">Réservations</button>
     <button type="button" data-tab="planning">Planning</button>
     <button type="button" data-tab="clients">Clientes</button>
+    <button type="button" data-tab="caresheets">Fiches conseils</button>
   </div>
 
   <div id="tabBookings">
@@ -274,6 +296,44 @@ tr:last-child td{border-bottom:none;}
       <div class="empty" id="clientEmpty" hidden>Aucune cliente. Importez votre fichier Planity ci-dessus.</div>
     </div>
   </div>
+
+  <div id="tabCareSheets" hidden>
+    <div class="care-panel">
+      <div class="care-toggle-row">
+        <div>
+          <div class="care-toggle-title">Envoi automatique des fiches de conseils</div>
+          <div class="care-toggle-sub">Environ 1 h après chaque rendez-vous (jamais la nuit : reporté au lendemain 9 h). Une fiche n'est envoyée qu'à la 1ʳᵉ fois que la cliente fait la prestation.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="careEnabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="care-status" id="careStatus"></div>
+    </div>
+
+    <div class="care-panel">
+      <div class="care-toggle-title">Envoyer une fiche de test</div>
+      <div class="care-test-row">
+        <input type="tel" id="careTestPhone" placeholder="Mon numéro (ex. 0696 12 34 56)">
+        <select id="careTestFiche"></select>
+        <button type="button" class="btn btn-dark" id="careTestBtn">Envoyer le test</button>
+      </div>
+      <div class="care-test-msg" id="careTestMsg"></div>
+    </div>
+
+    <h3 class="care-history-title">Historique des fiches envoyées</h3>
+    <div class="table-wrap">
+      <table id="careTable" hidden>
+        <thead>
+          <tr><th>Envoyée le</th><th>Cliente</th><th>Rendez-vous</th><th>Fiche</th><th></th></tr>
+        </thead>
+        <tbody id="careTbody"></tbody>
+      </table>
+      <div class="loading" id="careLoading">Chargement…</div>
+      <div class="empty" id="careEmpty" hidden>Aucune fiche envoyée pour l'instant.</div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop" hidden>
@@ -312,6 +372,7 @@ tr:last-child td{border-bottom:none;}
           <option value="paid">Payée</option>
           <option value="pending">En attente</option>
           <option value="cancelled">Annulée</option>
+          <option value="absente">Absente (cliente non venue)</option>
         </select>
       </div>
       <div class="modal-msg" id="modalMsg"></div>
@@ -373,11 +434,14 @@ tr:last-child td{border-bottom:none;}
 
 <script>
 (function(){
-  const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée' };
+  const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée', absente: 'Absente' };
   let bookings = [];
   let services = [];
   let currentFilter = 'all';
   let editingId = null;
+  let careFicheServiceIds = [];
+  let careFiches = [];
+  let careSettingsLoaded = false;
 
   function euros(cents){ return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
   function formatDate(iso){
@@ -400,11 +464,11 @@ tr:last-child td{border-bottom:none;}
   }
   function isUpcoming(b){
     const today = new Date().toISOString().slice(0,10);
-    return b.slot_date >= today && b.status !== 'cancelled';
+    return b.slot_date >= today && b.status !== 'cancelled' && b.status !== 'absente';
   }
   function isPast(b){
     const today = new Date().toISOString().slice(0,10);
-    return b.slot_date < today || b.status === 'cancelled';
+    return b.slot_date < today || b.status === 'cancelled' || b.status === 'absente';
   }
 
   function filtered(){
@@ -449,9 +513,13 @@ tr:last-child td{border-bottom:none;}
       const total = b.services.reduce((s, x) => s + x.price_cents, 0);
       const deposit = b.services.reduce((s, x) => s + x.deposit_cents, 0);
       const labels = b.services.map(s => s.label).join(', ');
-      const statusClass = ['paid','confirmed','pending','cancelled'].includes(b.status) ? b.status : 'pending';
-      const cancelBtn = b.status !== 'cancelled'
+      const statusClass = ['paid','confirmed','pending','cancelled','absente'].includes(b.status) ? b.status : 'pending';
+      const cancelBtn = (b.status !== 'cancelled' && b.status !== 'absente')
         ? `<button type="button" class="btn-danger-text" data-cancel="${b.id}">Annuler</button>`
+        : '';
+      const hasFiche = b.services.some(s => careFicheServiceIds.includes(s.id));
+      const ficheBtn = hasFiche
+        ? `<button type="button" class="btn-text" data-caresheet="${b.id}">Renvoyer la fiche</button>`
         : '';
       return `<tr>
         <td>${formatDate(b.slot_date)}</td>
@@ -464,6 +532,7 @@ tr:last-child td{border-bottom:none;}
         <td><span class="badge ${statusClass}">${STATUS_LABEL[b.status] || b.status}</span></td>
         <td><div class="row-actions">
           <button type="button" class="btn-text" data-edit="${b.id}">Modifier</button>
+          ${ficheBtn}
           ${cancelBtn}
         </div></td>
       </tr>`;
@@ -489,7 +558,27 @@ tr:last-child td{border-bottom:none;}
     if(editBtn){ openModal(bookings.find(b => b.id === editBtn.dataset.edit)); return; }
     const cancelBtn = e.target.closest('button[data-cancel]');
     if(cancelBtn){ cancelBooking(cancelBtn.dataset.cancel); return; }
+    const ficheBtn = e.target.closest('button[data-caresheet]');
+    if(ficheBtn){ resendCareSheet(ficheBtn.dataset.caresheet); return; }
   });
+
+  async function resendCareSheet(id){
+    const b = bookings.find(x => x.id === id);
+    const who = b ? b.client_name : 'cette cliente';
+    if(!confirm('Renvoyer la fiche de conseils à ' + who + ' sur WhatsApp ?')) return;
+    try{
+      const res = await fetch('/api/admin/care-sheets/resend', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ bookingId: id })
+      });
+      const data = await res.json();
+      if(res.ok && data.ok){ alert('Fiche renvoyée ✅'); }
+      else{
+        const why = (data.results || []).map(r => r.ok ? (r.fiche+' ✅') : (r.fiche+' ✗ '+(r.reason||''))).join('\n');
+        alert('Envoi incomplet :\n' + (why || data.error || 'erreur inconnue'));
+      }
+      if(document.getElementById('tabCareSheets') && !document.getElementById('tabCareSheets').hidden) loadCareSheets();
+    }catch(e){ alert('Impossible de renvoyer la fiche — merci de réessayer.'); }
+  }
 
   function buildServiceGrid(selectedIds){
     const grid = document.getElementById('serviceGrid');
@@ -590,12 +679,99 @@ tr:last-child td{border-bottom:none;}
       if(blockedRes.ok){
         blockedSlots = (await blockedRes.json()).map(b => ({ ...b, slot_date: b.slot_date.slice(0, 10) }));
       }
+      await loadCareSettings();
       renderCards();
       renderTable();
     }catch(e){
       document.getElementById('loading').textContent = 'Erreur de chargement — merci de recharger la page.';
     }
   }
+
+  // ---- Fiches de conseils ----
+  async function loadCareSettings(){
+    try{
+      const res = await fetch('/api/admin/care-sheets/settings');
+      if(!res.ok) return;
+      const s = await res.json();
+      careFicheServiceIds = s.ficheServiceIds || [];
+      careFiches = s.fiches || [];
+      careSettingsLoaded = true;
+      const toggle = document.getElementById('careEnabled');
+      if(toggle){ toggle.checked = !!s.enabled; toggle.disabled = !s.ready; }
+      const sel = document.getElementById('careTestFiche');
+      if(sel && !sel.options.length){
+        sel.innerHTML = careFiches.map(f => `<option value="${f.key}">${escapeHtml(f.label)}</option>`).join('');
+      }
+      const status = document.getElementById('careStatus');
+      if(status){
+        if(!s.ready){ status.className = 'care-status warn'; status.textContent = '⚠️ Base non prête : exécutez migrations/003 dans Railway pour activer cette fonction.'; }
+        else if(!s.whapiActif){ status.className = 'care-status warn'; status.textContent = '⚠️ WhatsApp (Whapi) non configuré : les fiches ne partiront pas tant que WHAPI_TOKEN est absent.'; }
+        else{ status.className = 'care-status'; status.textContent = s.enabled ? 'Envoi automatique activé.' : 'Envoi automatique désactivé.'; }
+      }
+    }catch(e){ /* onglet fiches indisponible, le reste de l'admin fonctionne */ }
+  }
+
+  async function loadCareSheets(){
+    await loadCareSettings();
+    const tbody = document.getElementById('careTbody');
+    const table = document.getElementById('careTable');
+    const empty = document.getElementById('careEmpty');
+    const loading = document.getElementById('careLoading');
+    try{
+      const res = await fetch('/api/admin/care-sheets');
+      const rows = res.ok ? await res.json() : [];
+      loading.hidden = true;
+      if(!rows.length){ table.hidden = true; empty.hidden = false; return; }
+      table.hidden = false; empty.hidden = true;
+      tbody.innerHTML = rows.map(r => `<tr>
+        <td>${escapeHtml((r.sent_at||'').replace('T',' à '))}</td>
+        <td>${escapeHtml(r.client_name||'')}<br><span style="color:var(--gris); font-size:12px;">${escapeHtml(r.client_phone||'')}</span></td>
+        <td>${escapeHtml(r.date||'')}</td>
+        <td>${escapeHtml(r.ficheLabel||r.fiche)}${r.manual ? ' <span style="color:var(--gris); font-size:11px;">(manuel)</span>' : ''}</td>
+        <td><button type="button" class="btn-text" data-care-resend="${r.booking_id}" data-care-fiche="${r.fiche}">Renvoyer</button></td>
+      </tr>`).join('');
+    }catch(e){ loading.textContent = 'Erreur de chargement de l\'historique.'; }
+  }
+
+  document.getElementById('careEnabled').addEventListener('change', async (e) => {
+    const status = document.getElementById('careStatus');
+    try{
+      const res = await fetch('/api/admin/care-sheets/settings', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ enabled: e.target.checked })
+      });
+      if(!res.ok){ const d = await res.json(); throw new Error(d.error||''); }
+      if(status){ status.className = 'care-status'; status.textContent = e.target.checked ? 'Envoi automatique activé.' : 'Envoi automatique désactivé.'; }
+    }catch(err){ e.target.checked = !e.target.checked; if(status){ status.className='care-status warn'; status.textContent = 'Impossible d\'enregistrer le réglage' + (err.message?(' : '+err.message):'') + '.'; } }
+  });
+
+  document.getElementById('careTestBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('careTestPhone').value.trim();
+    const fiche = document.getElementById('careTestFiche').value;
+    const msg = document.getElementById('careTestMsg');
+    if(!phone){ msg.className='care-test-msg err'; msg.textContent='Entrez un numéro.'; return; }
+    msg.className='care-test-msg'; msg.textContent='Envoi en cours…';
+    try{
+      const res = await fetch(`/api/admin/care-sheets/test?to=${encodeURIComponent(phone)}&fiche=${encodeURIComponent(fiche)}`);
+      const data = await res.json();
+      if(res.ok && data.result && data.result.ok){ msg.className='care-test-msg ok'; msg.textContent='Fiche de test envoyée ✅ Vérifiez votre WhatsApp.'; }
+      else{ msg.className='care-test-msg err'; msg.textContent='Échec : ' + ((data.result && (data.result.reason||data.result.message)) || data.error || 'erreur inconnue') + (data.whapiActif ? '' : ' (WHAPI_TOKEN manquant)'); }
+    }catch(e){ msg.className='care-test-msg err'; msg.textContent='Erreur réseau — réessayez.'; }
+  });
+
+  document.getElementById('careTbody').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-care-resend]');
+    if(!btn) return;
+    if(!confirm('Renvoyer cette fiche à la cliente sur WhatsApp ?')) return;
+    try{
+      const res = await fetch('/api/admin/care-sheets/resend', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ bookingId: btn.dataset.careResend, fiche: btn.dataset.careFiche })
+      });
+      const data = await res.json();
+      alert(res.ok && data.ok ? 'Fiche renvoyée ✅' : ('Échec : ' + ((data.results&&data.results[0]&&data.results[0].reason) || data.error || 'erreur')));
+      loadCareSheets();
+    }catch(err){ alert('Impossible de renvoyer — réessayez.'); }
+  });
 
   // ---- Tabs ----
   document.querySelectorAll('.tabs button').forEach(btn => {
@@ -605,8 +781,10 @@ tr:last-child td{border-bottom:none;}
       document.getElementById('tabBookings').hidden = tab !== 'bookings';
       document.getElementById('tabPlanning').hidden = tab !== 'planning';
       document.getElementById('tabClients').hidden = tab !== 'clients';
+      document.getElementById('tabCareSheets').hidden = tab !== 'caresheets';
       if(tab === 'clients' && clients.length === 0) loadClients();
       if(tab === 'planning') renderCalendar();
+      if(tab === 'caresheets') loadCareSheets();
     });
   });
 

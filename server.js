@@ -1,5 +1,6 @@
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
@@ -263,7 +264,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   res.json(rows);
 });
 
-const BOOKING_STATUSES = ['pending', 'paid', 'confirmed', 'cancelled'];
+const BOOKING_STATUSES = ['pending', 'paid', 'confirmed', 'cancelled', 'absente'];
 
 app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
   const { serviceIds, date, time, name, phone, status } = req.body;
@@ -374,6 +375,65 @@ app.get('/api/admin/test-notif', requireAdmin, async (req, res) => {
   }
   const result = await notif.sendDetailed(to, text, 'test-notif');
   res.json({ to, bookingId, whapiActif: notif.isEnabled(), result });
+});
+
+// ─── Fiches de conseils post-séance (admin) ───────────────────────────────────
+// Réglages : interrupteur ON/OFF, état de Whapi, liste des prestations qui ont une fiche.
+app.get('/api/admin/care-sheets/settings', requireAdmin, async (req, res) => {
+  res.json({
+    enabled: await careSheetsEnabled(),
+    whapiActif: notif.hasWhapi(),
+    ready: careSchemaReady,
+    ficheServiceIds: Object.keys(CARE_SHEET_FOR),
+    fiches: Object.entries(CARE_SHEETS).map(([key, m]) => ({ key, label: m.label })),
+  });
+});
+
+app.post('/api/admin/care-sheets/settings', requireAdmin, async (req, res) => {
+  if (!careSchemaReady) return res.status(409).json({ error: 'exécuter d\'abord migrations/003 sur la base' });
+  const enabled = !!(req.body && req.body.enabled);
+  await setSetting('care_sheets_enabled', enabled ? 'true' : 'false');
+  res.json({ ok: true, enabled });
+});
+
+// Historique des fiches envoyées (200 dernières), cliente + date + fiche.
+app.get('/api/admin/care-sheets', requireAdmin, async (req, res) => {
+  if (!careSchemaReady) return res.json([]);
+  const { rows } = await pool.query(`
+    select cs.id, cs.fiche, cs.manual, to_char(cs.sent_at, 'YYYY-MM-DD"T"HH24:MI') as sent_at,
+      b.id as booking_id, b.client_name, b.client_phone, to_char(b.slot_date, 'YYYY-MM-DD') as date
+    from care_sheets_sent cs join bookings b on b.id = cs.booking_id
+    order by cs.sent_at desc limit 200`);
+  res.json(rows.map(r => ({ ...r, ficheLabel: (CARE_SHEETS[r.fiche] || {}).label || r.fiche })));
+});
+
+// Renvoi manuel : une fiche précise, ou toutes les fiches d'un rendez-vous.
+app.post('/api/admin/care-sheets/resend', requireAdmin, async (req, res) => {
+  if (!careSchemaReady) return res.status(409).json({ error: 'exécuter d\'abord migrations/003 sur la base' });
+  const { bookingId, fiche } = req.body || {};
+  if (!bookingId) return res.status(400).json({ error: 'bookingId requis' });
+  if (fiche && !CARE_SHEETS[fiche]) return res.status(400).json({ error: 'fiche inconnue' });
+  const { rows } = await pool.query(bookingSelect('b.id = $1'), [bookingId]);
+  const b = rows[0];
+  if (!b) return res.status(404).json({ error: 'réservation introuvable' });
+  if (!b.client_phone_e164) return res.status(400).json({ error: 'numéro non valide pour WhatsApp' });
+  const fiches = fiche ? [fiche] : careSheetsForBooking(b.service_ids);
+  if (!fiches.length) return res.status(400).json({ error: 'aucune fiche pour cette prestation' });
+  const results = [];
+  for (const f of fiches) results.push({ fiche: f, ...(await sendCareSheetOnce(b, f, { manual: true })) });
+  res.json({ ok: results.every(r => r.ok), results });
+});
+
+// Test : envoie une fiche vers un numéro donné, sans rien enregistrer dans l'historique.
+app.get('/api/admin/care-sheets/test', requireAdmin, async (req, res) => {
+  const to = req.query.to;
+  const fiche = req.query.fiche || 'extensions';
+  if (!to) return res.status(400).json({ error: 'paramètre ?to=0696… requis' });
+  if (!CARE_SHEETS[fiche]) return res.status(400).json({ error: 'fiche inconnue (extensions, lash_lift, brow_lift, teinture, ombre)' });
+  const media = careSheetDataUrl(fiche);
+  if (!media) return res.status(500).json({ error: 'image de la fiche introuvable sur le serveur' });
+  const result = await notif.sendImageDetailed(to, media, notif.textes.conseils(), 'test-fiche');
+  res.json({ to, fiche, whapiActif: notif.hasWhapi(), result });
 });
 
 app.get('/api/admin/clients', requireAdmin, async (req, res) => {
@@ -764,6 +824,177 @@ const REFILL_FOR = {
 };
 const REFILL_AFTER_DAYS = 18;
 
+// ─── Fiches de conseils post-séance ───────────────────────────────────────────
+// Chaque fiche = une image dans public/images/soins/ + un libellé lisible.
+const CARE_SHEETS = {
+  extensions: { file: 'soins-extensions.png', label: 'Extensions de cils' },
+  lash_lift:  { file: 'soins-lash-lift.png',  label: 'Lash lift' },
+  brow_lift:  { file: 'soins-brow-lift.png',  label: 'Brow lift' },
+  teinture:   { file: 'soins-teinture.png',   label: 'Teinture cils / sourcils' },
+  ombre:      { file: 'soins-ombre-brows.png', label: 'Ombré powder brows' },
+};
+// Prestation → fiche(s) à ENVOYER. L'offre regard (extensions + brow lift) déclenche
+// les deux fiches. Les remplissages, la dépose et les épilations ne déclenchent rien.
+const CARE_SHEET_FOR = {
+  cil_a_cil: ['extensions'], mixte: ['extensions'], volume_russe: ['extensions'],
+  wispy_cil_a_cil: ['extensions'], wispy_mixte: ['extensions'], wispy_volume_russe: ['extensions'], wet_volume_russe: ['extensions'],
+  offre_cil_a_cil: ['extensions', 'brow_lift'], offre_mixte: ['extensions', 'brow_lift'], offre_volume_russe: ['extensions', 'brow_lift'],
+  lash_lift: ['lash_lift'],
+  brow_lift: ['brow_lift'], brow_lift_teinture: ['brow_lift'],
+  teinture_hybride: ['teinture'],
+  ombre_powder_brow: ['ombre'],
+};
+// Prestation → fiche(s) que la cliente CONNAÎT déjà si elle l'a faite par le passé.
+// Les remplissages comptent pour la fiche extensions (la pose a déjà été faite).
+const CARE_SHEET_KNOWN_FROM = {
+  ...CARE_SHEET_FOR,
+  remplissage_cil_a_cil: ['extensions'], remplissage_mixte: ['extensions'], remplissage_volume_russe: ['extensions'],
+};
+// Inverse : fiche → liste des prestations qui prouvent que la cliente la connaît.
+const KNOWN_SERVICE_IDS = {};
+for (const [sid, fiches] of Object.entries(CARE_SHEET_KNOWN_FROM)) {
+  for (const f of fiches) (KNOWN_SERVICE_IDS[f] || (KNOWN_SERVICE_IDS[f] = [])).push(sid);
+}
+
+function careSheetsForBooking(serviceIds) {
+  const set = new Set();
+  for (const id of serviceIds || []) for (const f of (CARE_SHEET_FOR[id] || [])) set.add(f);
+  return [...set];
+}
+
+// Lecture de l'image en base64 (envoyée directement à Whapi, sans dépendre d'une URL
+// publique). Mise en cache : les fiches ne changent pas souvent.
+const careSheetCache = new Map();
+function careSheetDataUrl(fiche) {
+  if (careSheetCache.has(fiche)) return careSheetCache.get(fiche);
+  const meta = CARE_SHEETS[fiche];
+  if (!meta) return null;
+  try {
+    const b64 = fs.readFileSync(path.join(__dirname, 'public', 'images', 'soins', meta.file)).toString('base64');
+    const url = `data:image/png;base64,${b64}`;
+    careSheetCache.set(fiche, url);
+    return url;
+  } catch (err) {
+    console.error('[fiche] image introuvable', meta.file, err.message);
+    return null;
+  }
+}
+
+// Le schéma des fiches a besoin des tables app_settings + care_sheets_sent (migration 003).
+let careSchemaReady = false;
+async function checkCareSchema() {
+  try {
+    const { rows } = await pool.query(
+      `select table_name from information_schema.tables where table_name in ('app_settings', 'care_sheets_sent')`
+    );
+    careSchemaReady = rows.length === 2;
+  } catch { careSchemaReady = false; }
+}
+
+async function getSetting(key, def) {
+  try {
+    const { rows } = await pool.query('select value from app_settings where key = $1', [key]);
+    return rows[0] ? rows[0].value : def;
+  } catch { return def; }
+}
+async function setSetting(key, value) {
+  await pool.query(
+    `insert into app_settings (key, value) values ($1, $2)
+     on conflict (key) do update set value = excluded.value`,
+    [key, String(value)]
+  );
+}
+async function careSheetsEnabled() { return (await getSetting('care_sheets_enabled', 'true')) !== 'false'; }
+
+// Réserve l'envoi (une ligne par rendez-vous + fiche) AVANT d'envoyer : on évite tout
+// doublon, et on efface la ligne si l'envoi a échoué pour réessayer plus tard.
+// `manual` (bouton « Renvoyer » de l'admin) force l'envoi même si déjà envoyée.
+async function sendCareSheetOnce(booking, fiche, { manual = false } = {}) {
+  const media = careSheetDataUrl(fiche);
+  if (!media) return { ok: false, reason: 'image manquante' };
+  if (!booking.client_phone_e164) return { ok: false, reason: 'numéro invalide' };
+  if (manual) await pool.query('delete from care_sheets_sent where booking_id = $1 and fiche = $2', [booking.id, fiche]).catch(() => {});
+  let claimed;
+  try {
+    claimed = await pool.query(
+      `insert into care_sheets_sent (booking_id, fiche, client_phone_e164, manual)
+       values ($1, $2, $3, $4) on conflict (booking_id, fiche) do nothing returning id`,
+      [booking.id, fiche, booking.client_phone_e164, manual]
+    );
+  } catch (err) { console.error('[fiche] réservation en base', err.message); return { ok: false, reason: 'base de données' }; }
+  if (!claimed.rowCount) return { ok: false, reason: 'déjà envoyée' };
+  const detail = await notif.sendImageDetailed(booking.client_phone_e164, media, notif.textes.conseils(), `fiche ${fiche} ${booking.id}`);
+  if (!detail.ok) {
+    await pool.query('delete from care_sheets_sent where booking_id = $1 and fiche = $2', [booking.id, fiche]).catch(() => {});
+    return { ok: false, reason: detail.reason || detail.message || ('Whapi ' + detail.status) };
+  }
+  return { ok: true };
+}
+
+// La cliente connaît-elle déjà cette fiche ? (déjà reçue, ou prestation déjà faite avant
+// ce rendez-vous — rendez-vous d'avant la mise en place compris). Repérage par le numéro
+// au format international, avec secours sur les 9 derniers chiffres du numéro brut (utile
+// pour les anciens rendez-vous importés de Planity, sans numéro international).
+async function clientAlreadyKnows(booking, fiche) {
+  const suffix = String(booking.client_phone || '').replace(/\D/g, '').slice(-9);
+  const already = await pool.query(
+    `select 1 from care_sheets_sent cs join bookings o on o.id = cs.booking_id
+      where cs.fiche = $1 and o.id <> $2 and o.client_phone_e164 = $3 limit 1`,
+    [fiche, booking.id, booking.client_phone_e164]
+  );
+  if (already.rowCount) return true;
+  const prior = await pool.query(
+    `select 1 from bookings o
+      where o.id <> $1
+        and o.status not in ('cancelled', 'absente')
+        and o.service_ids && $2::text[]
+        and (o.client_phone_e164 = $3 or right(regexp_replace(coalesce(o.client_phone, ''), '\\D', '', 'g'), 9) = $4)
+        and (o.slot_date < $5 or (o.slot_date = $5 and o.slot_time < $6))
+      limit 1`,
+    [booking.id, KNOWN_SERVICE_IDS[fiche] || [], booking.client_phone_e164, suffix, booking.date, booking.time]
+  );
+  return prior.rowCount > 0;
+}
+
+// Heure d'envoi d'une fiche : fin du rendez-vous + 1 h, jamais entre 20 h et 8 h
+// (dans ce cas, reporté à 9 h le matin), en heure de Martinique.
+const CARE_SHEET_DELAY_MIN = 60;
+const CARE_QUIET_START = 20 * 60;  // 20:00
+const CARE_QUIET_END = 8 * 60;     // 08:00
+const CARE_MORNING = 9 * 60;       // 09:00
+function careSheetSendMoment(dateIso, timeHHMM, durationMin) {
+  let minutes = timeToMinutes(timeHHMM) + (durationMin || 0) + CARE_SHEET_DELAY_MIN;
+  let date = dateIso;
+  while (minutes >= 24 * 60) { minutes -= 24 * 60; date = isoShift(date, 1); }
+  if (minutes >= CARE_QUIET_START) { date = isoShift(date, 1); minutes = CARE_MORNING; }
+  else if (minutes < CARE_QUIET_END) { minutes = CARE_MORNING; }
+  return { date, minutes };
+}
+
+// Toutes les ~15 min : envoie les fiches des rendez-vous terminés depuis ~1 h,
+// une seule fois, seulement à la 1ʳᵉ fois que la cliente fait la prestation.
+async function runCareSheets() {
+  if (!careSchemaReady) await checkCareSchema();
+  if (!careSchemaReady || !notif.hasWhapi()) return;
+  if (!(await careSheetsEnabled())) return;
+  const now = nowInMartinique();
+  const since = isoShift(now.date, -2);
+  const { rows } = await pool.query(bookingSelect(
+    `b.slot_date >= $1 and b.slot_date <= $2 and b.status in ('paid', 'confirmed') and b.client_phone_e164 is not null`
+  ), [since, now.date]);
+  for (const b of rows) {
+    const fiches = careSheetsForBooking(b.service_ids);
+    if (!fiches.length) continue;
+    const moment = careSheetSendMoment(b.date, b.time, b.duration);
+    if (now.date < moment.date || (now.date === moment.date && now.minutes < moment.minutes)) continue;
+    for (const fiche of fiches) {
+      if (await clientAlreadyKnows(b, fiche)) continue;
+      await sendCareSheetOnce(b, fiche).catch(err => console.error('[fiche]', err.message));
+    }
+  }
+}
+checkCareSchema().catch(err => console.error('[fiche] vérification du schéma', err.message));
+
 // Réservations avec leurs prestations (libellé, total, acompte, durée).
 function bookingSelect(where) {
   return `
@@ -846,6 +1077,8 @@ cron.schedule('0 10 * * *', () => {
   runReviewRequests().catch(logErr('avis J+1'));
   runRefillReminders().catch(logErr('remplissage J+18'));
 }, { timezone: TIMEZONE });
+// Fiches de conseils post-séance : toutes les 15 min (décalé de 5 min des autres envois).
+cron.schedule('5,20,35,50 * * * *', () => runCareSheets().catch(logErr('fiches conseils')), { timezone: TIMEZONE });
 // Filet de sécurité : si une confirmation a échoué (Whapi indisponible…), on réessaie toutes les 15 min.
 cron.schedule('*/15 * * * *', async () => {
   if (!automationReady) await checkAutomationSchema().catch(logErr('vérification du schéma'));
@@ -876,4 +1109,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Exotic Beauty server running on port ${PORT}`));
 
 // Pour les tests manuels (node -e "require('./server').runReminders()").
-module.exports = { runReminders, runReviewRequests, runRefillReminders, notifyBookingPaid };
+module.exports = { runReminders, runReviewRequests, runRefillReminders, notifyBookingPaid, runCareSheets };

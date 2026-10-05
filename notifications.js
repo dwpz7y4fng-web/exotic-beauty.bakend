@@ -50,6 +50,9 @@ function twilio() {
 }
 
 function isEnabled() { return !!process.env.WHAPI_TOKEN || !!twilio(); }
+// Les fiches de conseils sont envoyées en IMAGE : seul WhatsApp (Whapi) sait le faire,
+// un SMS ne peut pas porter d'image. On vérifie donc Whapi séparément.
+function hasWhapi() { return !!process.env.WHAPI_TOKEN; }
 
 // Envoie un message et renvoie le détail de ce qui s'est passé (statut + réponse Whapi).
 // Jamais d'exception. Garde-fou : aucun envoi vers un numéro qui n'est pas au format international.
@@ -88,6 +91,32 @@ async function send(toE164Number, text, tag) {
   return (await sendDetailed(toE164Number, text, tag)).ok;
 }
 
+// Envoie une IMAGE (fiche de conseils) avec une légende, via Whapi uniquement.
+// `media` peut être une URL publique (https://…/fiche.png) ou une image encodée
+// en base64 (data:image/png;base64,…). Jamais d'exception, jamais d'envoi vers
+// un numéro invalide. Pas de secours SMS : un SMS ne peut pas porter d'image.
+async function sendImageDetailed(toE164Number, media, caption, tag) {
+  const to = toE164(toE164Number);
+  if (!to) { console.warn(`[notif] ${tag} : numéro invalide (${toE164Number}) — rien envoyé`); return { ok: false, via: 'none', reason: 'numéro invalide', input: toE164Number }; }
+  if (!process.env.WHAPI_TOKEN) {
+    console.log(`[notif] ${tag} → ${to} : (image non envoyée — WHAPI_TOKEN manquant)`);
+    return { ok: false, via: 'none', reason: 'WHAPI_TOKEN manquant', to };
+  }
+  try {
+    const r = await fetch(`${WHAPI_URL}/messages/image`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.WHAPI_TOKEN}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ to: to.slice(1), media, caption }),
+      signal: AbortSignal.timeout(30000),
+    });
+    const raw = await r.text();
+    let response; try { response = JSON.parse(raw); } catch { response = raw.slice(0, 300); }
+    if (!r.ok) { console.error(`[notif] ${tag} → ${to} : Whapi a répondu ${r.status} ${raw.slice(0, 200)}`); return { ok: false, via: 'whapi', status: r.status, response, to }; }
+    console.log(`[notif] ${tag} → ${to} : fiche (image) envoyée`);
+    return { ok: true, via: 'whapi', status: r.status, response, to };
+  } catch (err) { console.error(`[notif] ${tag} → ${to} : échec Whapi (image)`, err.message); return { ok: false, via: 'whapi', reason: 'exception', message: err.message, to }; }
+}
+
 // ─── Les textes (modifiables ici) ────────────────────────────────────────────
 const textes = {
   confirmation: (b, ics) =>
@@ -122,6 +151,10 @@ const textes = {
 
   relance: (nom) =>
     `Coucou ${prenom(nom)} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
+
+  // Légende de la fiche de conseils post-séance (envoyée avec l'image).
+  conseils: () =>
+    `Merci pour votre visite chez Exotic Beauty ✨ Voici vos conseils pour prendre soin de votre résultat. N'hésitez pas à m'écrire si vous avez la moindre question.`,
 };
 
-module.exports = { toE164, send, sendDetailed, textes, isEnabled, STUDIO, STUDIO_MAPS };
+module.exports = { toE164, send, sendDetailed, sendImageDetailed, textes, isEnabled, hasWhapi, STUDIO, STUDIO_MAPS };
