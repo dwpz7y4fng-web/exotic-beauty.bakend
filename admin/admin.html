@@ -209,6 +209,7 @@ tr:last-child td{border-bottom:none;}
     <button type="button" data-tab="planning">Planning</button>
     <button type="button" data-tab="clients">Clientes</button>
     <button type="button" data-tab="caresheets">Fiches conseils</button>
+    <button type="button" data-tab="reminder">Rappel &amp; accès</button>
   </div>
 
   <div id="tabBookings">
@@ -332,6 +333,45 @@ tr:last-child td{border-bottom:none;}
       </table>
       <div class="loading" id="careLoading">Chargement…</div>
       <div class="empty" id="careEmpty" hidden>Aucune fiche envoyée pour l'instant.</div>
+    </div>
+  </div>
+
+  <div id="tabReminder" hidden>
+    <div class="care-panel">
+      <div class="care-toggle-title">Message de rappel de la veille</div>
+      <div class="care-toggle-sub">La veille du rendez-vous, la cliente reçoit sur WhatsApp : le rappel (date, heure, prestation) + le texte ci-dessous + le plan d'accès en photo. Tu peux modifier le texte et la photo ici, sans toucher au code.</div>
+      <div class="care-status" id="reminderStatus" style="margin-bottom:14px;"></div>
+
+      <label style="display:block; font-size:13px; color:var(--gris); margin:14px 0 6px;">Texte des informations d'accès</label>
+      <textarea id="reminderText" rows="16" style="width:100%; padding:12px; border:1px solid var(--line-2); border-radius:8px; font-size:14px; font-family:inherit; line-height:1.5; resize:vertical;"></textarea>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-dark" id="reminderSaveBtn">Enregistrer le texte</button>
+        <span class="care-test-msg" id="reminderTextMsg"></span>
+      </div>
+    </div>
+
+    <div class="care-panel">
+      <div class="care-toggle-title">Photo du plan d'accès</div>
+      <div class="care-test-row" style="align-items:flex-start;">
+        <img id="reminderImgPreview" alt="plan d'accès" style="width:150px; max-width:40%; border:1px solid var(--line-2); border-radius:8px;">
+        <div style="flex:1; min-width:200px;">
+          <input type="file" id="reminderImgFile" accept="image/png,image/jpeg,image/webp">
+          <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-dark" id="reminderImgBtn">Remplacer la photo</button>
+            <button type="button" class="btn btn-outline" id="reminderImgReset">Remettre celle d'origine</button>
+          </div>
+          <div class="care-test-msg" id="reminderImgMsg" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="care-panel">
+      <div class="care-toggle-title">Envoyer un rappel de test</div>
+      <div class="care-test-row">
+        <input type="tel" id="reminderTestPhone" placeholder="Mon numéro (ex. 0696 12 34 56)">
+        <button type="button" class="btn btn-dark" id="reminderTestBtn">Envoyer le test</button>
+      </div>
+      <div class="care-test-msg" id="reminderTestMsg"></div>
     </div>
   </div>
 </div>
@@ -711,6 +751,75 @@ tr:last-child td{border-bottom:none;}
     }catch(e){ /* onglet fiches indisponible, le reste de l'admin fonctionne */ }
   }
 
+  // ---- Rappel de la veille & accès ----
+  async function loadReminder(){
+    const status = document.getElementById('reminderStatus');
+    try{
+      const res = await fetch('/api/admin/reminder-access');
+      if(!res.ok) return;
+      const s = await res.json();
+      document.getElementById('reminderText').value = s.text || '';
+      document.getElementById('reminderImgPreview').src = '/api/admin/reminder-access/image?t=' + Date.now();
+      if(status){
+        if(!s.ready){ status.className='care-status warn'; status.textContent='⚠️ Pour modifier le texte ou la photo, exécutez d\'abord migrations/003 dans Railway. (L\'envoi fonctionne déjà avec le texte par défaut.)'; }
+        else if(!s.whapiActif){ status.className='care-status warn'; status.textContent='⚠️ WhatsApp (Whapi) non configuré : le rappel partira en texte seul, sans la photo.'; }
+        else{ status.className='care-status'; status.textContent='Le rappel part la veille à 18 h avec le plan en photo.'; }
+      }
+    }catch(e){ /* onglet indisponible */ }
+  }
+
+  document.getElementById('reminderSaveBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('reminderTextMsg');
+    msg.className='care-test-msg'; msg.textContent='Enregistrement…';
+    try{
+      const res = await fetch('/api/admin/reminder-access', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ text: document.getElementById('reminderText').value })
+      });
+      const d = await res.json().catch(()=>({}));
+      if(res.ok){ msg.className='care-test-msg ok'; msg.textContent='Texte enregistré ✅'; }
+      else{ msg.className='care-test-msg err'; msg.textContent='Échec : ' + (d.error||'erreur'); }
+    }catch(e){ msg.className='care-test-msg err'; msg.textContent='Erreur réseau — réessayez.'; }
+  });
+
+  document.getElementById('reminderImgBtn').addEventListener('click', async () => {
+    const file = document.getElementById('reminderImgFile').files[0];
+    const msg = document.getElementById('reminderImgMsg');
+    if(!file){ msg.className='care-test-msg err'; msg.textContent='Choisissez une image d\'abord.'; return; }
+    msg.className='care-test-msg'; msg.textContent='Envoi de l\'image…';
+    const fd = new FormData(); fd.append('file', file);
+    try{
+      const res = await fetch('/api/admin/reminder-access/image', { method:'POST', body: fd });
+      const d = await res.json().catch(()=>({}));
+      if(res.ok){ msg.className='care-test-msg ok'; msg.textContent='Photo remplacée ✅'; document.getElementById('reminderImgPreview').src = '/api/admin/reminder-access/image?t=' + Date.now(); }
+      else{ msg.className='care-test-msg err'; msg.textContent='Échec : ' + (d.error||'erreur'); }
+    }catch(e){ msg.className='care-test-msg err'; msg.textContent='Erreur réseau — réessayez.'; }
+  });
+
+  document.getElementById('reminderImgReset').addEventListener('click', async () => {
+    const msg = document.getElementById('reminderImgMsg');
+    if(!confirm('Remettre la photo du plan d\'origine ?')) return;
+    try{
+      const res = await fetch('/api/admin/reminder-access/image', { method:'DELETE' });
+      const d = await res.json().catch(()=>({}));
+      if(res.ok){ msg.className='care-test-msg ok'; msg.textContent='Photo d\'origine remise ✅'; document.getElementById('reminderImgPreview').src = '/api/admin/reminder-access/image?t=' + Date.now(); }
+      else{ msg.className='care-test-msg err'; msg.textContent='Échec : ' + (d.error||'erreur'); }
+    }catch(e){ msg.className='care-test-msg err'; msg.textContent='Erreur réseau — réessayez.'; }
+  });
+
+  document.getElementById('reminderTestBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('reminderTestPhone').value.trim();
+    const msg = document.getElementById('reminderTestMsg');
+    if(!phone){ msg.className='care-test-msg err'; msg.textContent='Entrez un numéro.'; return; }
+    msg.className='care-test-msg'; msg.textContent='Envoi en cours…';
+    try{
+      const res = await fetch('/api/admin/reminder-access/test?to=' + encodeURIComponent(phone));
+      const d = await res.json().catch(()=>({}));
+      if(res.ok && d.ok){ msg.className='care-test-msg ok'; msg.textContent='Rappel de test envoyé ✅ Vérifiez votre WhatsApp.'; }
+      else{ msg.className='care-test-msg err'; msg.textContent='Échec : ' + (d.error || (d.whapiActif ? 'envoi refusé' : 'WHAPI_TOKEN manquant')); }
+    }catch(e){ msg.className='care-test-msg err'; msg.textContent='Erreur réseau — réessayez.'; }
+  });
+
   async function loadCareSheets(){
     await loadCareSettings();
     const tbody = document.getElementById('careTbody');
@@ -782,9 +891,11 @@ tr:last-child td{border-bottom:none;}
       document.getElementById('tabPlanning').hidden = tab !== 'planning';
       document.getElementById('tabClients').hidden = tab !== 'clients';
       document.getElementById('tabCareSheets').hidden = tab !== 'caresheets';
+      document.getElementById('tabReminder').hidden = tab !== 'reminder';
       if(tab === 'clients' && clients.length === 0) loadClients();
       if(tab === 'planning') renderCalendar();
       if(tab === 'caresheets') loadCareSheets();
+      if(tab === 'reminder') loadReminder();
     });
   });
 
