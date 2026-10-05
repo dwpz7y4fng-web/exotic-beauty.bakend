@@ -214,6 +214,7 @@ tr:last-child td{border-bottom:none;}
             <th>Heure</th>
             <th>Cliente</th>
             <th>Téléphone</th>
+            <th>E-mail</th>
             <th>Prestations</th>
             <th>Prix total</th>
             <th>Acompte</th>
@@ -458,6 +459,7 @@ tr:last-child td{border-bottom:none;}
         <td>${b.slot_time.slice(0,5)}</td>
         <td>${escapeHtml(b.client_name)}</td>
         <td>${escapeHtml(b.client_phone)}</td>
+        <td>${escapeHtml(b.client_email || '—')}</td>
         <td class="services-cell">${escapeHtml(labels)}</td>
         <td class="price">${euros(total)}</td>
         <td class="price">${euros(deposit)}</td>

@@ -132,7 +132,7 @@
   var MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   var MOIS_L = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   var U = {
-    euros: function (c) { var e = c / 100; return (e % 1 ? e.toFixed(2).replace('.', ',') : String(e)) + ' €'; },
+    euros: function (c) { return (c / 100).toFixed(2).replace('.', ',') + ' €'; },
     duree: function (m) { var h = Math.floor(m / 60), r = m % 60; return h ? h + ' h' + (r ? ' ' + String(r).padStart(2, '0') : '') : r + ' min'; },
     min: function (hhmm) { return +hhmm.slice(0, 2) * 60 + +hhmm.slice(3, 5); },
     hm: function (m) { return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); },

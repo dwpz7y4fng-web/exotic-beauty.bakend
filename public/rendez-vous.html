@@ -72,6 +72,8 @@
       </div>
       <label class="chp"><span class="mono">Téléphone WhatsApp</span><input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="0696 12 34 56" required></label>
       <div class="r-aide" id="telAide">On vous accompagne par WhatsApp : confirmation, rappel la veille, conseils.</div>
+      <label class="chp"><span class="mono">E-mail</span><input id="email" type="email" inputmode="email" autocomplete="email" placeholder="vous@exemple.com" required></label>
+      <div class="r-aide" id="emailAide">Pour votre reçu de paiement et la confirmation.</div>
     </div>
 
     <div class="r-prix" id="prix2" style="margin-top:24px"></div>
@@ -186,17 +188,26 @@
       : e ? '✓ ' + e.replace(/^(\+\d{2,3})(\d{3})(\d{2})(\d{2})(\d{2})$/, '$1 $2 $3 $4 $5') + ' · confirmation et rappel par WhatsApp.'
       : 'Numéro incomplet ou invalide. Exemple : 0696 12 34 56.';
   });
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  $('email').addEventListener('blur', function () {
+    var v = $('email').value.trim();
+    $('emailAide').textContent = !v ? 'Pour votre reçu de paiement et la confirmation.'
+      : EMAIL_RE.test(v) ? '✓ Reçu et confirmation envoyés à cette adresse.'
+      : 'Adresse e-mail incomplète. Exemple : vous@exemple.com';
+  });
   $('payer').addEventListener('click', async function () {
     if (envoi) return;
-    var prenom = $('prenom').value.trim(), nom = $('nomF').value.trim(), tel = $('tel').value.trim();
-    if (!prenom || !U.e164(tel)) {
-      $('err').textContent = !prenom ? 'Indiquez au moins votre prénom.' : 'Ce numéro ne semble pas valide. Exemple : 0696 12 34 56 (ou +33 6… pour un numéro de métropole).';
+    var prenom = $('prenom').value.trim(), nom = $('nomF').value.trim(), tel = $('tel').value.trim(), email = $('email').value.trim();
+    if (!prenom || !U.e164(tel) || !EMAIL_RE.test(email)) {
+      $('err').textContent = !prenom ? 'Indiquez au moins votre prénom.'
+        : !U.e164(tel) ? 'Ce numéro ne semble pas valide. Exemple : 0696 12 34 56 (ou +33 6… pour un numéro de métropole).'
+        : 'Indiquez un e-mail valide. Exemple : vous@exemple.com';
       $('err').hidden = false; return;
     }
     $('err').hidden = true; envoi = true; $('payer').disabled = true; $('payer').textContent = 'Redirection vers le paiement…';
     try {
       var r = await fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel }) });
+        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel, email: email }) });
       var data = await r.json();
       if (!r.ok) {
         $('err').textContent = r.status === 409 ? 'Ce créneau vient d\'être pris. Revenez au calendrier pour en choisir un autre.' : 'Une erreur est survenue : ' + (data.error || 'merci de réessayer.');

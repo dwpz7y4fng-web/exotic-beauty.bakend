@@ -52,6 +52,9 @@ function nowInMartinique() {
 }
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const HH_MM = /^\d{2}:\d{2}$/;
+// Validation e-mail volontairement simple (présence d'un @ et d'un domaine) :
+// on veut écarter les saisies manifestement fausses, pas filtrer agressivement.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Heures de début libres pour une prestation de `durationMinutes` ce jour-là :
 // la prestation doit tenir entière dans une plage d'ouverture, sans chevaucher un
@@ -234,10 +237,19 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { rows } = await pool.query(
-      `update bookings set status = 'paid' where stripe_session_id = $1 returning id`,
-      [session.id]
-    );
+    // La devise et le montant réellement encaissés sont ceux renvoyés par Stripe
+    // (source de vérité). On les enregistre quand la migration 003 est passée.
+    const { rows } = contactReady
+      ? await pool.query(
+        `update bookings
+           set status = 'paid',
+               currency = coalesce($2, currency),
+               amount_total_cents = coalesce($3, amount_total_cents)
+         where stripe_session_id = $1 returning id`,
+        [session.id, session.currency || null, session.amount_total ?? null])
+      : await pool.query(
+        `update bookings set status = 'paid' where stripe_session_id = $1 returning id`,
+        [session.id]);
     // Confirmation à la cliente + notification à Malorie (sans bloquer la réponse à Stripe).
     for (const r of rows) notifyBookingPaid(r.id).catch(err => console.error('[notif] confirmation', r.id, err.message));
   }
@@ -253,6 +265,7 @@ app.get('/admin', requireAdmin, (req, res) => {
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   const { rows } = await pool.query(`
     select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status, b.created_at,
+      ${contactReady ? 'b.client_email' : 'null::text as client_email'},
       coalesce((
         select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes) order by s.label)
         from services s where s.id = any(b.service_ids)
@@ -621,8 +634,47 @@ app.get('/api/calendar/:id.ics', async (req, res) => {
   res.send(buildIcs(b));
 });
 
+// Retrouve la fiche cliente existante (même e-mail OU même téléphone) ou la crée,
+// pour rattacher la réservation sans créer de doublon. Renvoie l'id de la fiche,
+// ou null tant que la migration 003 n'est pas passée. Utilise la connexion de la
+// transaction en cours (`db`) pour rester cohérent avec l'insertion de la réservation.
+async function findOrCreateClient(db, name, email, phoneE164) {
+  if (!contactReady) return null;
+  const emailLower = email ? email.toLowerCase() : null;
+  const { rows } = await db.query(
+    `select id from clients
+       where ($1::text is not null and lower(email) = $1)
+          or ($2::text is not null and phone is not null and phone <> '' and phone = $2)
+       order by ($1::text is not null and lower(email) = $1) desc
+       limit 1`,
+    [emailLower, phoneE164]
+  );
+  if (rows.length) {
+    // On complète les infos manquantes de la fiche, sans écraser ce qui existe.
+    await db.query(
+      `update clients
+         set email = coalesce(nullif(email, ''), $2),
+             phone = coalesce(nullif(phone, ''), $3)
+       where id = $1`,
+      [rows[0].id, email, phoneE164]
+    );
+    return rows[0].id;
+  }
+  // Nouvelle fiche. Le on conflict couvre le cas rare où une fiche au même numéro
+  // existerait déjà sans qu'on l'ait trouvée (course, index unique sur phone).
+  const ins = await db.query(
+    `insert into clients (name, phone, email) values ($1, $2, $3)
+     on conflict (phone) where phone is not null and phone <> ''
+     do update set email = coalesce(nullif(clients.email, ''), excluded.email)
+     returning id`,
+    [name, phoneE164, email]
+  );
+  return ins.rows[0].id;
+}
+
 app.post('/api/book', async (req, res) => {
   const { serviceIds, date, time, name, phone } = req.body;
+  const email = (req.body.email || '').trim();
   if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
     return res.status(400).json({ error: 'champs manquants' });
   }
@@ -630,6 +682,7 @@ app.post('/api/book', async (req, res) => {
   if (!ISO_DATE.test(date) || !HH_MM.test(time)) return res.status(400).json({ error: 'date ou heure invalide' });
   const phoneE164 = notif.toE164(phone);
   if (!phoneE164) return res.status(400).json({ error: 'numéro de téléphone invalide (ex. 0696 12 34 56)' });
+  if (!email || !EMAIL_RE.test(email)) return res.status(400).json({ error: 'e-mail invalide (ex. vous@exemple.com)' });
   if (new Set(serviceIds).size !== serviceIds.length) return res.status(400).json({ error: 'prestation en double' });
 
   const svcRes = await pool.query('select * from services where id = any($1)', [serviceIds]);
@@ -652,15 +705,19 @@ app.post('/api/book', async (req, res) => {
       await client.query('rollback');
       return res.status(409).json({ error: 'ce créneau vient d\'être réservé' });
     }
-    const insertRes = automationReady
-      ? await client.query(
-        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, client_phone_e164)
-         values ($1, $2, $3, $4, $5, $6) returning id`,
-        [serviceIds, date, time, name, phone, phoneE164])
-      : await client.query(
-        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone)
-         values ($1, $2, $3, $4, $5) returning id`,
-        [serviceIds, date, time, name, phone]);
+    // Colonnes de base, puis on ajoute celles que les migrations ont apportées.
+    const cols = ['service_ids', 'slot_date', 'slot_time', 'client_name', 'client_phone'];
+    const vals = [serviceIds, date, time, name, phone];
+    if (automationReady) { cols.push('client_phone_e164'); vals.push(phoneE164); }
+    if (contactReady) {
+      const clientId = await findOrCreateClient(client, name, email, phoneE164);
+      cols.push('client_email'); vals.push(email);
+      cols.push('client_id'); vals.push(clientId);
+      cols.push('currency'); vals.push('eur');
+    }
+    const placeholders = vals.map((_, i) => '$' + (i + 1)).join(', ');
+    const insertRes = await client.query(
+      `insert into bookings (${cols.join(', ')}) values (${placeholders}) returning id`, vals);
     await client.query('commit');
     booking = insertRes.rows[0];
   } catch (err) {
@@ -677,7 +734,12 @@ app.post('/api/book', async (req, res) => {
   try {
     session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      locale: 'fr',
+      // Carte uniquement : en listant explicitement 'card', Stripe n'ajoute pas
+      // "Link" (l'enregistrement rapide de carte). Voir aussi le réglage du
+      // tableau de bord Stripe si Link apparaît encore.
       payment_method_types: ['card'],
+      customer_email: email,
       line_items: [{
         price_data: {
           currency: 'eur',
@@ -740,16 +802,27 @@ cron.schedule('0 10 * * 1', async () => {
 // Nécessite la migration 002 (colonnes *_sent_at). Tant qu'elle n'est pas passée,
 // le site fonctionne normalement et les automatisations restent en veille.
 const AUTOMATION_COLUMNS = ['client_phone_e164', 'confirmation_sent_at', 'owner_notified_at', 'review_sent_at', 'refill_sent_at'];
+// Colonnes ajoutées par la migration 003 (e-mail de la cliente, rattachement à sa
+// fiche, devise + montant du paiement). Tant qu'elles n'existent pas, le site tourne
+// normalement : on valide quand même l'e-mail côté formulaire, on ne fait juste pas
+// l'enregistrement en base de ces infos-là.
+const CONTACT_COLUMNS = ['client_email', 'client_id', 'currency', 'amount_total_cents'];
 let automationReady = false;
+let contactReady = false;
 async function checkAutomationSchema() {
   const { rows } = await pool.query(
     `select column_name from information_schema.columns where table_name = 'bookings' and column_name = any($1)`,
-    [AUTOMATION_COLUMNS]
+    [[...AUTOMATION_COLUMNS, ...CONTACT_COLUMNS]]
   );
-  automationReady = rows.length === AUTOMATION_COLUMNS.length;
+  const present = new Set(rows.map(r => r.column_name));
+  automationReady = AUTOMATION_COLUMNS.every(c => present.has(c));
+  contactReady = CONTACT_COLUMNS.every(c => present.has(c));
   console.log(automationReady
     ? `[notif] automatisations prêtes (${notif.isEnabled() ? 'envois ACTIVÉS' : 'envois désactivés : WHAPI_TOKEN manquant'})`
     : '[notif] automatisations en veille : exécuter migrations/002 sur la base');
+  console.log(contactReady
+    ? '[contact] e-mail + fiche cliente + devise : enregistrement ACTIVÉ'
+    : '[contact] en veille : exécuter migrations/003 sur la base');
 }
 checkAutomationSchema().catch(err => console.error('[notif] vérification du schéma', err.message));
 
@@ -848,7 +921,7 @@ cron.schedule('0 10 * * *', () => {
 }, { timezone: TIMEZONE });
 // Filet de sécurité : si une confirmation a échoué (Whapi indisponible…), on réessaie toutes les 15 min.
 cron.schedule('*/15 * * * *', async () => {
-  if (!automationReady) await checkAutomationSchema().catch(logErr('vérification du schéma'));
+  if (!automationReady || !contactReady) await checkAutomationSchema().catch(logErr('vérification du schéma'));
   if (!automationReady || !notif.isEnabled()) return;
   const { rows } = await pool.query(
     `select id from bookings where status = 'paid' and created_at > now() - interval '2 days'

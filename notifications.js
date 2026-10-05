@@ -38,7 +38,7 @@ function dateLongue(iso) {
   return `${JOURS[d.getUTCDay()]} ${d.getUTCDate()} ${MOIS[d.getUTCMonth()]}`;
 }
 function heure(t) { return String(t).slice(0, 5).replace(':', 'h'); }
-function euros(c) { const e = c / 100; return (e % 1 ? e.toFixed(2).replace('.', ',') : String(e)) + ' €'; }
+function euros(c) { return (c / 100).toFixed(2).replace('.', ',') + ' €'; }
 
 let twilioClient = null;
 function twilio() {
