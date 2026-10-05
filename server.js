@@ -436,6 +436,59 @@ app.get('/api/admin/care-sheets/test', requireAdmin, async (req, res) => {
   res.json({ to, fiche, whapiActif: notif.hasWhapi(), result });
 });
 
+// ─── Rappel de la veille : texte d'accès + plan (admin, modifiable) ────────────
+app.get('/api/admin/reminder-access', requireAdmin, async (req, res) => {
+  res.json({
+    text: await getReminderAccessText(),
+    ready: careSchemaReady,
+    whapiActif: notif.hasWhapi(),
+    hasCustomImage: !!(await getSetting('reminder_plan_image', '')),
+  });
+});
+
+app.post('/api/admin/reminder-access', requireAdmin, async (req, res) => {
+  if (!careSchemaReady) return res.status(409).json({ error: 'exécuter d\'abord migrations/003 sur la base' });
+  const text = req.body && typeof req.body.text === 'string' ? req.body.text : null;
+  if (text === null) return res.status(400).json({ error: 'texte manquant' });
+  await setSetting('reminder_access_text', text);
+  res.json({ ok: true });
+});
+
+app.post('/api/admin/reminder-access/image', requireAdmin, upload.single('file'), async (req, res) => {
+  if (!careSchemaReady) return res.status(409).json({ error: 'exécuter d\'abord migrations/003 sur la base' });
+  if (!req.file) return res.status(400).json({ error: 'aucune image reçue' });
+  if (!/^image\/(png|jpe?g|webp)$/.test(req.file.mimetype)) return res.status(400).json({ error: 'format non supporté (png, jpg)' });
+  await setSetting('reminder_plan_image', `data:${req.file.mimetype};base64,` + req.file.buffer.toString('base64'));
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/reminder-access/image', requireAdmin, async (req, res) => {
+  if (!careSchemaReady) return res.status(409).json({ error: 'exécuter d\'abord migrations/003 sur la base' });
+  await setSetting('reminder_plan_image', '');
+  res.json({ ok: true });
+});
+
+// Aperçu de l'image actuelle (personnalisée ou plan par défaut).
+app.get('/api/admin/reminder-access/image', requireAdmin, async (req, res) => {
+  const dataUrl = await getReminderPlanDataUrl();
+  const m = /^data:(image\/[a-z]+);base64,([\s\S]*)$/.exec(dataUrl || '');
+  if (!m) return res.status(404).send('aucune image');
+  res.set('Content-Type', m[1]);
+  res.send(Buffer.from(m[2], 'base64'));
+});
+
+// Test : envoie le rappel complet (accès + plan) vers un numéro, sur un RDV d'exemple.
+app.get('/api/admin/reminder-access/test', requireAdmin, async (req, res) => {
+  const phoneE164 = notif.toE164(req.query.to);
+  if (!phoneE164) return res.status(400).json({ error: 'paramètre ?to=0696… (numéro valide) requis' });
+  const sample = {
+    id: 'test', client_name: 'Test', client_phone_e164: phoneE164,
+    date: isoShift(nowInMartinique().date, 1), time: '14:00', label: 'Lash lift avec teinture', duration: 45,
+  };
+  const ok = await sendReminderWithAccess(sample);
+  res.json({ to: phoneE164, whapiActif: notif.hasWhapi(), ok });
+});
+
 app.get('/api/admin/clients', requireAdmin, async (req, res) => {
   const { rows } = await pool.query(
     'select id, name, phone, email, comments, gender, planity_created_at, planity_deleted_at from clients order by name'
@@ -1033,6 +1086,61 @@ function isoShift(isoDate, days) {
   return d.toISOString().slice(0, 10);
 }
 
+// ─── Infos d'accès au studio (ajoutées au rappel de la veille) ─────────────────
+// Le texte et l'image du plan sont modifiables par Malorie dans l'admin (table
+// app_settings). Valeurs par défaut ci-dessous tant qu'elle n'a rien changé.
+const DEFAULT_ACCESS_TEXT =
+`📍 Comment venir au studio
+
+Adresse : 722 route de la Chasse, quartier Rivage, Ducos
+Le numéro 722 est effacé : repérez plutôt le n° 716, juste à côté.
+
+🚗 Stationnement
+Garez-vous le long du trottoir, derrière les poubelles.
+Envoyez-moi un message à votre arrivée : je vous ouvre la barrière.
+
+🚶‍♀️ Pour rejoindre le studio
+1. Descendez l'allée : le parking est sur votre gauche.
+2. Face à vous, un bateau avec une bâche bleue : prenez l'escalier en gravillons sur la gauche et montez jusqu'à la piscine.
+3. Longez la piscine par la gauche et montez l'escalier en fer : l'accueil se trouve juste en face.
+
+Installez-vous à l'accueil, je viens vous chercher pour votre rendez-vous 🤍`;
+
+const WHATSAPP_CAPTION_LIMIT = 1024;  // au-delà, on coupe en 2 messages (photo + texte)
+
+async function getReminderAccessText() { return await getSetting('reminder_access_text', DEFAULT_ACCESS_TEXT); }
+
+let defaultPlanCache = null;
+function defaultPlanDataUrl() {
+  if (defaultPlanCache !== null) return defaultPlanCache;
+  try {
+    defaultPlanCache = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, 'public', 'images', 'acces', 'plan-acces.png')).toString('base64');
+  } catch (err) { console.error('[rappel] plan d\'accès introuvable', err.message); defaultPlanCache = ''; }
+  return defaultPlanCache;
+}
+async function getReminderPlanDataUrl() {
+  const custom = await getSetting('reminder_plan_image', '');
+  return custom || defaultPlanDataUrl();
+}
+
+// Envoie le rappel de la veille : rappel du RDV + bloc accès, avec le plan en image.
+// Si le texte dépasse la limite d'une légende WhatsApp, on coupe en 2 messages :
+// d'abord la photo du plan, puis le texte complet. Renvoie true si l'essentiel est parti.
+async function sendReminderWithAccess(b) {
+  const accessText = (await getReminderAccessText() || '').trim();
+  const full = accessText ? (notif.textes.rappel(b) + '\n\n' + accessText) : notif.textes.rappel(b);
+  const media = notif.hasWhapi() ? await getReminderPlanDataUrl() : null;
+  if (media) {
+    if (full.length <= WHATSAPP_CAPTION_LIMIT) {
+      return (await notif.sendImageDetailed(b.client_phone_e164, media, full, 'rappel ' + b.id)).ok;
+    }
+    await notif.sendImageDetailed(b.client_phone_e164, media, '', 'rappel-photo ' + b.id).catch(() => {});
+    return await notif.send(b.client_phone_e164, full, 'rappel-texte ' + b.id);
+  }
+  // Whapi indisponible : on envoie au moins le texte (SMS possible), sans le plan.
+  return await notif.send(b.client_phone_e164, full, 'rappel ' + b.id);
+}
+
 // Seules les réservations faites sur le site (numéro au format international) reçoivent
 // ces messages : les rendez-vous importés de Planity ne sont pas relancés en double.
 async function runReminders() {
@@ -1042,7 +1150,7 @@ async function runReminders() {
   for (const b of rows) {
     const claimed = await pool.query('update bookings set reminder_sent = true where id = $1 and reminder_sent = false returning id', [b.id]);
     if (!claimed.rowCount) continue;
-    if (!await notif.send(b.client_phone_e164, notif.textes.rappel(b), 'rappel ' + b.id)) {
+    if (!await sendReminderWithAccess(b)) {
       await pool.query('update bookings set reminder_sent = false where id = $1', [b.id]);
     }
   }
