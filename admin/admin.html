@@ -475,6 +475,8 @@ tr:last-child td{border-bottom:none;}
 <script>
 (function(){
   const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée', absente: 'Absente' };
+  const ZONE_LABEL = { tempes: 'tempes', mains: 'mains', epaules: 'épaules' };
+  function zoneText(b){ return b.massage_zone && ZONE_LABEL[b.massage_zone] ? ('💆 ' + ZONE_LABEL[b.massage_zone]) : ''; }
   let bookings = [];
   let services = [];
   let currentFilter = 'all';
@@ -566,7 +568,7 @@ tr:last-child td{border-bottom:none;}
         <td>${b.slot_time.slice(0,5)}</td>
         <td>${escapeHtml(b.client_name)}</td>
         <td>${escapeHtml(b.client_phone)}</td>
-        <td class="services-cell">${escapeHtml(labels)}</td>
+        <td class="services-cell">${escapeHtml(labels)}${b.massage_zone ? `<br><span style="color:var(--brun); font-size:12px;">${zoneText(b)}</span>` : ''}</td>
         <td class="price">${euros(total)}</td>
         <td class="price">${euros(deposit)}</td>
         <td><span class="badge ${statusClass}">${STATUS_LABEL[b.status] || b.status}</span></td>
@@ -929,7 +931,7 @@ tr:last-child td{border-bottom:none;}
   function apptChip(b){
     const labels = b.services.map(s => s.label).join(', ');
     return `<div class="cal-appt status-${b.status}" data-edit-cal="${b.id}">
-      <span class="t">${b.slot_time.slice(0,5)}</span> ${escapeHtml(b.client_name)}<br>${escapeHtml(labels)}
+      <span class="t">${b.slot_time.slice(0,5)}</span> ${escapeHtml(b.client_name)}<br>${escapeHtml(labels)}${b.massage_zone ? ` <span title="parenthèse ${ZONE_LABEL[b.massage_zone]||''}">💆</span>` : ''}
     </div>`;
   }
 
@@ -1025,7 +1027,7 @@ tr:last-child td{border-bottom:none;}
       return `<div class="cal-timeline-appt status-${b.status}" data-edit-cal="${b.id}"
         style="top:${top}px; height:${height}px; left:calc(${left}% + 2px); width:calc(${width}% - 4px);">
         <span class="t">${minToHHMM(start)} – ${minToHHMM(end)}</span>
-        <span class="c">${escapeHtml(b.client_name)}</span> <span class="s">${escapeHtml(labels)}</span>
+        <span class="c">${escapeHtml(b.client_name)}</span> <span class="s">${escapeHtml(labels)}</span>${b.massage_zone ? ` <span title="parenthèse ${ZONE_LABEL[b.massage_zone]||''}">💆</span>` : ''}
       </div>`;
     }).join('');
 
