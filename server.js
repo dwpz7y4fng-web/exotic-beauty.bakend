@@ -252,8 +252,9 @@ app.get('/admin', requireAdmin, (req, res) => {
 });
 
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
+  const zoneSelect = massageZoneReady ? 'b.massage_zone,' : 'null as massage_zone,';
   const { rows } = await pool.query(`
-    select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status, b.created_at,
+    select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status, b.created_at, ${zoneSelect}
       coalesce((
         select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes) order by s.label)
         from services s where s.id = any(b.service_ids)
@@ -809,6 +810,14 @@ app.post('/api/book', async (req, res) => {
   }
 
   await pool.query('update bookings set stripe_session_id = $1 where id = $2', [session.id, booking.id]);
+
+  // Parenthèse détente : on enregistre la zone choisie (si la colonne existe et la durée ≥ 30 min).
+  const zone = MASSAGE_ZONES.includes(req.body.massageZone) ? req.body.massageZone : null;
+  if (massageZoneReady && zone && totalMinutes > MASSAGE_MIN_DURATION) {
+    await pool.query('update bookings set massage_zone = $1 where id = $2', [zone, booking.id])
+      .catch(err => console.error('[parenthèse] enregistrement zone', err.message));
+  }
+
   res.json({ checkoutUrl: session.url });
 });
 
@@ -1047,6 +1056,18 @@ async function runCareSheets() {
   }
 }
 checkCareSchema().catch(err => console.error('[fiche] vérification du schéma', err.message));
+
+// La « parenthèse détente » : zone de massage choisie à la réservation (migration 004).
+const MASSAGE_ZONES = ['tempes', 'mains', 'epaules'];
+const MASSAGE_MIN_DURATION = 30; // proposée seulement pour les prestations de plus de 30 min
+let massageZoneReady = false;
+async function checkMassageZoneSchema() {
+  try {
+    const { rows } = await pool.query(`select 1 from information_schema.columns where table_name = 'bookings' and column_name = 'massage_zone'`);
+    massageZoneReady = rows.length > 0;
+  } catch { massageZoneReady = false; }
+}
+checkMassageZoneSchema().catch(err => console.error('[parenthèse] vérification du schéma', err.message));
 
 // Réservations avec leurs prestations (libellé, total, acompte, durée).
 function bookingSelect(where) {

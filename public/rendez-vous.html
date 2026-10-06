@@ -44,6 +44,17 @@
       <div class="r-duree" id="duree"></div>
     </div>
 
+    <div class="r-bloc" id="blocParenthese" hidden>
+      <div class="mono">✨ Offert — la parenthèse Exotic Beauty</div>
+      <div class="r-q">Pendant votre soin, on vous offre un petit massage détente. Vous préférez&nbsp;?</div>
+      <div class="r-opts" id="zoneOpts">
+        <button type="button" class="r-opt" data-zone="tempes">Tempes &amp; cuir chevelu</button>
+        <button type="button" class="r-opt" data-zone="mains">Mains</button>
+        <button type="button" class="r-opt" data-zone="epaules">Nuque &amp; épaules</button>
+        <button type="button" class="r-opt" data-zone="">Pas cette fois</button>
+      </div>
+    </div>
+
     <div class="r-prix" id="prix1"></div>
     <div class="r-pill"><span id="report1"></span></div>
   </div>
@@ -100,7 +111,7 @@
   var date = /^\d{4}-\d{2}-\d{2}$/.test(q.get('d') || '') ? q.get('d') : null;
   var heure = /^\d{2}:\d{2}$/.test(q.get('h') || '') ? q.get('h') : null;
   if (!f || !date || !heure) { location.replace('prestation.html'); return; }
-  var it = f.item, services = {}, on = {}, prev = null, dispoOk = true, envoi = false, verif = 0;
+  var it = f.item, services = {}, on = {}, prev = null, dispoOk = true, envoi = false, verif = 0, zone = null;
   var retour = 'prestation.html?c=' + f.cat + '&p=' + it.id;
   $('retour1').href = retour; $('modifier').href = retour;
 
@@ -143,6 +154,14 @@
     $('duree').textContent = 'Durée totale ' + U.duree(t.duree) + (dispoOk ? ' · ✓ créneau toujours disponible' : ' · ✕ trop long pour ce créneau : retirez un soin ou choisissez une autre heure (Modifier)');
     $('duree').classList.toggle('ko', !dispoOk);
 
+    // Parenthèse détente : proposée seulement pour les prestations de plus de 30 min.
+    var showP = t.duree > 30;
+    $('blocParenthese').hidden = !showP;
+    if (!showP) zone = null;
+    [].forEach.call(document.querySelectorAll('#zoneOpts .r-opt'), function (b) {
+      b.classList.toggle('on', zone !== null && b.getAttribute('data-zone') === zone);
+    });
+
     var lignes = [[it.name, s.price_cents]].concat(choisis().map(function (k) { return [EB.COMPLEMENTS[k], services[k].price_cents]; }));
     $('prix1').innerHTML = lignes.map(function (l) { return '<div><span>' + U.esc(l[0]) + '</span><span>' + U.euros(l[1]) + '</span></div>'; }).join('')
       + '<div class="b"><span>Total</span><span>' + U.euros(t.prix) + '</span></div>'
@@ -177,6 +196,7 @@
   });
   $('non').addEventListener('click', function () { prev = 'non'; on.depose = false; rendre(); verifier(); });
   $('oui').addEventListener('click', function () { prev = 'oui'; on.depose = true; rendre(); verifier(); });
+  $('zoneOpts').addEventListener('click', function (e) { var b = e.target.closest('[data-zone]'); if (!b) return; zone = b.getAttribute('data-zone'); rendre(); });
   $('versE2').addEventListener('click', function () { $('e1').hidden = true; $('e2').hidden = false; window.scrollTo(0, 0); });
   $('retour2').addEventListener('click', function () { $('e2').hidden = true; $('e1').hidden = false; window.scrollTo(0, 0); });
 
@@ -196,7 +216,7 @@
     $('err').hidden = true; envoi = true; $('payer').disabled = true; $('payer').textContent = 'Redirection vers le paiement…';
     try {
       var r = await fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel }) });
+        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel, massageZone: (zone && zone.length) ? zone : null }) });
       var data = await r.json();
       if (!r.ok) {
         $('err').textContent = r.status === 409 ? 'Ce créneau vient d\'être pris. Revenez au calendrier pour en choisir un autre.' : 'Une erreur est survenue : ' + (data.error || 'merci de réessayer.');
