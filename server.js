@@ -1092,7 +1092,7 @@ function isoShift(isoDate, days) {
 const DEFAULT_ACCESS_TEXT =
 `📍 Comment venir au studio
 
-Adresse : 722 route de la Chasse, quartier Rivage, Ducos
+Adresse : 722 route de la Chassaing, quartier Durivage, Ducos
 Le numéro 722 est effacé : repérez plutôt le n° 716, juste à côté.
 
 🚗 Stationnement

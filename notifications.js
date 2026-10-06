@@ -3,7 +3,7 @@
 // sur Railway : les messages sont alors seulement écrits dans les logs.
 
 const WHAPI_URL = (process.env.WHAPI_API_URL || 'https://gate.whapi.cloud').replace(/\/$/, '');
-const STUDIO = '722 route de la Chasse, quartier Rivage, Ducos (parking privé)';
+const STUDIO = '722 route de la Chassaing, quartier Durivage, Ducos (parking privé)';
 const STUDIO_MAPS = 'https://maps.app.goo.gl/3n1DRgjkgk2LMgx88'; // lien de partage Google Maps du studio
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
