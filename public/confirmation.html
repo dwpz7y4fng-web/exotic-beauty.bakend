@@ -92,6 +92,7 @@
     if (!b || !b.services.length) return;
     var principal = b.services.map(function (s) { return EB.trouver(s.id); }).filter(Boolean)[0];
     var t = b.services.reduce(function (a, s) { a.p += s.price_cents; a.a += s.deposit_cents; a.d += s.duration_minutes; return a; }, { p: 0, a: 0, d: 0 });
+    if (window.ebTrack) ebTrack('Purchase', { value: t.a / 100, currency: 'EUR' });
     var fin = U.hm(U.min(b.time) + t.d);
     var noms = b.services.map(function (s) { var f = EB.trouver(s.id); return f ? f.item.name : s.label; }).join(' + ');
     if (b.firstName) $('hello').textContent = ', ' + b.firstName;
@@ -114,5 +115,6 @@
   }).catch(function () {});
 })();
 </script>
+<script src="pixel.js"></script>
 </body>
 </html>
