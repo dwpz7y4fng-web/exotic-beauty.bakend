@@ -2,7 +2,7 @@
 // Le pixel ne se charge QU'APRÈS que la visiteuse ait cliqué « Accepter ».
 // Pour changer le pixel, modifier PIXEL_ID ci-dessous.
 (function () {
-  var PIXEL_ID = '1013734279643582';
+  var PIXEL_ID = '933967576455280';
   var KEY = 'eb_cookie_consent'; // 'yes' | 'no'
   var consent = null;
   try { consent = localStorage.getItem(KEY); } catch (e) {}
