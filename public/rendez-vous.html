@@ -223,6 +223,7 @@
         $('err').textContent = r.status === 409 ? 'Ce créneau vient d\'être pris. Revenez au calendrier pour en choisir un autre.' : 'Une erreur est survenue : ' + (data.error || 'merci de réessayer.');
         $('err').hidden = false; return;
       }
+      if (window.ebTrack) ebTrack('InitiateCheckout', { value: totaux().acompte / 100, currency: 'EUR' });
       location.href = data.checkoutUrl;
     } catch (e) {
       $('err').textContent = 'Une erreur est survenue. Vérifiez votre connexion et réessayez.'; $('err').hidden = false;
@@ -238,5 +239,6 @@
   });
 })();
 </script>
+<script src="pixel.js"></script>
 </body>
 </html>
