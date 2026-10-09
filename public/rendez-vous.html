@@ -25,7 +25,7 @@
       <div class="txt"><div class="n" id="nom"></div><div class="w" id="quand"></div><div class="mono">Studio · Ducos</div></div>
       <a id="modifier" href="prestation.html">Modifier</a>
     </div>
-    <div class="r-inclus"><div class="mono">✓ Déjà inclus</div><div>Diagnostic du regard · conseils d'entretien</div></div>
+    <div class="r-inclus"><div class="mono">✓ Déjà inclus</div><div id="inclusTxt">Diagnostic du regard · conseils d'entretien</div></div>
 
     <div class="r-bloc" id="question" hidden>
       <div class="mono">01 — Une petite question</div>
@@ -157,6 +157,7 @@
     // Parenthèse détente : proposée seulement pour les prestations de plus de 30 min.
     var showP = t.duree > 30;
     $('blocParenthese').hidden = !showP;
+    $('inclusTxt').textContent = 'Diagnostic du regard · conseils d\'entretien' + (showP ? ' · parenthèse détente offerte' : '');
     if (!showP) zone = null;
     [].forEach.call(document.querySelectorAll('#zoneOpts .r-opt'), function (b) {
       b.classList.toggle('on', zone !== null && b.getAttribute('data-zone') === zone);
