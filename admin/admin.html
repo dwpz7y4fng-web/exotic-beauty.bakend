@@ -233,7 +233,7 @@ tr:last-child td{border-bottom:none;}
   <header class="top">
     <div>
       <p class="sub">Exotic Beauty</p>
-      <h1>Réservations &amp; chiffre d'affaires</h1>
+      <h1>Planning &amp; chiffre d'affaires</h1>
     </div>
     <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
       <button type="button" class="btn btn-dark" id="newBtn">+ Nouveau rendez-vous</button>
@@ -242,13 +242,12 @@ tr:last-child td{border-bottom:none;}
   </header>
 
   <div class="tabs">
-    <button type="button" class="active" data-tab="bookings">Réservations</button>
-    <button type="button" data-tab="planning">Planning</button>
+    <button type="button" class="active" data-tab="planning">Planning</button>
     <button type="button" data-tab="clients">Clientes</button>
     <button type="button" data-tab="stats">Statistiques</button>
   </div>
 
-  <div id="tabBookings">
+  <div id="tabBookings" hidden>
     <div class="import-bar">
       <input type="file" id="planityFile" accept=".xlsx">
       <button type="button" class="btn btn-outline" id="planityImportBtn">Importer un export Planity (Détails RDV)</button>
@@ -287,7 +286,7 @@ tr:last-child td{border-bottom:none;}
     </div>
   </div>
 
-  <div id="tabPlanning" hidden>
+  <div id="tabPlanning">
     <div class="cal-nav">
       <div class="cal-nav-left">
         <button type="button" id="calPrev" class="cal-arrow-btn">←</button>
