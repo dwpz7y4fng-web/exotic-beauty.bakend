@@ -41,6 +41,7 @@ const SLOT_STEP_MINUTES = 30;     // on propose un début toutes les 30 min (9h0
 const BUFFER_MINUTES = 0;         // temps de battement entre deux clientes (ménage…)
 const BLOCKED_SLOT_MINUTES = 60;  // un créneau fermé dans l'admin bloque 1 h
 const DEFAULT_DURATION_MINUTES = 60;
+const MIN_LEAD_MINUTES = 6 * 60; // réservation en ligne : au moins 6 h avant le rendez-vous
 
 function timeToMinutes(t) { const [h, m] = String(t).slice(0, 5).split(':').map(Number); return h * 60 + m; }
 function minutesToTime(n) { return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0'); }
@@ -50,6 +51,12 @@ function nowInMartinique() {
   new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
     .formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
   return { date: `${p.year}-${p.month}-${p.day}`, minutes: Number(p.hour) * 60 + Number(p.minute) };
+}
+// Minutes entre maintenant (heure Martinique) et le début d'un créneau donné.
+function slotLeadMinutes(date, time) {
+  const now = nowInMartinique();
+  const dayDiff = Math.round((Date.parse(date + 'T00:00:00Z') - Date.parse(now.date + 'T00:00:00Z')) / 86400000);
+  return dayDiff * 1440 + timeToMinutes(time) - now.minutes;
 }
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const HH_MM = /^\d{2}:\d{2}$/;
@@ -61,6 +68,7 @@ async function computeAvailableTimes(db, date, durationMinutes) {
   const ranges = SCHEDULE[dayOfWeek(date)] || [];
   const now = nowInMartinique();
   if (!ranges.length || date < now.date) return [];
+  const dayDiff = Math.round((Date.parse(date + 'T00:00:00Z') - Date.parse(now.date + 'T00:00:00Z')) / 86400000);
 
   const [bookedRes, blockedRes] = await Promise.all([
     db.query(
@@ -86,7 +94,7 @@ async function computeAvailableTimes(db, date, durationMinutes) {
   for (const [open, close] of ranges) {
     const rangeStart = timeToMinutes(open), rangeEnd = timeToMinutes(close);
     for (let t = rangeStart; t + durationMinutes <= rangeEnd; t += SLOT_STEP_MINUTES) {
-      if (date === now.date && t <= now.minutes) continue; // déjà passé
+      if (dayDiff * 1440 + t - now.minutes < MIN_LEAD_MINUTES) continue; // trop proche : au moins 6 h avant
       const end = t + durationMinutes + BUFFER_MINUTES;
       if (busy.some(([bStart, bEnd]) => t < bEnd && bStart < end)) continue;
       available.push(minutesToTime(t));
@@ -745,6 +753,10 @@ app.post('/api/book', async (req, res) => {
   const phoneE164 = notif.toE164(phone);
   if (!phoneE164) return res.status(400).json({ error: 'numéro de téléphone invalide (ex. 0696 12 34 56)' });
   if (new Set(serviceIds).size !== serviceIds.length) return res.status(400).json({ error: 'prestation en double' });
+
+  if (slotLeadMinutes(date, time) < MIN_LEAD_MINUTES) {
+    return res.status(409).json({ error: 'Ce créneau n\'est plus réservable en ligne (moins de 6 h avant). Écrivez-moi sur WhatsApp pour une demande de dernière minute.' });
+  }
 
   const svcRes = await pool.query('select * from services where id = any($1)', [serviceIds]);
   if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
