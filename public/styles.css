@@ -16,7 +16,8 @@
   --off: #C9D2D6;
   --danger: #A33A3A;
   --ok: #2F6B4F;
-  --sans: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+  --sans: "Figtree", system-ui, -apple-system, sans-serif;
+  --titre: "Instrument Serif", Georgia, "Times New Roman", serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -38,8 +39,8 @@ section[id] { scroll-margin-top: 90px; }
   font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
   text-transform: uppercase; color: var(--gris-label);
 }
-h1, h2 { margin: 0; text-wrap: pretty; }
-h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 600; line-height: 1.08; letter-spacing: -.025em; }
+h1, h2 { margin: 0; text-wrap: balance; font-family: var(--titre); font-weight: 400; letter-spacing: -.01em; }
+h2 { font-size: clamp(32px, 4.2vw, 46px); line-height: 1.05; }
 h2 span, h1 span { color: var(--gris-titre); }
 .h2-sm { font-size: clamp(26px, 3.4vw, 38px); line-height: 1.1; }
 .lead { margin: 0; font-size: 15px; line-height: 1.6; color: var(--texte); max-width: 440px; }
@@ -107,7 +108,7 @@ body.scrolled .hdr-btn, .hdr.solid .hdr-btn { background: var(--ardoise); color:
 .hero-note { font-size: 17px; color: rgba(255,255,255,.9); }
 .hero-note strong { font-size: 20px; font-weight: 600; color: var(--blanc); }
 .hero-note a { color: var(--blanc); text-decoration: underline; }
-.hero h1 { font-size: clamp(42px, 7vw, 76px); font-weight: 500; line-height: 1.02; letter-spacing: -.035em; }
+.hero h1 { font-size: clamp(44px, 7.5vw, 82px); font-weight: 400; line-height: 1.0; letter-spacing: -.02em; }
 .hero h1 span { color: rgba(255,255,255,.6); }
 .hero p { margin: 0; font-size: 17px; line-height: 1.5; color: rgba(255,255,255,.86); max-width: 460px; }
 .hero .btn { margin-top: 8px; max-width: 360px; }
@@ -210,7 +211,7 @@ body.scrolled .hdr-btn, .hdr.solid .hdr-btn { background: var(--ardoise); color:
 /* ---------- Footer ---------- */
 .pied { background: var(--noir); color: var(--blanc); }
 .pied-in { max-width: 1180px; margin: 0 auto; padding: 56px 24px 130px; display: flex; flex-direction: column; gap: 20px; }
-.pied-titre { font-size: clamp(36px, 5vw, 56px); font-weight: 600; line-height: 1.02; letter-spacing: -.03em; }
+.pied-titre { font-family: var(--titre); font-size: clamp(38px, 5.2vw, 60px); font-weight: 400; line-height: 1.0; letter-spacing: -.015em; }
 .pied-titre span { color: rgba(255,255,255,.5); }
 .pied-adr { font-size: 15px; color: rgba(255,255,255,.78); }
 .pied-nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }

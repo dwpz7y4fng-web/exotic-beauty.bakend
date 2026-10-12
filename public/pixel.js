@@ -37,7 +37,7 @@
   // Aucun choix fait → on affiche le bandeau.
   function showBanner() {
     if (document.getElementById('eb-cookie')) return;
-    var css = '#eb-cookie{position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;max-width:720px;margin:0 auto;background:#1E2B31;color:#F4EFE8;border-radius:14px;padding:15px 18px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between;font-size:14px;line-height:1.45}'
+    var css = '#eb-cookie{position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;max-width:720px;margin:0 auto;background:#1E2B31;color:#F4EFE8;border-radius:14px;padding:15px 18px;box-shadow:0 10px 30px rgba(0,0,0,.28);font-family:"Figtree",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between;font-size:14px;line-height:1.45}'
       + '#eb-cookie p{margin:0;flex:1;min-width:220px}'
       + '#eb-cookie .eb-btns{display:flex;gap:10px;flex:none}'
       + '#eb-cookie button{border:0;border-radius:999px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}'
