@@ -1218,8 +1218,9 @@ cron.schedule('0 10 * * *', () => {
   runReviewRequests().catch(logErr('avis J+1'));
   runRefillReminders().catch(logErr('remplissage J+18'));
 }, { timezone: TIMEZONE });
-// Fiches de conseils post-séance : toutes les 15 min (décalé de 5 min des autres envois).
-cron.schedule('5,20,35,50 * * * *', () => runCareSheets().catch(logErr('fiches conseils')), { timezone: TIMEZONE });
+// Fiches de conseils post-séance : désactivées (non utilisées par l'institut).
+// Pour les réactiver, décommenter la ligne ci-dessous et remettre l'onglet dans l'admin.
+// cron.schedule('5,20,35,50 * * * *', () => runCareSheets().catch(logErr('fiches conseils')), { timezone: TIMEZONE });
 // Filet de sécurité : si une confirmation a échoué (Whapi indisponible…), on réessaie toutes les 15 min.
 cron.schedule('*/15 * * * *', async () => {
   if (!automationReady) await checkAutomationSchema().catch(logErr('vérification du schéma'));

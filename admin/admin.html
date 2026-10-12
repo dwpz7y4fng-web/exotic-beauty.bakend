@@ -84,6 +84,10 @@ tr:last-child td{border-bottom:none;}
 .money-recap > div:last-child{border-right:none;}
 .money-recap span{display:block; font-size:11px; letter-spacing:.03em; color:var(--brun); text-transform:uppercase; margin-bottom:4px;}
 .money-recap strong{font-size:16px; color:var(--noir); font-weight:600;}
+.chosen-services{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+.chosen-chip{display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--creme); border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:14px; color:var(--noir);}
+.chosen-chip button{border:none; background:none; color:var(--err); cursor:pointer; font-size:20px; line-height:1; padding:0 4px; font-family:inherit;}
+.chosen-empty{font-size:13px; color:var(--gris); padding:4px 0;}
 .stats-controls{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:18px;}
 .seg{display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden;}
 .seg button{border:none; background:var(--blanc); padding:8px 15px; font-size:13px; cursor:pointer; font-family:inherit; color:var(--texte);}
@@ -241,8 +245,6 @@ tr:last-child td{border-bottom:none;}
     <button type="button" class="active" data-tab="bookings">Réservations</button>
     <button type="button" data-tab="planning">Planning</button>
     <button type="button" data-tab="clients">Clientes</button>
-    <button type="button" data-tab="caresheets">Fiches conseils</button>
-    <button type="button" data-tab="reminder">Rappel &amp; accès</button>
     <button type="button" data-tab="stats">Statistiques</button>
   </div>
 
@@ -445,7 +447,11 @@ tr:last-child td{border-bottom:none;}
       <input type="hidden" id="fId">
       <div class="form-row">
         <label>Prestations</label>
-        <div class="service-grid" id="serviceGrid"></div>
+        <div style="display:flex; gap:8px; align-items:stretch;">
+          <select id="serviceSelect" style="flex:1; min-width:0; padding:10px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:14px; background:var(--blanc); color:var(--noir);"></select>
+          <button type="button" class="btn btn-outline" id="serviceAdd">Ajouter</button>
+        </div>
+        <div class="chosen-services" id="chosenServices"></div>
       </div>
       <div class="money-recap" id="moneyRecap">
         <div><span>Total</span><strong id="mTotal">—</strong></div>
@@ -689,29 +695,50 @@ tr:last-child td{border-bottom:none;}
     }catch(e){ alert('Impossible de renvoyer la fiche — merci de réessayer.'); }
   }
 
+  let modalServiceIds = [];
   function buildServiceGrid(selectedIds){
-    const grid = document.getElementById('serviceGrid');
-    grid.innerHTML = services.map(s => `
-      <label>
-        <input type="checkbox" value="${s.id}" ${selectedIds && selectedIds.includes(s.id) ? 'checked' : ''}>
-        ${escapeHtml(s.label)}
-      </label>
-    `).join('');
+    modalServiceIds = (selectedIds || []).slice();
+    const sel = document.getElementById('serviceSelect');
+    sel.innerHTML = '<option value="">Choisir une prestation…</option>' + services.map(s => `<option value="${s.id}">${escapeHtml(s.label)}</option>`).join('');
+    sel.value = '';
+    renderChosenServices();
+  }
+  function renderChosenServices(){
+    const box = document.getElementById('chosenServices');
+    const byId = {};
+    services.forEach(s => { byId[s.id] = s; });
+    if(!modalServiceIds.length){
+      box.innerHTML = '<div class="chosen-empty">Aucune prestation choisie.</div>';
+    } else {
+      box.innerHTML = modalServiceIds.map(id => {
+        const s = byId[id];
+        return `<div class="chosen-chip"><span>${s ? escapeHtml(s.label) : id}</span><button type="button" data-remove-service="${id}" aria-label="Retirer">×</button></div>`;
+      }).join('');
+    }
     updateMoneyRecap();
   }
   function updateMoneyRecap(){
     const byId = {};
     services.forEach(s => { byId[s.id] = s; });
     let total = 0, deposit = 0;
-    document.querySelectorAll('#serviceGrid input:checked').forEach(el => {
-      const s = byId[el.value];
+    modalServiceIds.forEach(id => {
+      const s = byId[id];
       if(s){ total += s.price_cents; deposit += s.deposit_cents; }
     });
     document.getElementById('mTotal').textContent = euros(total);
     document.getElementById('mDeposit').textContent = euros(deposit);
     document.getElementById('mRest').textContent = euros(Math.max(0, total - deposit));
   }
-  document.getElementById('serviceGrid').addEventListener('change', updateMoneyRecap);
+  document.getElementById('serviceAdd').addEventListener('click', () => {
+    const sel = document.getElementById('serviceSelect');
+    const v = sel.value;
+    if(v && !modalServiceIds.includes(v)){ modalServiceIds.push(v); renderChosenServices(); }
+    sel.value = '';
+  });
+  document.getElementById('chosenServices').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove-service]');
+    if(btn){ modalServiceIds = modalServiceIds.filter(id => id !== btn.dataset.removeService); renderChosenServices(); }
+  });
 
   function openModal(booking, prefill){
     editingId = booking ? booking.id : null;
@@ -740,7 +767,7 @@ tr:last-child td{border-bottom:none;}
     const msg = document.getElementById('modalMsg');
     msg.textContent = '';
 
-    const serviceIds = [...document.querySelectorAll('#serviceGrid input:checked')].map(el => el.value);
+    const serviceIds = modalServiceIds.slice();
     if(serviceIds.length === 0){
       msg.textContent = 'Choisissez au moins une prestation.';
       return;
