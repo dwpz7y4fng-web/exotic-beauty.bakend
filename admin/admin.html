@@ -79,6 +79,39 @@ tr:last-child td{border-bottom:none;}
 .tabs{display:flex; gap:6px; margin:24px 0 26px; border-bottom:1px solid var(--line-2);}
 .tabs button{padding:10px 4px; margin-right:22px; border:none; background:none; font-size:14px; color:var(--gris); cursor:pointer; font-family:inherit; border-bottom:2px solid transparent; margin-bottom:-1px;}
 .tabs button.active{color:var(--noir); border-bottom-color:var(--noir);}
+.money-recap{display:flex; border:1px solid var(--line); border-radius:8px; overflow:hidden; margin:0 0 16px; background:var(--creme);}
+.money-recap > div{flex:1; padding:10px 6px; text-align:center; border-right:1px solid var(--line);}
+.money-recap > div:last-child{border-right:none;}
+.money-recap span{display:block; font-size:11px; letter-spacing:.03em; color:var(--brun); text-transform:uppercase; margin-bottom:4px;}
+.money-recap strong{font-size:16px; color:var(--noir); font-weight:600;}
+.stats-controls{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:18px;}
+.seg{display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden;}
+.seg button{border:none; background:var(--blanc); padding:8px 15px; font-size:13px; cursor:pointer; font-family:inherit; color:var(--texte);}
+.seg button.active{background:var(--noir); color:var(--creme);}
+.stats-range{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.stats-range input{padding:7px 8px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:13px; color:var(--noir);}
+.stats-period{font-size:13px; color:var(--brun); margin-bottom:14px;}
+.kpi-row{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:26px;}
+.kpi{background:var(--blanc); border:1px solid var(--line-2); border-radius:8px; padding:14px 16px;}
+.kpi .k{font-size:12px; color:var(--gris); margin-bottom:6px;}
+.kpi .v{font-size:22px; font-weight:600; color:var(--noir);}
+.stats-section-title{font-size:14px; font-weight:600; color:var(--noir); margin:0 0 14px;}
+.barchart{display:flex; align-items:flex-end; gap:6px; height:170px;}
+.bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; min-width:0;}
+.bar-col .bval{font-size:10px; color:var(--gris); margin-bottom:4px; white-space:nowrap;}
+.bar-col .bar{width:62%; max-width:40px; background:var(--brun); border-radius:4px 4px 0 0; min-height:2px;}
+.bar-col.current .bar{background:var(--noir);}
+.bar-labels{display:flex; gap:6px; margin-top:6px;}
+.bar-labels > div{flex:1; text-align:center; font-size:10.5px; color:var(--gris); min-width:0;}
+.top-list{display:flex; flex-direction:column; gap:14px;}
+.top-head{display:flex; justify-content:space-between; gap:10px; font-size:13px; margin-bottom:6px;}
+.top-head .nm{color:var(--noir);}
+.top-head .pc{color:var(--brun); font-weight:600; white-space:nowrap;}
+.top-track{height:8px; background:var(--line); border-radius:999px; overflow:hidden;}
+.top-track .fill{height:100%; background:var(--brun); border-radius:999px;}
+.stats-empty{color:var(--gris); font-size:14px; padding:18px 0;}
+.stats-note{font-size:12px; color:var(--gris); margin-top:24px;}
+@media(min-width:720px){ .kpi-row{grid-template-columns:repeat(4,1fr);} }
 .import-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:20px;}
 .import-bar input[type="file"]{font-size:13px;}
 .import-msg{font-size:13px; color:var(--texte);}
@@ -210,6 +243,7 @@ tr:last-child td{border-bottom:none;}
     <button type="button" data-tab="clients">Clientes</button>
     <button type="button" data-tab="caresheets">Fiches conseils</button>
     <button type="button" data-tab="reminder">Rappel &amp; accès</button>
+    <button type="button" data-tab="stats">Statistiques</button>
   </div>
 
   <div id="tabBookings">
@@ -374,6 +408,34 @@ tr:last-child td{border-bottom:none;}
       <div class="care-test-msg" id="reminderTestMsg"></div>
     </div>
   </div>
+
+  <div id="tabStats" hidden>
+    <div class="stats-controls">
+      <div class="seg" id="statsSeg">
+        <button type="button" data-mode="week">Cette semaine</button>
+        <button type="button" data-mode="month" class="active">Ce mois</button>
+        <button type="button" data-mode="custom">Personnalisé</button>
+      </div>
+      <div class="stats-range" id="statsRange" hidden>
+        <span style="font-size:13px; color:var(--gris);">Du</span>
+        <input type="date" id="statsFrom">
+        <span style="font-size:13px; color:var(--gris);">au</span>
+        <input type="date" id="statsTo">
+        <button type="button" class="btn btn-dark" id="statsApply">Voir</button>
+      </div>
+    </div>
+    <div class="stats-period" id="statsPeriod"></div>
+    <div class="kpi-row" id="statsKpis"></div>
+    <div id="statsChartWrap">
+      <div class="stats-section-title" id="statsChartTitle">Chiffre d'affaires</div>
+      <div id="statsChart"></div>
+    </div>
+    <div style="margin-top:28px;">
+      <div class="stats-section-title">Prestations les plus demandées</div>
+      <div id="statsTop"></div>
+    </div>
+    <p class="stats-note">Basé sur les rendez-vous payés et confirmés (hors annulations et absences). Le taux d'occupation compare le temps réservé aux heures d'ouverture de la période.</p>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop" hidden>
@@ -384,6 +446,11 @@ tr:last-child td{border-bottom:none;}
       <div class="form-row">
         <label>Prestations</label>
         <div class="service-grid" id="serviceGrid"></div>
+      </div>
+      <div class="money-recap" id="moneyRecap">
+        <div><span>Total</span><strong id="mTotal">—</strong></div>
+        <div><span>Acompte</span><strong id="mDeposit">—</strong></div>
+        <div><span>Reste à régler</span><strong id="mRest">—</strong></div>
       </div>
       <div class="form-cols">
         <div class="form-row">
@@ -630,7 +697,21 @@ tr:last-child td{border-bottom:none;}
         ${escapeHtml(s.label)}
       </label>
     `).join('');
+    updateMoneyRecap();
   }
+  function updateMoneyRecap(){
+    const byId = {};
+    services.forEach(s => { byId[s.id] = s; });
+    let total = 0, deposit = 0;
+    document.querySelectorAll('#serviceGrid input:checked').forEach(el => {
+      const s = byId[el.value];
+      if(s){ total += s.price_cents; deposit += s.deposit_cents; }
+    });
+    document.getElementById('mTotal').textContent = euros(total);
+    document.getElementById('mDeposit').textContent = euros(deposit);
+    document.getElementById('mRest').textContent = euros(Math.max(0, total - deposit));
+  }
+  document.getElementById('serviceGrid').addEventListener('change', updateMoneyRecap);
 
   function openModal(booking, prefill){
     editingId = booking ? booking.id : null;
@@ -894,12 +975,125 @@ tr:last-child td{border-bottom:none;}
       document.getElementById('tabClients').hidden = tab !== 'clients';
       document.getElementById('tabCareSheets').hidden = tab !== 'caresheets';
       document.getElementById('tabReminder').hidden = tab !== 'reminder';
+      document.getElementById('tabStats').hidden = tab !== 'stats';
       if(tab === 'clients' && clients.length === 0) loadClients();
       if(tab === 'planning') renderCalendar();
       if(tab === 'caresheets') loadCareSheets();
       if(tab === 'reminder') loadReminder();
+      if(tab === 'stats') renderStats();
     });
   });
+
+  // ---- Statistiques ----
+  let statsMode = 'month';
+  const STATS_SCHEDULE = {
+    0: [], 1: [['09:00','12:00'],['12:30','17:00']], 2: [['09:00','12:00'],['12:30','17:00']],
+    3: [['09:00','10:30'],['12:00','14:30']], 4: [['09:00','12:00'],['12:30','17:00']],
+    5: [['09:00','12:00'],['12:30','17:00']], 6: [['09:00','12:00'],['12:30','18:00']]
+  };
+  function statTimeToMin(t){ const p = t.split(':'); return Number(p[0]) * 60 + Number(p[1]); }
+  function openMinutesOnDate(iso){
+    const dow = new Date(iso + 'T12:00:00Z').getUTCDay();
+    return (STATS_SCHEDULE[dow] || []).reduce((s, r) => s + (statTimeToMin(r[1]) - statTimeToMin(r[0])), 0);
+  }
+  function statEligible(b){ return b.status === 'paid' || b.status === 'confirmed'; }
+  function addDaysIso(iso, n){ const d = new Date(iso + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+  function monthStartIso(y, m){ const d = new Date(y, m, 1); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; }
+  function eurosShort(cents){ return Math.round(cents / 100).toLocaleString('fr-FR') + ' €'; }
+
+  function statsForRange(fromIso, toIso){
+    const bs = bookings.filter(b => statEligible(b) && b.slot_date >= fromIso && b.slot_date < toIso);
+    let ca = 0, minutes = 0; const byService = {};
+    bs.forEach(b => b.services.forEach(s => {
+      ca += s.price_cents; minutes += s.duration_minutes;
+      if(!byService[s.label]) byService[s.label] = { count: 0, ca: 0 };
+      byService[s.label].count++; byService[s.label].ca += s.price_cents;
+    }));
+    let openMin = 0;
+    for(let iso = fromIso; iso < toIso; iso = addDaysIso(iso, 1)) openMin += openMinutesOnDate(iso);
+    return { count: bs.length, ca, minutes, openMin, byService };
+  }
+
+  function renderStats(){
+    document.getElementById('statsChartWrap').hidden = (statsMode === 'custom');
+    const today = new Date();
+    let cur, periodLabel = '';
+    if(statsMode === 'custom'){
+      const f = document.getElementById('statsFrom').value, t = document.getElementById('statsTo').value;
+      if(!f || !t){
+        document.getElementById('statsPeriod').textContent = 'Choisis une date de début et de fin, puis clique « Voir ».';
+        document.getElementById('statsKpis').innerHTML = '';
+        document.getElementById('statsTop').innerHTML = '';
+        return;
+      }
+      cur = statsForRange(f, addDaysIso(t, 1));
+      periodLabel = 'du ' + formatDate(f) + ' au ' + formatDate(t);
+    } else if(statsMode === 'week'){
+      const ws = toIso(startOfWeek(today));
+      cur = statsForRange(ws, addDaysIso(ws, 7));
+      periodLabel = 'semaine du ' + formatDate(ws);
+    } else {
+      const ms = monthStartIso(today.getFullYear(), today.getMonth());
+      const nm = monthStartIso(today.getFullYear(), today.getMonth() + 1);
+      cur = statsForRange(ms, nm);
+      periodLabel = MOIS_LONG[today.getMonth()] + ' ' + today.getFullYear();
+    }
+    document.getElementById('statsPeriod').textContent = 'Période : ' + periodLabel;
+
+    const occ = cur.openMin > 0 ? Math.round(cur.minutes / cur.openMin * 100) : null;
+    const panier = cur.count > 0 ? Math.round(cur.ca / cur.count) : 0;
+    document.getElementById('statsKpis').innerHTML =
+      `<div class="kpi"><div class="k">Chiffre d'affaires</div><div class="v">${euros(cur.ca)}</div></div>`
+      + `<div class="kpi"><div class="k">Rendez-vous</div><div class="v">${cur.count}</div></div>`
+      + `<div class="kpi"><div class="k">Panier moyen</div><div class="v">${cur.count ? euros(panier) : '—'}</div></div>`
+      + `<div class="kpi"><div class="k">Taux d'occupation</div><div class="v">${occ === null ? '—' : occ + ' %'}</div></div>`;
+
+    if(statsMode !== 'custom') renderStatsChart();
+    renderStatsTop(cur.byService);
+  }
+
+  function renderStatsChart(){
+    const today = new Date();
+    const cols = [];
+    if(statsMode === 'week'){
+      document.getElementById('statsChartTitle').textContent = "Chiffre d'affaires — 8 dernières semaines";
+      for(let i = 7; i >= 0; i--){
+        const ws = toIso(addDays(startOfWeek(today), -i * 7));
+        cols.push({ label: ws.slice(8, 10) + '/' + ws.slice(5, 7), ca: statsForRange(ws, addDaysIso(ws, 7)).ca, current: i === 0 });
+      }
+    } else {
+      document.getElementById('statsChartTitle').textContent = "Chiffre d'affaires — 6 derniers mois";
+      for(let i = 5; i >= 0; i--){
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const ms = monthStartIso(d.getFullYear(), d.getMonth());
+        const nm = monthStartIso(d.getFullYear(), d.getMonth() + 1);
+        cols.push({ label: MOIS_LONG[d.getMonth()].slice(0, 3), ca: statsForRange(ms, nm).ca, current: i === 0 });
+      }
+    }
+    const max = Math.max(1, ...cols.map(c => c.ca)), H = 150;
+    const bars = cols.map(c => `<div class="bar-col${c.current ? ' current' : ''}"><div class="bval">${c.ca ? eurosShort(c.ca) : ''}</div><div class="bar" style="height:${Math.max(2, Math.round(c.ca / max * H))}px" title="${c.label} : ${euros(c.ca)}"></div></div>`).join('');
+    const labels = cols.map(c => `<div>${c.label}</div>`).join('');
+    document.getElementById('statsChart').innerHTML = `<div class="barchart">${bars}</div><div class="bar-labels">${labels}</div>`;
+  }
+
+  function renderStatsTop(byService){
+    const arr = Object.keys(byService).map(label => ({ label, count: byService[label].count })).sort((a, b) => b.count - a.count);
+    const total = arr.reduce((s, x) => s + x.count, 0);
+    const el = document.getElementById('statsTop');
+    if(!total){ el.innerHTML = '<div class="stats-empty">Aucun rendez-vous sur cette période.</div>'; return; }
+    el.innerHTML = '<div class="top-list">' + arr.slice(0, 8).map(x => {
+      const pc = Math.round(x.count / total * 100);
+      return `<div class="top-row"><div class="top-head"><span class="nm">${escapeHtml(x.label)}</span><span class="pc">${pc}% · ${x.count}</span></div><div class="top-track"><div class="fill" style="width:${pc}%"></div></div></div>`;
+    }).join('') + '</div>';
+  }
+
+  document.querySelectorAll('#statsSeg button').forEach(b => b.addEventListener('click', () => {
+    statsMode = b.dataset.mode;
+    document.querySelectorAll('#statsSeg button').forEach(x => x.classList.toggle('active', x === b));
+    document.getElementById('statsRange').hidden = statsMode !== 'custom';
+    renderStats();
+  }));
+  document.getElementById('statsApply').addEventListener('click', renderStats);
 
   // ---- Planning (jour / semaine / mois) ----
   let calView = 'week';
