@@ -132,7 +132,7 @@ tr:last-child td{border-bottom:none;}
 .cal-timeline{position:relative; display:flex; background:var(--blanc); border:1px solid var(--line-2); border-radius:6px; overflow:hidden;}
 .cal-timeline-hours{width:64px; flex-shrink:0; border-right:1px solid var(--line-2); position:relative;}
 .cal-hour-label{position:absolute; left:0; right:0; padding:0 10px; font-size:12px; color:var(--gris); transform:translateY(-50%);}
-.cal-timeline-grid{position:relative; flex:1;}
+.cal-timeline-grid{position:relative; flex:1; cursor:cell;}
 .cal-hour-line{position:absolute; left:0; right:0; border-top:1px solid var(--line-2); z-index:1;}
 .cal-timeline-appt{position:absolute; border-radius:5px; border-left:4px solid var(--brun); background:#DCC7A8; color:var(--noir); padding:6px 10px; font-size:12px; line-height:1.4; overflow:hidden; cursor:pointer; box-sizing:border-box; z-index:2;}
 .cal-timeline-appt.status-paid{border-left-color:#2E6B22; background:#B9DDAE;}
@@ -155,7 +155,7 @@ tr:last-child td{border-bottom:none;}
 .cal-week-daycol-head{height:36px; display:flex; align-items:center; justify-content:center; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; color:var(--gris); border-bottom:1px solid var(--line-2); text-align:center;}
 .cal-week-daycol-head.today{color:var(--brun); font-weight:500;}
 .cal-week-daycol-head.day-closed{color:var(--err);}
-.cal-week-daycol-grid{position:relative;}
+.cal-week-daycol-grid{position:relative; cursor:cell;}
 .cal-timeline-appt.compact{padding:3px 6px; font-size:10.5px; line-height:1.25;}
 .cal-timeline-appt.compact .t{display:none;}
 @media(max-width:900px){ .cal-week-daycol{min-width:90px;} }
@@ -632,13 +632,13 @@ tr:last-child td{border-bottom:none;}
     `).join('');
   }
 
-  function openModal(booking){
+  function openModal(booking, prefill){
     editingId = booking ? booking.id : null;
     document.getElementById('modalTitle').textContent = booking ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous';
     document.getElementById('modalMsg').textContent = '';
     buildServiceGrid(booking ? booking.services.map(s => s.id) : []);
-    document.getElementById('fDate').value = booking ? booking.slot_date : '';
-    document.getElementById('fTime').value = booking ? booking.slot_time.slice(0,5) : '';
+    document.getElementById('fDate').value = booking ? booking.slot_date : ((prefill && prefill.date) || '');
+    document.getElementById('fTime').value = booking ? booking.slot_time.slice(0,5) : ((prefill && prefill.time) || '');
     document.getElementById('fName').value = booking ? booking.client_name : '';
     document.getElementById('fPhone').value = booking ? booking.client_phone : '';
     document.getElementById('fStatus').value = booking ? booking.status : 'confirmed';
@@ -1039,7 +1039,7 @@ tr:last-child td{border-bottom:none;}
       ${closedBanner}
       <div class="cal-timeline" style="height:${totalHeight}px;">
         <div class="cal-timeline-hours" style="height:${totalHeight}px;">${hourLabels.join('')}</div>
-        <div class="cal-timeline-grid" style="height:${totalHeight}px;">
+        <div class="cal-timeline-grid" style="height:${totalHeight}px;" data-grid-add data-iso="${iso}" data-range-start="${rangeStart}">
           ${offHoursBlocks.join('')}
           ${hourLines.join('')}
           ${apptEls}
@@ -1113,7 +1113,7 @@ tr:last-child td{border-bottom:none;}
 
       return `<div class="cal-week-daycol">
         <div class="cal-week-daycol-head ${isToday ? 'today' : ''} ${dayClosed ? 'day-closed' : ''}">${DOW_SHORT[d.getDay()]} ${d.getDate()}${dayClosed ? ' · Fermé' : ''}</div>
-        <div class="cal-week-daycol-grid" style="height:${totalHeight}px;">
+        <div class="cal-week-daycol-grid" style="height:${totalHeight}px;" data-grid-add data-iso="${iso}" data-range-start="${rangeStart}">
           ${offHoursBlocks.join('')}
           ${hourLines.join('')}
           ${apptEls}
@@ -1187,6 +1187,16 @@ tr:last-child td{border-bottom:none;}
   document.getElementById('calBody').addEventListener('click', (e) => {
     const appt = e.target.closest('[data-edit-cal]');
     if(appt){ openModal(bookings.find(b => b.id === appt.dataset.editCal)); return; }
+    const grid = e.target.closest('[data-grid-add]');
+    if(grid){
+      const iso = grid.dataset.iso;
+      const gRangeStart = Number(grid.dataset.rangeStart);
+      const y = e.clientY - grid.getBoundingClientRect().top;
+      let min = Math.round(((y - LABEL_PAD) / PX_PER_MIN + gRangeStart) / 30) * 30; // arrondi au 1/2 h
+      if(min < gRangeStart) min = gRangeStart;
+      openModal(null, { date: iso, time: minToHHMM(min) });
+      return;
+    }
     const cell = e.target.closest('.cal-month-cell');
     if(cell){ calDate = new Date(cell.dataset.day + 'T00:00:00'); calView = 'day';
       document.querySelectorAll('.cal-view-switch button').forEach(b => b.classList.toggle('active', b.dataset.calview === 'day'));
