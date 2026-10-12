@@ -639,6 +639,11 @@ app.post('/api/admin/bookings/import-planity', requireAdmin, upload.single('file
   res.json({ imported, conflicts, skipped, unmatched: [...unmatched] });
 });
 
+// Manifeste de l'appli « Exotic Beauty » (écran d'accueil) — servi avec le bon type.
+app.get('/manifest.webmanifest', (req, res) => {
+  res.type('application/manifest+json');
+  res.sendFile(path.join(__dirname, 'public', 'manifest.webmanifest'));
+});
 app.use(express.static('public'));
 
 app.get('/api/services', async (req, res) => {
