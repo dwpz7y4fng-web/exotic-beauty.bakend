@@ -132,6 +132,20 @@ const textes = {
     `Je reste dispo pour toute question, répondez simplement à ce message.\n` +
     `À très vite ! Malorie — Exotic Beauty`,
 
+  // Confirmation d'un rendez-vous ajouté à la main par l'institut (sans paiement en ligne).
+  confirmationManuelle: (b, ics) =>
+    `Hello ${prenom(b.client_name)} 🌿\n\n` +
+    `Votre rendez-vous chez Exotic Beauty est confirmé ✅\n\n` +
+    `📋 ${b.label}\n` +
+    `📅 ${dateLongue(b.date)} à ${heure(b.time)} (≈ ${b.duration} min)\n` +
+    `📍 ${STUDIO}\n` +
+    `🧭 Itinéraire : ${STUDIO_MAPS}\n` +
+    (ics ? `➕ Ajouter à mon agenda : ${ics}\n` : '') +
+    `\nMontant : ${euros(b.total)} à régler au studio.\n` +
+    `Pensez à venir sans maquillage sur la zone traitée 😉\n\n` +
+    `Je reste dispo pour toute question, répondez simplement à ce message.\n` +
+    `À très vite ! Malorie — Exotic Beauty`,
+
   proprietaire: (b) =>
     `🗓️ Nouvelle réservation\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
     `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nAcompte payé : ${euros(b.deposit)} · reste : ${euros(b.total - b.deposit)}`,

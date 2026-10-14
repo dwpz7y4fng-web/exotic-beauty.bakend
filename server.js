@@ -288,19 +288,35 @@ app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
   const svcRes = await pool.query('select id from services where id = any($1)', [serviceIds]);
   if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
 
+  const phoneE164 = notif.toE164(phone);
   try {
-    const insertRes = await pool.query(
-      `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, status)
-       values ($1, $2, $3, $4, $5, $6) returning id`,
-      [serviceIds, date, time, name, phone, bookingStatus]
-    );
-    res.status(201).json({ id: insertRes.rows[0].id });
+    const insertRes = (automationReady && phoneE164)
+      ? await pool.query(
+        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, client_phone_e164, status)
+         values ($1, $2, $3, $4, $5, $6, $7) returning id`,
+        [serviceIds, date, time, name, phone, phoneE164, bookingStatus])
+      : await pool.query(
+        `insert into bookings (service_ids, slot_date, slot_time, client_name, client_phone, status)
+         values ($1, $2, $3, $4, $5, $6) returning id`,
+        [serviceIds, date, time, name, phone, bookingStatus]);
+    const newId = insertRes.rows[0].id;
+    // Si demandé (case cochée) et RDV réel : on envoie la confirmation à la cliente.
+    if (req.body.notify && (bookingStatus === 'confirmed' || bookingStatus === 'paid')) {
+      sendBookingConfirmation(newId).catch(e => console.error('[notif] confirmation manuelle', newId, e.message));
+    }
+    res.status(201).json({ id: newId });
   } catch (err) {
     if (err.code === '23505') {
       return res.status(409).json({ error: 'ce créneau est déjà pris' });
     }
     throw err;
   }
+});
+
+app.post('/api/admin/bookings/:id/confirm', requireAdmin, async (req, res) => {
+  const result = await sendBookingConfirmation(req.params.id, { force: true });
+  if (result.ok) return res.json({ ok: true });
+  return res.status(400).json({ error: result.reason || 'échec de l\'envoi' });
 });
 
 app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
@@ -1116,6 +1132,29 @@ async function notifyBookingPaid(id) {
   if (!b) return;
   if (b.client_phone_e164) await sendOnce(b.id, 'confirmation_sent_at', b.client_phone_e164, notif.textes.confirmation(b, `${SITE_URL}/api/calendar/${b.id}.ics`), 'confirmation ' + b.id);
   await sendOnce(b.id, 'owner_notified_at', OWNER_WHATSAPP, notif.textes.proprietaire(b), 'notif Malorie ' + b.id);
+}
+
+// Confirmation WhatsApp d'un RDV ajouté à la main dans l'admin (sans paiement en ligne).
+// force=true : le bouton « Envoyer la confirmation » renvoie même si déjà envoyée.
+async function sendBookingConfirmation(id, { force } = {}) {
+  if (!automationReady || !notif.isEnabled()) return { ok: false, reason: 'messagerie non configurée' };
+  const { rows } = await pool.query(bookingSelect('b.id = $1'), [id]);
+  const b = rows[0];
+  if (!b) return { ok: false, reason: 'rendez-vous introuvable' };
+  let e164 = b.client_phone_e164;
+  if (!e164) {
+    e164 = notif.toE164(b.client_phone);
+    if (e164) await pool.query('update bookings set client_phone_e164 = $1 where id = $2', [e164, b.id]);
+  }
+  if (!e164) return { ok: false, reason: 'numéro de téléphone invalide' };
+  const text = notif.textes.confirmationManuelle(b, `${SITE_URL}/api/calendar/${b.id}.ics`);
+  if (force) {
+    const ok = await notif.send(e164, text, 'confirmation manuelle ' + b.id);
+    if (ok) await pool.query('update bookings set confirmation_sent_at = now() where id = $1', [b.id]);
+    return { ok, reason: ok ? null : 'envoi WhatsApp échoué' };
+  }
+  const ok = await sendOnce(b.id, 'confirmation_sent_at', e164, text, 'confirmation manuelle ' + b.id);
+  return { ok };
 }
 
 function isoShift(isoDate, days) {
