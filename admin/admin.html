@@ -493,9 +493,16 @@ tr:last-child td{border-bottom:none;}
           <option value="absente">Absente (cliente non venue)</option>
         </select>
       </div>
+      <div class="form-row" id="notifyRow">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:14px; color:var(--texte);">
+          <input type="checkbox" id="fNotify" checked style="width:auto;">
+          Envoyer une confirmation WhatsApp à la cliente
+        </label>
+      </div>
       <div class="modal-msg" id="modalMsg"></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="modalCancel">Annuler</button>
+        <button type="button" class="btn btn-outline" id="sendConfirmBtn" hidden>Envoyer la confirmation WhatsApp</button>
         <button type="submit" class="btn btn-dark" id="modalSubmit">Enregistrer</button>
       </div>
     </form>
@@ -755,6 +762,10 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('fName').value = booking ? booking.client_name : '';
     document.getElementById('fPhone').value = booking ? booking.client_phone : '';
     document.getElementById('fStatus').value = booking ? booking.status : 'confirmed';
+    // Nouveau RDV : case « Envoyer une confirmation ». RDV existant : bouton d'envoi manuel.
+    document.getElementById('notifyRow').hidden = !!booking;
+    document.getElementById('fNotify').checked = true;
+    document.getElementById('sendConfirmBtn').hidden = !booking;
     document.getElementById('modalBackdrop').hidden = false;
   }
   function closeModal(){
@@ -763,6 +774,21 @@ tr:last-child td{border-bottom:none;}
 
   document.getElementById('newBtn').addEventListener('click', () => openModal(null));
   document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('sendConfirmBtn').addEventListener('click', async () => {
+    if(!editingId) return;
+    if(!confirm('Envoyer la confirmation WhatsApp à cette cliente ?')) return;
+    const btn = document.getElementById('sendConfirmBtn');
+    const msg = document.getElementById('modalMsg');
+    msg.style.color = ''; msg.textContent = '';
+    btn.disabled = true; btn.textContent = 'Envoi…';
+    try{
+      const res = await fetch(`/api/admin/bookings/${editingId}/confirm`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if(res.ok){ msg.style.color = 'var(--ok)'; msg.textContent = '✅ Confirmation envoyée à la cliente.'; }
+      else { msg.style.color = 'var(--err)'; msg.textContent = data.error || 'Échec de l\'envoi.'; }
+    }catch(e){ msg.style.color = 'var(--err)'; msg.textContent = 'Échec de l\'envoi — réessayez.'; }
+    finally{ btn.disabled = false; btn.textContent = 'Envoyer la confirmation WhatsApp'; }
+  });
   document.getElementById('modalBackdrop').addEventListener('click', (e) => {
     if(e.target.id === 'modalBackdrop') closeModal();
   });
@@ -783,7 +809,8 @@ tr:last-child td{border-bottom:none;}
       time: document.getElementById('fTime').value,
       name: document.getElementById('fName').value.trim(),
       phone: document.getElementById('fPhone').value.trim(),
-      status: document.getElementById('fStatus').value
+      status: document.getElementById('fStatus').value,
+      notify: !editingId && document.getElementById('fNotify').checked
     };
 
     const submitBtn = document.getElementById('modalSubmit');
