@@ -465,6 +465,11 @@ tr:last-child td{border-bottom:none;}
         <div><span>Acompte</span><strong id="mDeposit">—</strong></div>
         <div><span>Reste à régler</span><strong id="mRest">—</strong></div>
       </div>
+      <div class="form-row" id="paidRow">
+        <label for="fPaid">Acompte déjà réglé par la cliente (€)</label>
+        <input type="number" id="fPaid" min="0" step="0.01" value="0" inputmode="decimal" placeholder="0">
+        <div style="font-size:12px; color:var(--gris); margin-top:4px;">Laisse 0 si la cliente n'a rien réglé. Le « reste à régler » s'ajuste tout seul.</div>
+      </div>
       <div class="form-cols">
         <div class="form-row">
           <label for="fDate">Date</label>
@@ -641,8 +646,8 @@ tr:last-child td{border-bottom:none;}
 
     tbody.innerHTML = rows.map(b => {
       const total = b.services.reduce((s, x) => s + x.price_cents, 0);
-      // Acompte encaissé uniquement pour les RDV en ligne (Stripe) ; 0 pour les RDV à la main.
-      const deposit = b.online ? b.services.reduce((s, x) => s + x.deposit_cents, 0) : 0;
+      // Acompte : encaissé par Stripe pour les RDV en ligne ; saisi à la main sinon (0 par défaut).
+      const deposit = b.online ? b.services.reduce((s, x) => s + x.deposit_cents, 0) : (b.paid_cents || 0);
       const labels = b.services.map(s => s.label).join(', ');
       const statusClass = ['paid','confirmed','pending','cancelled','absente'].includes(b.status) ? b.status : 'pending';
       const cancelBtn = (b.status !== 'cancelled' && b.status !== 'absente')
@@ -741,13 +746,15 @@ tr:last-child td{border-bottom:none;}
       const s = byId[id];
       if(s){ total += s.price_cents; depositTheorique += s.deposit_cents; }
     });
-    // Acompte réellement encaissé : seulement pour un RDV réservé en ligne (Stripe).
-    // Pour un RDV ajouté à la main, rien n'est encaissé d'avance → 0, et tout reste à régler.
-    const paid = editingOnline ? depositTheorique : 0;
+    // RDV en ligne : acompte réellement encaissé par Stripe (non modifiable).
+    // RDV à la main : l'acompte saisi dans le champ ci-dessous (0 par défaut).
+    const paidSaisi = Math.max(0, Math.round((parseFloat(document.getElementById('fPaid').value) || 0) * 100));
+    const paid = editingOnline ? depositTheorique : paidSaisi;
     document.getElementById('mTotal').textContent = euros(total);
     document.getElementById('mDeposit').textContent = euros(paid);
     document.getElementById('mRest').textContent = euros(Math.max(0, total - paid));
   }
+  document.getElementById('fPaid').addEventListener('input', updateMoneyRecap);
   document.getElementById('serviceAdd').addEventListener('click', () => {
     const sel = document.getElementById('serviceSelect');
     const v = sel.value;
@@ -770,10 +777,15 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('fName').value = booking ? booking.client_name : '';
     document.getElementById('fPhone').value = booking ? booking.client_phone : '';
     document.getElementById('fStatus').value = booking ? booking.status : 'confirmed';
+    // Acompte déjà réglé : champ visible pour les RDV à la main ; masqué pour les RDV en ligne
+    // (leur acompte vient de Stripe). Pré-rempli avec la valeur enregistrée.
+    document.getElementById('paidRow').hidden = editingOnline;
+    document.getElementById('fPaid').value = (booking && !editingOnline) ? ((booking.paid_cents || 0) / 100) : 0;
     // Nouveau RDV : case « Envoyer une confirmation ». RDV existant : bouton d'envoi manuel.
     document.getElementById('notifyRow').hidden = !!booking;
     document.getElementById('fNotify').checked = true;
     document.getElementById('sendConfirmBtn').hidden = !booking;
+    updateMoneyRecap();
     document.getElementById('modalBackdrop').hidden = false;
   }
   function closeModal(){
@@ -820,6 +832,10 @@ tr:last-child td{border-bottom:none;}
       status: document.getElementById('fStatus').value,
       notify: !editingId && document.getElementById('fNotify').checked
     };
+    // Acompte déjà réglé (RDV à la main uniquement ; les RDV en ligne gardent l'acompte Stripe).
+    if(!editingOnline){
+      payload.paidCents = Math.max(0, Math.round((parseFloat(document.getElementById('fPaid').value) || 0) * 100));
+    }
 
     const submitBtn = document.getElementById('modalSubmit');
     submitBtn.disabled = true;
