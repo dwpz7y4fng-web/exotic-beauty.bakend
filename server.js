@@ -260,6 +260,7 @@ app.get('/admin', requireAdmin, (req, res) => {
 });
 
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
+  if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
   const zoneSelect = massageZoneReady ? 'b.massage_zone,' : 'null as massage_zone,';
   const { rows } = await pool.query(`
     select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status,
@@ -277,6 +278,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
 const BOOKING_STATUSES = ['pending', 'paid', 'confirmed', 'cancelled', 'absente'];
 
 app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
+  if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
   const { serviceIds, date, time, name, phone, status } = req.body;
   if (!Array.isArray(serviceIds) || serviceIds.length === 0 || !date || !time || !name || !phone) {
     return res.status(400).json({ error: 'champs manquants' });
@@ -326,6 +328,7 @@ app.post('/api/admin/bookings/:id/confirm', requireAdmin, async (req, res) => {
 });
 
 app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
+  if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
   const { id } = req.params;
   const existingRes = await pool.query('select * from bookings where id = $1', [id]);
   const existing = existingRes.rows[0];
