@@ -141,7 +141,7 @@ const textes = {
     `📍 ${STUDIO}\n` +
     `🧭 Itinéraire : ${STUDIO_MAPS}\n` +
     (ics ? `➕ Ajouter à mon agenda : ${ics}\n` : '') +
-    `\nMontant : ${euros(b.total)} à régler au studio.\n` +
+    `\n💰 Reste à régler au studio : ${euros(b.total)}.\n` +
     `Pensez à venir sans maquillage sur la zone traitée 😉\n\n` +
     `Je reste dispo pour toute question, répondez simplement à ce message.\n` +
     `À très vite ! Malorie — Exotic Beauty`,
@@ -153,7 +153,7 @@ const textes = {
   // Notif à Malorie pour un RDV ajouté à la main dans l'admin (pas de paiement en ligne).
   proprietaireManuelle: (b) =>
     `🗓️ Nouvelle réservation (ajoutée à la main)\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
-    `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nMontant : ${euros(b.total)} à régler au studio`,
+    `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nReste à régler au studio : ${euros(b.total)} (aucun acompte en ligne)`,
 
   rappel: (b) =>
     `Bonjour ${prenom(b.client_name)}, petit rappel : je vous attends demain, ${dateLongue(b.date)} à ${heure(b.time)}, pour ${b.label}.\n\n` +

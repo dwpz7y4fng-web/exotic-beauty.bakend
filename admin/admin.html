@@ -566,6 +566,7 @@ tr:last-child td{border-bottom:none;}
   let services = [];
   let currentFilter = 'all';
   let editingId = null;
+  let editingOnline = false; // true = RDV réservé/payé en ligne (acompte Stripe réel) ; false = RDV à la main (rien encaissé d'avance)
   let careFicheServiceIds = [];
   let careFiches = [];
   let careSettingsLoaded = false;
@@ -638,7 +639,8 @@ tr:last-child td{border-bottom:none;}
 
     tbody.innerHTML = rows.map(b => {
       const total = b.services.reduce((s, x) => s + x.price_cents, 0);
-      const deposit = b.services.reduce((s, x) => s + x.deposit_cents, 0);
+      // Acompte encaissé uniquement pour les RDV en ligne (Stripe) ; 0 pour les RDV à la main.
+      const deposit = b.online ? b.services.reduce((s, x) => s + x.deposit_cents, 0) : 0;
       const labels = b.services.map(s => s.label).join(', ');
       const statusClass = ['paid','confirmed','pending','cancelled','absente'].includes(b.status) ? b.status : 'pending';
       const cancelBtn = (b.status !== 'cancelled' && b.status !== 'absente')
@@ -732,14 +734,17 @@ tr:last-child td{border-bottom:none;}
   function updateMoneyRecap(){
     const byId = {};
     services.forEach(s => { byId[s.id] = s; });
-    let total = 0, deposit = 0;
+    let total = 0, depositTheorique = 0;
     modalServiceIds.forEach(id => {
       const s = byId[id];
-      if(s){ total += s.price_cents; deposit += s.deposit_cents; }
+      if(s){ total += s.price_cents; depositTheorique += s.deposit_cents; }
     });
+    // Acompte réellement encaissé : seulement pour un RDV réservé en ligne (Stripe).
+    // Pour un RDV ajouté à la main, rien n'est encaissé d'avance → 0, et tout reste à régler.
+    const paid = editingOnline ? depositTheorique : 0;
     document.getElementById('mTotal').textContent = euros(total);
-    document.getElementById('mDeposit').textContent = euros(deposit);
-    document.getElementById('mRest').textContent = euros(Math.max(0, total - deposit));
+    document.getElementById('mDeposit').textContent = euros(paid);
+    document.getElementById('mRest').textContent = euros(Math.max(0, total - paid));
   }
   document.getElementById('serviceAdd').addEventListener('click', () => {
     const sel = document.getElementById('serviceSelect');
@@ -754,6 +759,7 @@ tr:last-child td{border-bottom:none;}
 
   function openModal(booking, prefill){
     editingId = booking ? booking.id : null;
+    editingOnline = booking ? !!booking.online : false; // nouveau RDV = à la main ; sinon selon la réservation
     document.getElementById('modalTitle').textContent = booking ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous';
     document.getElementById('modalMsg').textContent = '';
     buildServiceGrid(booking ? booking.services.map(s => s.id) : []);

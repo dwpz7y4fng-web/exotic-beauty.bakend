@@ -262,7 +262,8 @@ app.get('/admin', requireAdmin, (req, res) => {
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   const zoneSelect = massageZoneReady ? 'b.massage_zone,' : 'null as massage_zone,';
   const { rows } = await pool.query(`
-    select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status, b.created_at, ${zoneSelect}
+    select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status,
+      (b.stripe_session_id is not null) as online, b.created_at, ${zoneSelect}
       coalesce((
         select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes) order by s.label)
         from services s where s.id = any(b.service_ids)
