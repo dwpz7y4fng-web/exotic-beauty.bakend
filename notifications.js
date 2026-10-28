@@ -150,6 +150,11 @@ const textes = {
     `🗓️ Nouvelle réservation\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
     `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nAcompte payé : ${euros(b.deposit)} · reste : ${euros(b.total - b.deposit)}`,
 
+  // Notif à Malorie pour un RDV ajouté à la main dans l'admin (pas de paiement en ligne).
+  proprietaireManuelle: (b) =>
+    `🗓️ Nouvelle réservation (ajoutée à la main)\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
+    `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nMontant : ${euros(b.total)} à régler au studio`,
+
   rappel: (b) =>
     `Bonjour ${prenom(b.client_name)}, petit rappel : je vous attends demain, ${dateLongue(b.date)} à ${heure(b.time)}, pour ${b.label}.\n\n` +
     `${STUDIO}. Venez sans maquillage sur la zone et évitez le café juste avant 😉\n\n` +

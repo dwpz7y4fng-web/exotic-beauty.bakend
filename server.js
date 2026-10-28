@@ -300,9 +300,9 @@ app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
          values ($1, $2, $3, $4, $5, $6) returning id`,
         [serviceIds, date, time, name, phone, bookingStatus]);
     const newId = insertRes.rows[0].id;
-    // Si demandé (case cochée) et RDV réel : on envoie la confirmation à la cliente.
+    // Si demandé (case cochée) et RDV réel : confirmation à la cliente + notif à Malorie.
     if (req.body.notify && (bookingStatus === 'confirmed' || bookingStatus === 'paid')) {
-      sendBookingConfirmation(newId).catch(e => console.error('[notif] confirmation manuelle', newId, e.message));
+      sendBookingConfirmation(newId, { notifyOwner: true }).catch(e => console.error('[notif] confirmation manuelle', newId, e.message));
     }
     res.status(201).json({ id: newId });
   } catch (err) {
@@ -1136,11 +1136,16 @@ async function notifyBookingPaid(id) {
 
 // Confirmation WhatsApp d'un RDV ajouté à la main dans l'admin (sans paiement en ligne).
 // force=true : le bouton « Envoyer la confirmation » renvoie même si déjà envoyée.
-async function sendBookingConfirmation(id, { force } = {}) {
+// notifyOwner=true : prévient aussi Malorie (comme pour une résa en ligne). Idempotent :
+// la notif propriétaire ne part qu'une fois (colonne owner_notified_at).
+async function sendBookingConfirmation(id, { force, notifyOwner } = {}) {
   if (!automationReady || !notif.isEnabled()) return { ok: false, reason: 'messagerie non configurée' };
   const { rows } = await pool.query(bookingSelect('b.id = $1'), [id]);
   const b = rows[0];
   if (!b) return { ok: false, reason: 'rendez-vous introuvable' };
+  if (notifyOwner) {
+    await sendOnce(b.id, 'owner_notified_at', OWNER_WHATSAPP, notif.textes.proprietaireManuelle(b), 'notif Malorie (manuel) ' + b.id);
+  }
   let e164 = b.client_phone_e164;
   if (!e164) {
     e164 = notif.toE164(b.client_phone);
