@@ -263,7 +263,7 @@ app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   const zoneSelect = massageZoneReady ? 'b.massage_zone,' : 'null as massage_zone,';
   const { rows } = await pool.query(`
     select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status,
-      (b.stripe_session_id is not null) as online, b.created_at, ${zoneSelect}
+      (b.stripe_session_id is not null) as online, ${paidCentsReady ? 'coalesce(b.paid_cents, 0)' : '0'}::int as paid_cents, b.created_at, ${zoneSelect}
       coalesce((
         select json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents, 'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes) order by s.label)
         from services s where s.id = any(b.service_ids)
@@ -301,6 +301,11 @@ app.post('/api/admin/bookings', requireAdmin, async (req, res) => {
          values ($1, $2, $3, $4, $5, $6) returning id`,
         [serviceIds, date, time, name, phone, bookingStatus]);
     const newId = insertRes.rows[0].id;
+    // Acompte déjà réglé par la cliente (RDV à la main) : saisi dans la fiche, à 0 par défaut.
+    const paidCents = Math.max(0, Math.round(Number(req.body.paidCents) || 0));
+    if (paidCentsReady && paidCents > 0) {
+      await pool.query('update bookings set paid_cents = $1 where id = $2', [paidCents, newId]);
+    }
     // Si demandé (case cochée) et RDV réel : confirmation à la cliente + notif à Malorie.
     if (req.body.notify && (bookingStatus === 'confirmed' || bookingStatus === 'paid')) {
       sendBookingConfirmation(newId, { notifyOwner: true }).catch(e => console.error('[notif] confirmation manuelle', newId, e.message));
@@ -349,6 +354,11 @@ app.patch('/api/admin/bookings/:id', requireAdmin, async (req, res) => {
        where id = $7`,
       [serviceIds, date, time, name, phone, status, id]
     );
+    // Acompte déjà réglé : modifiable seulement pour les RDV à la main (sans paiement Stripe).
+    if (paidCentsReady && !existing.stripe_session_id && req.body.paidCents !== undefined) {
+      const paidCents = Math.max(0, Math.round(Number(req.body.paidCents) || 0));
+      await pool.query('update bookings set paid_cents = $1 where id = $2', [paidCents, id]);
+    }
     res.json({ ok: true });
   } catch (err) {
     if (err.code === '23505') {
@@ -1103,6 +1113,17 @@ async function checkMassageZoneSchema() {
 }
 checkMassageZoneSchema().catch(err => console.error('[parenthèse] vérification du schéma', err.message));
 
+// Acompte déjà réglé par la cliente (migration 005). Tant qu'elle n'est pas passée, le champ
+// reste à 0 partout et le site fonctionne normalement.
+let paidCentsReady = false;
+async function checkPaidCentsSchema() {
+  try {
+    const { rows } = await pool.query(`select 1 from information_schema.columns where table_name = 'bookings' and column_name = 'paid_cents'`);
+    paidCentsReady = rows.length > 0;
+  } catch { paidCentsReady = false; }
+}
+checkPaidCentsSchema().catch(err => console.error('[acompte] vérification du schéma', err.message));
+
 // Réservations avec leurs prestations (libellé, total, acompte, durée).
 function bookingSelect(where) {
   return `
@@ -1110,7 +1131,8 @@ function bookingSelect(where) {
       to_char(b.slot_date, 'YYYY-MM-DD') as date, to_char(b.slot_time, 'HH24:MI') as time,
       coalesce(string_agg(s.label, ' + ' order by s.duration_minutes desc), '') as label,
       coalesce(sum(s.price_cents), 0)::int as total, coalesce(sum(s.deposit_cents), 0)::int as deposit,
-      coalesce(sum(s.duration_minutes), 0)::int as duration
+      coalesce(sum(s.duration_minutes), 0)::int as duration,
+      ${paidCentsReady ? 'coalesce(b.paid_cents, 0)' : '0'}::int as paid
     from bookings b left join services s on s.id = any(b.service_ids)
     where ${where}
     group by b.id`;
