@@ -268,6 +268,7 @@ app.get('/admin', requireAdmin, (req, res) => {
 
 app.get('/api/admin/bookings', requireAdmin, async (req, res) => {
   if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
+  if (!massageZoneReady) await checkMassageZoneSchema();  // détecte la migration 004 sans redémarrage
   const zoneSelect = massageZoneReady ? 'b.massage_zone,' : 'null as massage_zone,';
   const { rows } = await pool.query(`
     select b.id, b.slot_date, b.slot_time, b.client_name, b.client_phone, b.status,
@@ -880,6 +881,7 @@ app.post('/api/book', async (req, res) => {
   await pool.query('update bookings set stripe_session_id = $1 where id = $2', [session.id, booking.id]);
 
   // Parenthèse détente : on enregistre la zone choisie (si la colonne existe et la durée ≥ 30 min).
+  if (!massageZoneReady) await checkMassageZoneSchema();  // détecte la migration 004 sans redémarrage
   const zone = MASSAGE_ZONES.includes(req.body.massageZone) ? req.body.massageZone : null;
   if (massageZoneReady && zone && totalMinutes > MASSAGE_MIN_DURATION) {
     await pool.query('update bookings set massage_zone = $1 where id = $2', [zone, booking.id])
