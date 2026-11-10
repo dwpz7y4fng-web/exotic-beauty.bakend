@@ -277,7 +277,7 @@ tr:last-child td{border-bottom:none;}
         <thead>
           <tr>
             <th>Date</th>
-            <th>Heure</th>
+            <th>Horaire</th>
             <th>Cliente</th>
             <th>Téléphone</th>
             <th>Prestations</th>
@@ -568,7 +568,7 @@ tr:last-child td{border-bottom:none;}
 (function(){
   const STATUS_LABEL = { paid: 'Payée', confirmed: 'Confirmée', pending: 'En attente', cancelled: 'Annulée', absente: 'Absente' };
   const ZONE_LABEL = { tempes: 'tempes', mains: 'mains', epaules: 'épaules' };
-  function zoneText(b){ return b.massage_zone && ZONE_LABEL[b.massage_zone] ? ('💆 ' + ZONE_LABEL[b.massage_zone]) : ''; }
+  function zoneText(b){ return b.massage_zone && ZONE_LABEL[b.massage_zone] ? ('💆 Massage : ' + ZONE_LABEL[b.massage_zone]) : ''; }
   let bookings = [];
   let services = [];
   let currentFilter = 'all';
@@ -582,6 +582,12 @@ tr:last-child td{border-bottom:none;}
   function formatDate(iso){
     const d = new Date(iso + 'T00:00:00');
     return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  }
+  // Durée en texte court : 90 → « 1 h 30 », 120 → « 2 h », 45 → « 45 min ».
+  function dureeTexte(min){
+    if(min < 60) return min + ' min';
+    const h = Math.floor(min / 60), r = min % 60;
+    return r ? h + ' h ' + String(r).padStart(2,'0') : h + ' h';
   }
 
   function inMonth(dateStr){
@@ -649,6 +655,9 @@ tr:last-child td{border-bottom:none;}
       // Acompte : encaissé par Stripe pour les RDV en ligne ; saisi à la main sinon (0 par défaut).
       const deposit = b.online ? b.services.reduce((s, x) => s + x.deposit_cents, 0) : (b.paid_cents || 0);
       const labels = b.services.map(s => s.label).join(', ');
+      // Durée totale et heure de fin, calculées à partir des prestations choisies.
+      const dureeMin = apptDuration(b);
+      const heureFin = minToHHMM(timeToMin(b.slot_time) + dureeMin);
       const statusClass = ['paid','confirmed','pending','cancelled','absente'].includes(b.status) ? b.status : 'pending';
       const cancelBtn = (b.status !== 'cancelled' && b.status !== 'absente')
         ? `<button type="button" class="btn-danger-text" data-cancel="${b.id}">Annuler</button>`
@@ -659,7 +668,7 @@ tr:last-child td{border-bottom:none;}
         : '';
       return `<tr>
         <td>${formatDate(b.slot_date)}</td>
-        <td>${b.slot_time.slice(0,5)}</td>
+        <td>${b.slot_time.slice(0,5)} → ${heureFin}<br><span style="color:var(--gris); font-size:12px;">${dureeTexte(dureeMin)}</span></td>
         <td>${escapeHtml(b.client_name)}</td>
         <td>${escapeHtml(b.client_phone)}</td>
         <td class="services-cell">${escapeHtml(labels)}${b.massage_zone ? `<br><span style="color:var(--brun); font-size:12px;">${zoneText(b)}</span>` : ''}</td>
