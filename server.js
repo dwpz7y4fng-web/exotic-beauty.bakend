@@ -243,10 +243,17 @@ app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { rows } = await pool.query(
-      `update bookings set status = 'paid' where stripe_session_id = $1 returning id`,
-      [session.id]
-    );
+    // Montant réellement prélevé par Stripe, en centimes : c'est LA source de vérité du
+    // montant payé (acompte OU total, selon le choix fait par la cliente au paiement).
+    if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
+    const amountPaid = Number.isInteger(session.amount_total) ? session.amount_total : null;
+    const { rows } = (paidCentsReady && amountPaid !== null)
+      ? await pool.query(
+          `update bookings set status = 'paid', paid_cents = $2 where stripe_session_id = $1 returning id`,
+          [session.id, amountPaid])
+      : await pool.query(
+          `update bookings set status = 'paid' where stripe_session_id = $1 returning id`,
+          [session.id]);
     // Confirmation à la cliente + notification à Malorie (sans bloquer la réponse à Stripe).
     for (const r of rows) notifyBookingPaid(r.id).catch(err => console.error('[notif] confirmation', r.id, err.message));
   }
@@ -718,8 +725,10 @@ app.get('/api/availability-range', async (req, res) => {
 // GET /api/booking/:id — résumé pour la page « Merci » (l'identifiant est impossible à deviner).
 app.get('/api/booking/:id', async (req, res) => {
   if (!/^[0-9a-f-]{36}$/i.test(req.params.id)) return res.status(404).json({ error: 'réservation introuvable' });
+  if (!paidCentsReady) await checkPaidCentsSchema();  // détecte la migration 005 sans redémarrage
   const { rows } = await pool.query(
     `select to_char(b.slot_date, 'YYYY-MM-DD') as date, to_char(b.slot_time, 'HH24:MI') as time, b.status, b.client_name,
+       ${paidCentsReady ? 'coalesce(b.paid_cents, 0)' : '0'}::int as paid,
        coalesce(json_agg(json_build_object('id', s.id, 'label', s.label, 'price_cents', s.price_cents,
          'deposit_cents', s.deposit_cents, 'duration_minutes', s.duration_minutes)) filter (where s.id is not null), '[]') as services
      from bookings b left join services s on s.id = any(b.service_ids)
@@ -731,6 +740,7 @@ app.get('/api/booking/:id', async (req, res) => {
   res.json({
     date: b.date, time: b.time, status: b.status,
     firstName: (b.client_name || '').trim().split(/\s+/)[0] || '',
+    paid: b.paid,
     services: b.services,
   });
 });
@@ -784,6 +794,13 @@ app.post('/api/book', async (req, res) => {
     return res.status(400).json({ error: 'champs manquants' });
   }
 
+  // Choix de la cliente : régler l'acompte ('deposit') ou le total ('full'). Obligatoire.
+  // On ne reçoit JAMAIS de montant du front : seul le serveur calcule le prix (règle n°7).
+  const payChoice = req.body.payChoice;
+  if (payChoice !== 'deposit' && payChoice !== 'full') {
+    return res.status(400).json({ error: 'choisissez le montant à payer (acompte ou total)' });
+  }
+
   if (!ISO_DATE.test(date) || !HH_MM.test(time)) return res.status(400).json({ error: 'date ou heure invalide' });
   const phoneE164 = notif.toE164(phone);
   if (!phoneE164) return res.status(400).json({ error: 'numéro de téléphone invalide (ex. 0696 12 34 56)' });
@@ -797,8 +814,12 @@ app.post('/api/book', async (req, res) => {
   if (svcRes.rows.length !== serviceIds.length) return res.status(404).json({ error: 'prestation inconnue' });
   const services = svcRes.rows;
   const totalDeposit = services.reduce((sum, s) => sum + s.deposit_cents, 0);
+  const totalPrice = services.reduce((sum, s) => sum + s.price_cents, 0);
   const totalMinutes = services.reduce((sum, s) => sum + s.duration_minutes, 0);
   const labels = services.map(s => s.label).join(' + ');
+  // Montant à prélever selon le choix : total de la prestation, ou simple acompte.
+  const payFull = payChoice === 'full';
+  const amountToCharge = payFull ? totalPrice : totalDeposit;
 
   // On re-vérifie le créneau au moment de réserver, en tenant compte de la durée.
   // Le verrou (un par jour) empêche deux clientes qui valident en même temps de
@@ -842,8 +863,8 @@ app.post('/api/book', async (req, res) => {
       line_items: [{
         price_data: {
           currency: 'eur',
-          product_data: { name: `Acompte — ${labels} (${date} ${time})` },
-          unit_amount: totalDeposit,
+          product_data: { name: `${payFull ? 'Paiement complet' : 'Acompte'} — ${labels} (${date} ${time})` },
+          unit_amount: amountToCharge,
         },
         quantity: 1,
       }],

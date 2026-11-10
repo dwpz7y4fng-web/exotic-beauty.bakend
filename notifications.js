@@ -127,7 +127,13 @@ const textes = {
     `📍 ${STUDIO}\n` +
     `🧭 Itinéraire : ${STUDIO_MAPS}\n` +
     (ics ? `➕ Ajouter à mon agenda : ${ics}\n` : '') +
-    `\nAcompte réglé : ${euros(b.deposit)} · reste à régler au studio : ${euros(b.total - b.deposit)}.\n` +
+    // b.paid = montant réellement prélevé en ligne (acompte OU total selon le choix).
+    // S'il est inconnu (migration 005 non passée → 0), on garde l'ancien texte « acompte ».
+    (b.paid >= b.total && b.paid > 0
+      ? `\n💰 Réglé en ligne : ${euros(b.paid)} · tout est payé, rien à régler au studio 🎉\n`
+      : b.paid > 0
+        ? `\nAcompte réglé : ${euros(b.paid)} · reste à régler au studio : ${euros(b.total - b.paid)}.\n`
+        : `\nAcompte réglé : ${euros(b.deposit)} · reste à régler au studio : ${euros(b.total - b.deposit)}.\n`) +
     `Pensez à venir sans maquillage sur la zone traitée 😉\n\n` +
     `Je reste dispo pour toute question, répondez simplement à ce message.\n` +
     `À très vite ! Malorie — Exotic Beauty`,
@@ -150,7 +156,12 @@ const textes = {
 
   proprietaire: (b) =>
     `🗓️ Nouvelle réservation\n${b.client_name} · ${b.client_phone}\n${b.label}\n` +
-    `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\nAcompte payé : ${euros(b.deposit)} · reste : ${euros(b.total - b.deposit)}`,
+    `${dateLongue(b.date)} à ${heure(b.time)} (${b.duration} min)\n` +
+    (b.paid >= b.total && b.paid > 0
+      ? `Payé en entier : ${euros(b.paid)} · rien à régler au studio`
+      : b.paid > 0
+        ? `Acompte payé : ${euros(b.paid)} · reste : ${euros(b.total - b.paid)}`
+        : `Acompte payé : ${euros(b.deposit)} · reste : ${euros(b.total - b.deposit)}`),
 
   // Notif à Malorie pour un RDV ajouté à la main dans l'admin (pas de paiement en ligne).
   proprietaireManuelle: (b) =>

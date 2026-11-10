@@ -72,7 +72,7 @@
 <section id="e2" hidden>
   <div class="r-hdr"><div class="r-hdr-in">
     <button type="button" class="r-back" id="retour2" aria-label="Retour"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-    <div class="t">Acompte</div>
+    <div class="t">Paiement</div>
     <div style="display:flex;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" aria-label="Paiement sécurisé"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></div>
   </div></div>
   <div class="r-wrap">
@@ -85,12 +85,21 @@
       <div class="r-aide" id="telAide">On vous accompagne par WhatsApp : confirmation, rappel la veille, conseils.</div>
     </div>
 
+    <div class="r-bloc" id="blocChoix" style="margin:24px 0 0">
+      <div class="mono">Votre paiement</div>
+      <div class="r-q">Vous préférez régler l'acompte maintenant, ou la totalité&nbsp;?</div>
+      <div class="r-opts">
+        <button type="button" class="r-opt" id="choixAcompte" data-pay="deposit" aria-pressed="false">Acompte</button>
+        <button type="button" class="r-opt" id="choixTotal" data-pay="full" aria-pressed="false">Total</button>
+      </div>
+    </div>
+
     <div class="r-prix" id="prix2" style="margin-top:24px"></div>
     <div class="r-pill"><span id="report2"></span></div>
 
     <div class="r-secu">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
-      <div>Paiement sécurisé par Stripe : vous allez être redirigée vers leur page de paiement. L'acompte bloque votre créneau, rien d'autre n'est prélevé.</div>
+      <div>Paiement sécurisé par Stripe : vous allez être redirigée vers leur page de paiement. Votre créneau est bloqué dès le paiement.</div>
     </div>
   </div>
 
@@ -112,6 +121,7 @@
   var heure = /^\d{2}:\d{2}$/.test(q.get('h') || '') ? q.get('h') : null;
   if (!f || !date || !heure) { location.replace('prestation.html'); return; }
   var it = f.item, services = {}, on = {}, prev = null, dispoOk = true, envoi = false, verif = 0, zone = null;
+  var payChoice = null; // null tant que la cliente n'a pas choisi : 'deposit' (acompte) ou 'full' (total).
   var retour = 'prestation.html?c=' + f.cat + '&p=' + it.id;
   $('retour1').href = retour; $('modifier').href = retour;
 
@@ -168,16 +178,28 @@
       + '<div class="b"><span>Total</span><span>' + U.euros(t.prix) + '</span></div>'
       + '<div class="b"><span>Acompte aujourd\'hui</span><span>' + U.euros(t.acompte) + '</span></div>'
       + '<div class="g"><span>Reste à régler au studio</span><span>' + U.euros(t.prix - t.acompte) + '</span></div>';
-    $('prix2').innerHTML = '<div style="font-weight:600;font-size:17px"><span>À payer aujourd\'hui</span><span>' + U.euros(t.acompte) + '</span></div>'
-      + '<div class="g"><span>Au studio le ' + U.court(date) + '</span><span>' + U.euros(t.prix - t.acompte) + '</span></div>'
+    // Montant à payer aujourd'hui selon le choix (null tant qu'aucun choix n'est fait).
+    var aPayer = payChoice === 'full' ? t.prix : payChoice === 'deposit' ? t.acompte : null;
+    var reste = t.prix - (aPayer || 0);
+    // Les deux boutons de choix affichent leur montant et l'option sélectionnée est surlignée.
+    $('choixAcompte').textContent = 'Acompte · ' + U.euros(t.acompte);
+    $('choixTotal').textContent = 'Total · ' + U.euros(t.prix);
+    $('choixAcompte').classList.toggle('on', payChoice === 'deposit');
+    $('choixTotal').classList.toggle('on', payChoice === 'full');
+    $('choixAcompte').setAttribute('aria-pressed', payChoice === 'deposit');
+    $('choixTotal').setAttribute('aria-pressed', payChoice === 'full');
+
+    $('prix2').innerHTML = '<div style="font-weight:600;font-size:17px"><span>À payer aujourd\'hui</span><span>' + (aPayer === null ? '—' : U.euros(aPayer)) + '</span></div>'
+      + '<div class="g"><span>Au studio le ' + U.court(date) + '</span><span>' + U.euros(reste) + '</span></div>'
       + '<div class="b g" style="font-weight:400"><span>' + U.esc([it.name].concat(choisis().map(function (k) { return EB.COMPLEMENTS[k].toLowerCase(); })).join(' + ')) + '</span><span>' + U.euros(t.prix) + '</span></div>';
     var rep = reportJusquau();
     $('report1').textContent = $('report2').textContent = rep;
     $('report1').parentNode.hidden = $('report2').parentNode.hidden = !rep;
-    $('bas1').textContent = U.euros(t.acompte) + ' aujourd\'hui';
+    $('bas1').textContent = 'À partir de ' + U.euros(t.acompte);
     $('bas1b').textContent = 'Total ' + U.euros(t.prix);
     $('versE2').disabled = !dispoOk;
-    $('payer').textContent = 'Confirmer et payer ' + U.euros(t.acompte);
+    $('payer').disabled = envoi || aPayer === null;
+    $('payer').textContent = aPayer === null ? 'Choisissez un montant ci-dessus' : 'Confirmer et payer ' + U.euros(aPayer);
   }
 
   // Le créneau tient-il toujours avec les compléments (la durée change) ?
@@ -198,6 +220,7 @@
   $('non').addEventListener('click', function () { prev = 'non'; on.depose = false; rendre(); verifier(); });
   $('oui').addEventListener('click', function () { prev = 'oui'; on.depose = true; rendre(); verifier(); });
   $('zoneOpts').addEventListener('click', function (e) { var b = e.target.closest('[data-zone]'); if (!b) return; zone = b.getAttribute('data-zone'); rendre(); });
+  $('blocChoix').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; payChoice = b.getAttribute('data-pay'); $('err').hidden = true; rendre(); });
   $('versE2').addEventListener('click', function () { $('e1').hidden = true; $('e2').hidden = false; window.scrollTo(0, 0); });
   $('retour2').addEventListener('click', function () { $('e2').hidden = true; $('e1').hidden = false; window.scrollTo(0, 0); });
 
@@ -214,16 +237,21 @@
       $('err').textContent = !prenom ? 'Indiquez au moins votre prénom.' : 'Ce numéro ne semble pas valide. Exemple : 0696 12 34 56 (ou +33 6… pour un numéro de métropole).';
       $('err').hidden = false; return;
     }
+    if (payChoice !== 'deposit' && payChoice !== 'full') {
+      $('err').textContent = 'Choisissez le montant à payer : l\'acompte ou le total.';
+      $('err').hidden = false; return;
+    }
     $('err').hidden = true; envoi = true; $('payer').disabled = true; $('payer').textContent = 'Redirection vers le paiement…';
     try {
       var r = await fetch('/api/book', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel, massageZone: (zone && zone.length) ? zone : null }) });
+        body: JSON.stringify({ serviceIds: [it.id].concat(choisis()), date: date, time: heure, name: (prenom + ' ' + nom).trim(), phone: tel, payChoice: payChoice, massageZone: (zone && zone.length) ? zone : null }) });
       var data = await r.json();
       if (!r.ok) {
         $('err').textContent = r.status === 409 ? 'Ce créneau vient d\'être pris. Revenez au calendrier pour en choisir un autre.' : 'Une erreur est survenue : ' + (data.error || 'merci de réessayer.');
         $('err').hidden = false; return;
       }
-      if (window.ebTrack) ebTrack('InitiateCheckout', { value: totaux().acompte / 100, currency: 'EUR' });
+      var tt = totaux();
+      if (window.ebTrack) ebTrack('InitiateCheckout', { value: (payChoice === 'full' ? tt.prix : tt.acompte) / 100, currency: 'EUR' });
       location.href = data.checkoutUrl;
     } catch (e) {
       $('err').textContent = 'Une erreur est survenue. Vérifiez votre connexion et réessayez.'; $('err').hidden = false;

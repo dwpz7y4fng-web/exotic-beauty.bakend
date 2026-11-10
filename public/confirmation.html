@@ -92,12 +92,15 @@
     if (!b || !b.services.length) return;
     var principal = b.services.map(function (s) { return EB.trouver(s.id); }).filter(Boolean)[0];
     var t = b.services.reduce(function (a, s) { a.p += s.price_cents; a.a += s.deposit_cents; a.d += s.duration_minutes; return a; }, { p: 0, a: 0, d: 0 });
-    if (window.ebTrack) ebTrack('Purchase', { value: t.a / 100, currency: 'EUR' });
+    // Montant réellement payé en ligne (acompte OU total). Si inconnu (0), on retombe sur l'acompte.
+    var paye = b.paid > 0 ? b.paid : t.a;
+    var toutPaye = paye >= t.p;
+    if (window.ebTrack) ebTrack('Purchase', { value: paye / 100, currency: 'EUR' });
     var fin = U.hm(U.min(b.time) + t.d);
     var noms = b.services.map(function (s) { var f = EB.trouver(s.id); return f ? f.item.name : s.label; }).join(' + ');
     if (b.firstName) $('hello').textContent = ', ' + b.firstName;
     var rows = [['Prestation', noms], ['Date', U.long(b.date)], ['Heure', b.time + ' → ' + fin], ['Adresse', 'Quartier Durivage, Ducos'],
-      ['Acompte payé', U.euros(t.a)], ['Au studio', U.euros(t.p - t.a)]];
+      [toutPaye ? 'Payé en ligne' : 'Acompte payé', U.euros(paye)], ['Au studio', U.euros(toutPaye ? 0 : t.p - paye)]];
     $('recap').innerHTML = rows.map(function (r) { return '<div><span class="mono">' + r[0] + '</span><strong>' + U.esc(r[1]) + '</strong></div>'; }).join('');
 
     var st = b.date.replace(/-/g, '') + 'T' + b.time.replace(':', '') + '00', en = b.date.replace(/-/g, '') + 'T' + fin.replace(':', '') + '00';
