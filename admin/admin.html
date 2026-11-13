@@ -461,6 +461,7 @@ tr:last-child td{border-bottom:none;}
         <div class="chosen-services" id="chosenServices"></div>
       </div>
       <div class="money-recap" id="moneyRecap">
+        <div><span>Durée</span><strong id="mDuration">—</strong></div>
         <div><span>Total</span><strong id="mTotal">—</strong></div>
         <div><span>Acompte</span><strong id="mDeposit">—</strong></div>
         <div><span>Reste à régler</span><strong id="mRest">—</strong></div>
@@ -579,6 +580,14 @@ tr:last-child td{border-bottom:none;}
   let careSettingsLoaded = false;
 
   function euros(cents){ return (cents / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+  // Durée en minutes → « 45 min », « 2 h » ou « 1 h 45 ».
+  function formatDuree(min){
+    min = Math.round(Number(min) || 0);
+    if(min <= 0) return '—';
+    const h = Math.floor(min / 60), m = min % 60;
+    if(!h) return m + ' min';
+    return m ? `${h} h ${String(m).padStart(2,'0')}` : `${h} h`;
+  }
   function formatDate(iso){
     const d = new Date(iso + 'T00:00:00');
     return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
@@ -733,7 +742,9 @@ tr:last-child td{border-bottom:none;}
     } else {
       box.innerHTML = modalServiceIds.map(id => {
         const s = byId[id];
-        return `<div class="chosen-chip"><span>${s ? escapeHtml(s.label) : id}</span><button type="button" data-remove-service="${id}" aria-label="Retirer">×</button></div>`;
+        const label = s ? escapeHtml(s.label) : id;
+        const duree = s ? ` <span style="color:var(--gris); font-size:13px;">· ${formatDuree(s.duration_minutes)}</span>` : '';
+        return `<div class="chosen-chip"><span>${label}${duree}</span><button type="button" data-remove-service="${id}" aria-label="Retirer">×</button></div>`;
       }).join('');
     }
     updateMoneyRecap();
@@ -741,11 +752,12 @@ tr:last-child td{border-bottom:none;}
   function updateMoneyRecap(){
     const byId = {};
     services.forEach(s => { byId[s.id] = s; });
-    let total = 0, depositTheorique = 0;
+    let total = 0, depositTheorique = 0, minutes = 0;
     modalServiceIds.forEach(id => {
       const s = byId[id];
-      if(s){ total += s.price_cents; depositTheorique += s.deposit_cents; }
+      if(s){ total += s.price_cents; depositTheorique += s.deposit_cents; minutes += (s.duration_minutes || 0); }
     });
+    document.getElementById('mDuration').textContent = formatDuree(minutes);
     // RDV en ligne : acompte réellement encaissé par Stripe (non modifiable).
     // RDV à la main : l'acompte saisi dans le champ ci-dessous (0 par défaut).
     const paidSaisi = Math.max(0, Math.round((parseFloat(document.getElementById('fPaid').value) || 0) * 100));
