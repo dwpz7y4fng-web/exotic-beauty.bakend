@@ -80,6 +80,10 @@ tr:last-child td{border-bottom:none;}
 .service-grid input[type="checkbox"]{width:auto;}
 .modal-actions{display:flex; justify-content:flex-end; gap:12px; margin-top:24px;}
 .modal-msg{font-size:13px; color:var(--err); margin-top:12px; min-height:1.2em;}
+.confirm-status{font-size:13px; margin-top:14px; padding:10px 12px; border-radius:8px; line-height:1.4;}
+.confirm-status.ok{background:#eef6ee; color:#2c6e34; border:1px solid #cfe6d1;}
+.confirm-status.warn{background:#fdf3e7; color:#8a5a12; border:1px solid #f0dcbd;}
+.confirm-status.neutral{background:var(--creme); color:var(--gris); border:1px solid var(--line);}
 @media(max-width:640px){ .form-cols{grid-template-columns:1fr;} }
 
 .tabs{display:flex; gap:6px; margin:24px 0 26px; border-bottom:1px solid var(--line-2);}
@@ -507,6 +511,7 @@ tr:last-child td{border-bottom:none;}
           Envoyer la confirmation WhatsApp à la cliente (et me prévenir)
         </label>
       </div>
+      <div class="confirm-status" id="confirmStatus" hidden></div>
       <div class="modal-msg" id="modalMsg"></div>
       <div class="modal-actions">
         <button type="button" class="btn btn-outline" id="modalCancel">Annuler</button>
@@ -588,6 +593,13 @@ tr:last-child td{border-bottom:none;}
     if(!h) return m + ' min';
     return m ? `${h} h ${String(m).padStart(2,'0')}` : `${h} h`;
   }
+  // RDV en ligne (payé) dont la cliente n'a pas encore reçu sa confirmation WhatsApp,
+  // alors que son numéro est valide : à repérer dans le planning (⚠️).
+  function needsConfirm(b){
+    return b.online && b.phone_ok === true && !b.confirmation_sent_at
+      && (b.status === 'paid' || b.status === 'confirmed');
+  }
+  const CONFIRM_WARN = ' <span title="Confirmation WhatsApp pas encore reçue — ouvre le RDV pour la renvoyer">⚠️</span>';
   function formatDate(iso){
     const d = new Date(iso + 'T00:00:00');
     return d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
@@ -797,8 +809,32 @@ tr:last-child td{border-bottom:none;}
     document.getElementById('notifyRow').hidden = !!booking;
     document.getElementById('fNotify').checked = true;
     document.getElementById('sendConfirmBtn').hidden = !booking;
+    renderConfirmStatus(booking);
     updateMoneyRecap();
     document.getElementById('modalBackdrop').hidden = false;
+  }
+  // État de la confirmation WhatsApp pour un RDV existant (affichage seulement).
+  function renderConfirmStatus(booking){
+    const box = document.getElementById('confirmStatus');
+    if(!booking){ box.hidden = true; return; }
+    // phone_ok vaut null si la migration 002 n'est pas encore passée : on n'affiche rien.
+    if(booking.confirmation_sent_at){
+      let quand = '';
+      try{ quand = ' le ' + new Date(booking.confirmation_sent_at).toLocaleString('fr-FR', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }); }catch(e){}
+      box.className = 'confirm-status ok';
+      box.textContent = '✅ Confirmation envoyée à la cliente' + quand + '.';
+      box.hidden = false;
+    } else if(booking.phone_ok === false){
+      box.className = 'confirm-status warn';
+      box.textContent = '⚠️ Le numéro de cette cliente n\'est pas valide pour WhatsApp : la confirmation ne peut pas partir. Vérifie/corrige le numéro ci-dessus.';
+      box.hidden = false;
+    } else if(booking.phone_ok === true){
+      box.className = 'confirm-status warn';
+      box.textContent = '⚠️ La cliente n\'a pas (encore) reçu sa confirmation. Tu peux la renvoyer avec le bouton ci-dessous.';
+      box.hidden = false;
+    } else {
+      box.hidden = true;
+    }
   }
   function closeModal(){
     document.getElementById('modalBackdrop').hidden = true;
@@ -816,7 +852,11 @@ tr:last-child td{border-bottom:none;}
     try{
       const res = await fetch(`/api/admin/bookings/${editingId}/confirm`, { method: 'POST' });
       const data = await res.json().catch(() => ({}));
-      if(res.ok){ msg.style.color = 'var(--ok)'; msg.textContent = '✅ Confirmation envoyée à la cliente.'; }
+      if(res.ok){
+        msg.style.color = 'var(--ok)'; msg.textContent = '✅ Confirmation envoyée à la cliente.';
+        const box = document.getElementById('confirmStatus');
+        box.className = 'confirm-status ok'; box.textContent = '✅ Confirmation envoyée à la cliente à l\'instant.'; box.hidden = false;
+      }
       else { msg.style.color = 'var(--err)'; msg.textContent = data.error || 'Échec de l\'envoi.'; }
     }catch(e){ msg.style.color = 'var(--err)'; msg.textContent = 'Échec de l\'envoi — réessayez.'; }
     finally{ btn.disabled = false; btn.textContent = 'Envoyer la confirmation WhatsApp'; }
@@ -1318,7 +1358,7 @@ tr:last-child td{border-bottom:none;}
       return `<div class="cal-timeline-appt status-${b.status}" data-edit-cal="${b.id}"
         style="top:${top}px; height:${height}px; left:calc(${left}% + 2px); width:calc(${width}% - 4px);">
         <span class="t">${minToHHMM(start)} – ${minToHHMM(end)}</span>
-        <span class="c">${escapeHtml(b.client_name)}</span> <span class="s">${escapeHtml(labels)}</span>${b.massage_zone ? ` <span title="parenthèse ${ZONE_LABEL[b.massage_zone]||''}">💆</span>` : ''}
+        <span class="c">${escapeHtml(b.client_name)}${needsConfirm(b) ? CONFIRM_WARN : ''}</span> <span class="s">${escapeHtml(labels)}</span>${b.massage_zone ? ` <span title="parenthèse ${ZONE_LABEL[b.massage_zone]||''}">💆</span>` : ''}
       </div>`;
     }).join('');
 
@@ -1398,7 +1438,7 @@ tr:last-child td{border-bottom:none;}
         const labels = b.services.map(sv => sv.label).join(', ');
         return `<div class="cal-timeline-appt compact status-${b.status}" data-edit-cal="${b.id}"
           style="top:${top}px; height:${height}px; left:calc(${left}% + 1px); width:calc(${width}% - 2px);">
-          <span class="c">${minToHHMM(s)} ${escapeHtml(b.client_name)}</span> <span class="s">${escapeHtml(labels)}</span>
+          <span class="c">${minToHHMM(s)} ${escapeHtml(b.client_name)}${needsConfirm(b) ? CONFIRM_WARN : ''}</span> <span class="s">${escapeHtml(labels)}</span>
         </div>`;
       }).join('');
 
