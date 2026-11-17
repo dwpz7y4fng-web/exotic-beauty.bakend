@@ -699,7 +699,7 @@ app.get('/api/availability', async (req, res) => {
 // Les heures libres jour par jour (calendrier + « Prochaines disponibilités »).
 app.get('/api/availability-range', async (req, res) => {
   const from = ISO_DATE.test(req.query.from || '') ? req.query.from : nowInMartinique().date;
-  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 14, 1), 31);
+  const days = Math.min(Math.max(parseInt(req.query.days, 10) || 14, 1), 93);
   const serviceIds = String(req.query.services || '').split(',').map(s => s.trim()).filter(Boolean);
   const duration = await totalDuration(pool, serviceIds);
   if (!duration.ok) return res.status(404).json({ error: 'prestation inconnue' });

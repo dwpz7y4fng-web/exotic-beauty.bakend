@@ -270,7 +270,7 @@
     var id = item().id;
     if (dispoCache[id]) return afficherDispos();
     $('dispos').innerHTML = '<div class="dispo-vide">Recherche des créneaux…</div>';
-    fetch('/api/availability-range?days=21&services=' + encodeURIComponent(id))
+    fetch('/api/availability-range?days=92&services=' + encodeURIComponent(id))
       .then(function (r) { return r.json(); })
       .then(function (d) { dispoCache[id] = d; if (item().id === id) afficherDispos(); })
       .catch(function () { $('dispos').innerHTML = '<div class="dispo-vide">Impossible de charger les créneaux pour le moment. Réessayez dans un instant.</div>'; });
@@ -284,7 +284,7 @@
     var d = dispoCache[item().id]; if (!d) return;
     var auj = d.days[0] && d.days[0].date;
     var dur = d.duration, trouves = d.days.filter(function (x) { return x.available.length; }).slice(0, 3);
-    if (!trouves.length) { $('dispos').innerHTML = '<div class="dispo-vide">Aucun créneau libre dans les 3 prochaines semaines. Écrivez-moi sur WhatsApp, je vous trouve une place.</div>'; }
+    if (!trouves.length) { $('dispos').innerHTML = '<div class="dispo-vide">Aucun créneau libre dans les 3 prochains mois. Écrivez-moi sur WhatsApp, je vous trouve une place.</div>'; }
     else {
       $('dispos').innerHTML = trouves.map(function (x, i) {
         var h = x.available[0], r = h + ' → ' + U.hm(U.min(h) + dur);
