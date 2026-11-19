@@ -1287,11 +1287,44 @@ async function runRefillReminders() {
   }
 }
 
+// ─── Demande d'acompte (RDV ajoutés à la main) ───────────────────────────────
+// 8 jours avant le RDV, à 10 h : message WhatsApp avec le lien de la page d'acompte, pour
+// les RDV ajoutés dans l'admin (sans paiement Stripe) dont l'acompte n'est pas réglé.
+// Un RDV ajouté moins de 8 jours avant le reçoit au passage suivant (jusqu'à J-2).
+// Nécessite les migrations 005 (paid_cents) et 006 (deposit_request_sent_at).
+const DEPOSIT_PAGE_URL = process.env.DEPOSIT_PAGE_URL || 'https://claude.ai/artifact/H3Jt1iWi4eRFZtm4cjr35v';
+const DEPOSIT_REQUEST_DAYS_BEFORE = 8;
+let depositRequestReady = false;
+async function checkDepositRequestSchema() {
+  try {
+    const { rows } = await pool.query(`select 1 from information_schema.columns where table_name = 'bookings' and column_name = 'deposit_request_sent_at'`);
+    depositRequestReady = rows.length > 0;
+  } catch { depositRequestReady = false; }
+}
+checkDepositRequestSchema().catch(err => console.error('[acompte] vérification du schéma (006)', err.message));
+
+async function runDepositRequests() {
+  if (!depositRequestReady) await checkDepositRequestSchema();
+  if (!paidCentsReady) await checkPaidCentsSchema();
+  // Sans paid_cents, on ne saurait pas qui a déjà payé : on n'envoie rien.
+  if (!automationReady || !notif.isEnabled() || !depositRequestReady || !paidCentsReady) return;
+  const today = nowInMartinique().date;
+  const { rows } = await pool.query(bookingSelect(
+    `b.slot_date between $1 and $2 and b.status = 'confirmed' and b.stripe_session_id is null
+     and coalesce(b.paid_cents, 0) = 0 and b.deposit_request_sent_at is null and b.client_phone_e164 is not null`
+  ), [isoShift(today, 2), isoShift(today, DEPOSIT_REQUEST_DAYS_BEFORE)]);
+  for (const b of rows) {
+    if (b.deposit <= 0) continue;
+    await sendOnce(b.id, 'deposit_request_sent_at', b.client_phone_e164, notif.textes.demandeAcompte(b, DEPOSIT_PAGE_URL), 'demande acompte ' + b.id);
+  }
+}
+
 const logErr = (tag) => (err) => console.error(`[notif] ${tag}`, err.message);
 cron.schedule('0 18 * * *', () => runReminders().catch(logErr('rappels J-1')), { timezone: TIMEZONE });
 cron.schedule('0 10 * * *', () => {
   runReviewRequests().catch(logErr('avis J+1'));
   runRefillReminders().catch(logErr('remplissage J+18'));
+  runDepositRequests().catch(logErr('demande acompte J-8'));
 }, { timezone: TIMEZONE });
 // Fiches de conseils post-séance : envoyées ~1 h après chaque rendez-vous (voir runCareSheets).
 cron.schedule('5,20,35,50 * * * *', () => runCareSheets().catch(logErr('fiches conseils')), { timezone: TIMEZONE });
@@ -1325,4 +1358,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Exotic Beauty server running on port ${PORT}`));
 
 // Pour les tests manuels (node -e "require('./server').runReminders()").
-module.exports = { runReminders, runReviewRequests, runRefillReminders, notifyBookingPaid, runCareSheets };
+module.exports = { runReminders, runReviewRequests, runRefillReminders, notifyBookingPaid, runCareSheets, runDepositRequests };

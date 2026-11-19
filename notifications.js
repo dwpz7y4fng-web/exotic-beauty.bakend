@@ -176,6 +176,16 @@ const textes = {
   relance: (nom) =>
     `Coucou ${prenom(nom)} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
 
+  // Demande d'acompte (RDV ajouté à la main, rien réglé) : envoyée 8 jours avant le RDV.
+  demandeAcompte: (b, lien) =>
+    `Bonjour ${prenom(b.client_name)} 🤍\n\n` +
+    `Votre rendez-vous chez Exotic Beauty approche : ${b.label}, ${dateLongue(b.date)} à ${heure(b.time)}.\n\n` +
+    `Pour le confirmer, merci de régler votre acompte de ${euros(b.deposit)} au plus tard 7 jours avant la séance :\n` +
+    `👉 ${lien}\n\n` +
+    `Choisissez votre prestation et cliquez sur « Payer l'acompte ». Si vous préférez régler la totalité à l'avance, écrivez-moi.\n\n` +
+    `Une fois le paiement fait, envoyez-moi un petit message ici pour que je confirme votre rendez-vous.\n\n` +
+    `À très bientôt,\nMalorie — Exotic Beauty`,
+
   // Légende de la fiche de conseils post-séance (envoyée avec l'image).
   conseils: () =>
     `Merci pour votre visite chez Exotic Beauty ✨ Voici vos conseils pour prendre soin de votre résultat. N'hésitez pas à m'écrire si vous avez la moindre question.`,
