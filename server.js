@@ -1101,11 +1101,12 @@ app.post('/api/admin/campagne-abo/lancer', requireAdmin, async (req, res) => {
   if (!notif.hasWhapi()) return res.status(409).json({ error: 'WHAPI_TOKEN manquant : les envois WhatsApp sont désactivés' });
   const pending = await campaignAboPending();
   if (!pending.length) return res.status(409).json({ error: 'aucune cliente à contacter' });
-  const dailyCap = Math.max(1, Math.ceil(pending.length / 2)); // étalé sur ~2 jours
+  const jours = Math.min(10, Math.max(1, parseInt(req.body && req.body.jours, 10) || 5)); // étalement choisi
+  const dailyCap = Math.max(1, Math.ceil(pending.length / jours));
   await setSetting('campaign_abo_daily_cap', String(dailyCap));
   await setSetting('campaign_abo_done', 'false');
   await setSetting('campaign_abo_active', 'true');
-  res.json({ ok: true, total: pending.length, dailyCap });
+  res.json({ ok: true, total: pending.length, dailyCap, jours });
 });
 
 // Mettre en pause / arrêter la campagne.

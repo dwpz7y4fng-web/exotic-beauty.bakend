@@ -452,8 +452,11 @@ tr:last-child td{border-bottom:none;}
       <div class="care-toggle-title">Campagne WhatsApp — Abonnement Regard libre</div>
       <div class="care-toggle-sub">Envoie l'annonce de l'abonnement à vos clientes, par WhatsApp. Envoi lent et étalé sur environ 2 jours, en journée (9h–19h), une seule fois par cliente. Les clientes régulières et occasionnelles reçoivent un texte adapté.</div>
       <div class="care-status" id="campStatus" style="margin-top:12px;">Cliquez sur « Aperçu » pour voir combien de clientes seront contactées.</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px;">
         <button type="button" class="btn btn-outline" id="campApercuBtn">Aperçu (sans envoi)</button>
+        <label id="campJoursLabel" hidden style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gris);">Étaler sur
+          <input type="number" id="campJours" value="5" min="1" max="10" style="width:56px; padding:6px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:14px;"> jours
+        </label>
         <button type="button" class="btn btn-dark" id="campLancerBtn" hidden>Lancer la campagne</button>
         <button type="button" class="btn btn-outline" id="campStopBtn" hidden>Mettre en pause</button>
       </div>
@@ -1110,19 +1113,21 @@ tr:last-child td{border-bottom:none;}
       else if(d.done) s += '<br>✅ Campagne <b>terminée</b>.';
       status.innerHTML = s;
       lancer.hidden = d.active || d.total === 0 || !d.whapiActif;
+      document.getElementById('campJoursLabel').hidden = lancer.hidden;
       stop.hidden = !d.active;
     }catch(e){ status.textContent = 'Erreur de chargement.'; }
   }
   document.getElementById('campApercuBtn').addEventListener('click', loadCampagne);
   document.getElementById('campLancerBtn').addEventListener('click', async () => {
     const msg = document.getElementById('campMsg');
-    if(!confirm('Lancer la campagne ? Les messages partiront lentement, en journée, sur environ 2 jours.')) return;
+    const jours = Math.min(10, Math.max(1, parseInt(document.getElementById('campJours').value, 10) || 5));
+    if(!confirm('Lancer la campagne ? Les messages partiront lentement, en journée, étalés sur environ ' + jours + ' jours.')) return;
     msg.textContent = 'Lancement…';
     try{
-      const r = await fetch('/api/admin/campagne-abo/lancer', { method:'POST' });
+      const r = await fetch('/api/admin/campagne-abo/lancer', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ jours: jours }) });
       const d = await r.json();
       if(!r.ok){ msg.textContent = '⚠️ ' + (d.error || 'échec'); return; }
-      msg.textContent = '✅ Campagne lancée : ' + d.total + ' cliente(s), environ ' + d.dailyCap + '/jour.';
+      msg.textContent = '✅ Campagne lancée : ' + d.total + ' cliente(s), environ ' + d.dailyCap + '/jour sur ~' + d.jours + ' jours.';
       loadCampagne();
     }catch(e){ msg.textContent = 'Erreur.'; }
   });
