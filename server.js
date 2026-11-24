@@ -1026,6 +1026,7 @@ const CAMPAIGN_ABO = {
   perRun: 8,                            // messages max par passage (toutes les 15 min)
   delayMinMs: 30000, delayMaxMs: 45000, // pause entre deux envois
   regularWithinMonths: 3,               // vue il y a moins de 3 mois => régulière
+  maxRecencyMonths: 6,                  // on ne contacte que les clientes venues dans ce délai
 };
 const ABO_URL = `${SITE_URL}/abonnement.html`;
 
@@ -1060,8 +1061,9 @@ async function campaignAboPending() {
     left join la on regexp_replace(c.phone, '\\D', '', 'g') = la.pn
     where c.phone is not null and c.phone <> '' and c.planity_deleted_at is null
       and c.campaign_abo_optout_at is null and c.campaign_abo_sent_at is null
+      and la.last_date >= current_date - make_interval(months => $2)
     order by c.imported_at
-  `, [CAMPAIGN_ABO.regularWithinMonths]);
+  `, [CAMPAIGN_ABO.regularWithinMonths, CAMPAIGN_ABO.maxRecencyMonths]);
   return rows.filter(r => notif.toE164(r.phone)); // on ne garde que les numéros valides
 }
 function campaignAboText(c) {
