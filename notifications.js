@@ -176,6 +176,24 @@ const textes = {
   relance: (nom) =>
     `Coucou ${prenom(nom)} ! Ça fait un moment qu'on ne s'est pas vues chez Exotic Beauty 💛 Envie de reprendre rendez-vous ? On vous attend !`,
 
+  // Campagne d'annonce de l'abonnement « Regard libre » (Black Friday) — clientes régulières.
+  campagneAboReguliere: (nom, lien) =>
+    `Bonjour ${prenom(nom)} 🤍\n` +
+    `Vous qui prenez soin de votre regard régulièrement, j'ai pensé à vous : je lance l'abonnement Regard libre. Chaque mois, votre remplissage de cils + un soin sourcils au choix (brow lift, teinture hybride ou épilation au fil), avec un créneau réservé rien que pour vous.\n\n` +
+    `Lancement Black Friday : -10 € sur votre 1er mois avec le code BLACKFRIDAY, jusqu'au 30 novembre (10 places).\n\n` +
+    `Tout est ici 👉 ${lien}\n\n` +
+    `Malorie — Exotic Beauty\n` +
+    `(Répondez STOP pour ne plus recevoir ce type de message.)`,
+
+  // Campagne d'annonce de l'abonnement — clientes pas revues depuis un moment (ton plus doux).
+  campagneAboOccasionnelle: (nom, lien) =>
+    `Bonjour ${prenom(nom)} 🤍\n` +
+    `J'espère que vous allez bien ! Une nouveauté qui pourrait vous plaire : l'abonnement Regard libre. Chaque mois, un remplissage de cils + un soin sourcils au choix, avec un créneau déjà réservé pour vous.\n\n` +
+    `Lancement Black Friday : -10 € sur votre 1er mois avec le code BLACKFRIDAY, jusqu'au 30 novembre (10 places).\n\n` +
+    `À découvrir ici 👉 ${lien}\n\n` +
+    `Au plaisir de vous revoir 🤍\nMalorie — Exotic Beauty\n` +
+    `(Répondez STOP pour ne plus recevoir ce type de message.)`,
+
   // Demande d'acompte (RDV ajouté à la main, rien réglé) : envoyée 8 jours avant le RDV.
   demandeAcompte: (b, lien) =>
     `Bonjour ${prenom(b.client_name)} 🤍\n\n` +
