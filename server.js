@@ -1015,6 +1015,157 @@ async function setSetting(key, value) {
 }
 async function careSheetsEnabled() { return (await getSetting('care_sheets_enabled', 'true')) !== 'false'; }
 
+// ─── Campagne WhatsApp « Abonnement Regard libre » (Black Friday) ─────────────
+// Envoi ponctuel, via Whapi, d'un message d'annonce aux clientes. Deux textes
+// (régulières / occasionnelles). Envoi LENT (un par ~30-40 s), uniquement en
+// journée, plafonné par jour pour s'étaler sur ~2 jours, une seule fois par
+// cliente (colonne campaign_abo_sent_at), STOP exclus (campaign_abo_optout_at).
+// Nécessite la migration 007 et WHAPI_TOKEN.
+const CAMPAIGN_ABO = {
+  startHour: 9, endHour: 19,            // fenêtre d'envoi (heure de Martinique)
+  perRun: 8,                            // messages max par passage (toutes les 15 min)
+  delayMinMs: 30000, delayMaxMs: 45000, // pause entre deux envois
+  regularWithinMonths: 3,               // vue il y a moins de 3 mois => régulière
+};
+const ABO_URL = `${SITE_URL}/abonnement.html`;
+
+let campaignAboReady = false;
+async function checkCampaignAboSchema() {
+  try {
+    const { rows } = await pool.query(`select 1 from information_schema.columns where table_name = 'clients' and column_name = 'campaign_abo_sent_at'`);
+    campaignAboReady = rows.length > 0;
+  } catch { campaignAboReady = false; }
+}
+checkCampaignAboSchema().catch(err => console.error('[campagne] vérification du schéma (007)', err.message));
+
+// Heure + date courantes en Martinique (pour la fenêtre d'envoi et le plafond/jour).
+function martiniqueNow() {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hour12: false,
+  }).formatToParts(new Date()).map(p => [p.type, p.value]));
+  return { date: `${parts.year}-${parts.month}-${parts.day}`, hour: Number(parts.hour) % 24 };
+}
+
+// Clientes à contacter : numéro valide, non supprimées, pas déjà contactées, pas STOP.
+async function campaignAboPending() {
+  const { rows } = await pool.query(`
+    with nb as (
+      select regexp_replace(client_phone, '\\D', '', 'g') as pn, slot_date
+      from bookings where status <> 'cancelled'
+    ),
+    la as ( select pn, max(slot_date) as last_date from nb group by pn )
+    select c.id, c.name, c.phone,
+      case when la.last_date >= current_date - make_interval(months => $1) then 'reguliere' else 'occasionnelle' end as seg
+    from clients c
+    left join la on regexp_replace(c.phone, '\\D', '', 'g') = la.pn
+    where c.phone is not null and c.phone <> '' and c.planity_deleted_at is null
+      and c.campaign_abo_optout_at is null and c.campaign_abo_sent_at is null
+    order by c.imported_at
+  `, [CAMPAIGN_ABO.regularWithinMonths]);
+  return rows.filter(r => notif.toE164(r.phone)); // on ne garde que les numéros valides
+}
+function campaignAboText(c) {
+  return c.seg === 'reguliere'
+    ? notif.textes.campagneAboReguliere(c.name, ABO_URL)
+    : notif.textes.campagneAboOccasionnelle(c.name, ABO_URL);
+}
+
+// Aperçu : combien de clientes, par segment, + exemples. AUCUN envoi.
+app.get('/api/admin/campagne-abo/apercu', requireAdmin, async (req, res) => {
+  if (!campaignAboReady) await checkCampaignAboSchema();
+  if (!campaignAboReady) return res.json({ ready: false, whapiActif: notif.hasWhapi() });
+  const pending = await campaignAboPending();
+  const reguliere = pending.filter(p => p.seg === 'reguliere').length;
+  const sent = (await pool.query(`select count(*)::int n from clients where campaign_abo_sent_at is not null`)).rows[0].n;
+  const optout = (await pool.query(`select count(*)::int n from clients where campaign_abo_optout_at is not null`)).rows[0].n;
+  res.json({
+    ready: true,
+    whapiActif: notif.hasWhapi(),
+    active: (await getSetting('campaign_abo_active', 'false')) === 'true',
+    done: (await getSetting('campaign_abo_done', 'false')) === 'true',
+    total: pending.length,
+    reguliere,
+    occasionnelle: pending.length - reguliere,
+    sent,
+    optout,
+    exemples: {
+      reguliere: notif.textes.campagneAboReguliere('Marie', ABO_URL),
+      occasionnelle: notif.textes.campagneAboOccasionnelle('Marie', ABO_URL),
+    },
+  });
+});
+
+// Lancer : active l'envoi (le cron s'en charge ensuite, lentement, en journée).
+app.post('/api/admin/campagne-abo/lancer', requireAdmin, async (req, res) => {
+  if (!campaignAboReady) return res.status(409).json({ error: "exécuter d'abord migrations/007 sur la base" });
+  if (!notif.hasWhapi()) return res.status(409).json({ error: 'WHAPI_TOKEN manquant : les envois WhatsApp sont désactivés' });
+  const pending = await campaignAboPending();
+  if (!pending.length) return res.status(409).json({ error: 'aucune cliente à contacter' });
+  const jours = Math.min(10, Math.max(1, parseInt(req.body && req.body.jours, 10) || 5)); // étalement choisi
+  const dailyCap = Math.max(1, Math.ceil(pending.length / jours));
+  await setSetting('campaign_abo_daily_cap', String(dailyCap));
+  await setSetting('campaign_abo_done', 'false');
+  await setSetting('campaign_abo_active', 'true');
+  res.json({ ok: true, total: pending.length, dailyCap, jours });
+});
+
+// Mettre en pause / arrêter la campagne.
+app.post('/api/admin/campagne-abo/stop', requireAdmin, async (req, res) => {
+  await setSetting('campaign_abo_active', 'false');
+  res.json({ ok: true });
+});
+
+// Exclure un numéro (cliente ayant répondu STOP).
+app.post('/api/admin/campagne-abo/optout', requireAdmin, async (req, res) => {
+  const e164 = notif.toE164((req.body && req.body.phone) || '');
+  if (!e164) return res.status(400).json({ error: 'numéro invalide' });
+  const suffix = e164.replace(/\D/g, '').slice(-9);
+  const r = await pool.query(
+    `update clients set campaign_abo_optout_at = now()
+     where campaign_abo_optout_at is null and right(regexp_replace(coalesce(phone, ''), '\\D', '', 'g'), 9) = $1`,
+    [suffix]);
+  res.json({ ok: true, count: r.rowCount });
+});
+
+// Envoi effectif : toutes les 15 min, en journée, par petits paquets plafonnés.
+let campaignAboRunning = false;
+async function runCampaignAbo() {
+  if (campaignAboRunning) return;
+  if (!campaignAboReady) { await checkCampaignAboSchema(); if (!campaignAboReady) return; }
+  if ((await getSetting('campaign_abo_active', 'false')) !== 'true') return;
+  if (!notif.isEnabled()) return;
+  const { date, hour } = martiniqueNow();
+  if (hour < CAMPAIGN_ABO.startHour || hour >= CAMPAIGN_ABO.endHour) return;
+
+  campaignAboRunning = true;
+  try {
+    const pending = await campaignAboPending();
+    if (!pending.length) {
+      await setSetting('campaign_abo_active', 'false');
+      await setSetting('campaign_abo_done', 'true');
+      console.log('[campagne] abonnement : terminée, toutes les clientes ont été contactées');
+      return;
+    }
+    const dailyCap = parseInt(await getSetting('campaign_abo_daily_cap', '40'), 10) || 40;
+    const sentToday = (await pool.query(
+      `select count(*)::int n from clients where (campaign_abo_sent_at at time zone $1)::date = $2`,
+      [TIMEZONE, date])).rows[0].n;
+    const budget = Math.min(CAMPAIGN_ABO.perRun, Math.max(0, dailyCap - sentToday), pending.length);
+    for (let i = 0; i < budget; i++) {
+      const c = pending[i];
+      const ok = await notif.send(c.phone, campaignAboText(c), 'campagne-abo ' + c.id);
+      if (ok) await pool.query('update clients set campaign_abo_sent_at = now() where id = $1', [c.id]);
+      if (i < budget - 1) {
+        const d = CAMPAIGN_ABO.delayMinMs + Math.floor(Math.random() * (CAMPAIGN_ABO.delayMaxMs - CAMPAIGN_ABO.delayMinMs));
+        await new Promise(r => setTimeout(r, d));
+      }
+    }
+  } finally {
+    campaignAboRunning = false;
+  }
+}
+cron.schedule('*/15 * * * *', () => runCampaignAbo().catch(logErr('campagne abonnement')), { timezone: TIMEZONE });
+
 // Réserve l'envoi (une ligne par rendez-vous + fiche) AVANT d'envoyer : on évite tout
 // doublon, et on efface la ligne si l'envoi a échoué pour réessayer plus tard.
 // `manual` (bouton « Renvoyer » de l'admin) force l'envoi même si déjà envoyée.

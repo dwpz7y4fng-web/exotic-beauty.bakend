@@ -253,6 +253,7 @@ tr:last-child td{border-bottom:none;}
     <button type="button" data-tab="caresheets">Fiches conseils</button>
     <button type="button" data-tab="reminder">Rappel & accès</button>
     <button type="button" data-tab="stats">Statistiques</button>
+    <button type="button" data-tab="campagne">Campagne</button>
   </div>
 
   <div id="tabBookings" hidden>
@@ -444,6 +445,41 @@ tr:last-child td{border-bottom:none;}
       <div id="statsTop"></div>
     </div>
     <p class="stats-note">Basé sur les rendez-vous payés et confirmés (hors annulations et absences). Le taux d'occupation compare le temps réservé aux heures d'ouverture de la période.</p>
+  </div>
+
+  <div id="tabCampagne" hidden>
+    <div class="care-panel">
+      <div class="care-toggle-title">Campagne WhatsApp — Abonnement Regard libre</div>
+      <div class="care-toggle-sub">Envoie l'annonce de l'abonnement à vos clientes, par WhatsApp. Envoi lent et étalé sur environ 2 jours, en journée (9h–19h), une seule fois par cliente. Les clientes régulières et occasionnelles reçoivent un texte adapté.</div>
+      <div class="care-status" id="campStatus" style="margin-top:12px;">Cliquez sur « Aperçu » pour voir combien de clientes seront contactées.</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px;">
+        <button type="button" class="btn btn-outline" id="campApercuBtn">Aperçu (sans envoi)</button>
+        <label id="campJoursLabel" hidden style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gris);">Étaler sur
+          <input type="number" id="campJours" value="5" min="1" max="10" style="width:56px; padding:6px; border:1px solid var(--line); border-radius:6px; font-family:inherit; font-size:14px;"> jours
+        </label>
+        <button type="button" class="btn btn-dark" id="campLancerBtn" hidden>Lancer la campagne</button>
+        <button type="button" class="btn btn-outline" id="campStopBtn" hidden>Mettre en pause</button>
+      </div>
+      <div class="care-test-msg" id="campMsg"></div>
+    </div>
+
+    <div class="care-panel" id="campExemplesPanel" hidden>
+      <div class="care-toggle-title">Aperçu des messages</div>
+      <div style="font-size:12px; color:var(--gris); margin:10px 0 4px;">Clientes régulières</div>
+      <pre id="campExReg" style="white-space:pre-wrap; background:#f3f6f7; border-radius:8px; padding:12px; font-family:inherit; font-size:13px; line-height:1.5; margin:0 0 14px;"></pre>
+      <div style="font-size:12px; color:var(--gris); margin:0 0 4px;">Clientes occasionnelles</div>
+      <pre id="campExOcc" style="white-space:pre-wrap; background:#f3f6f7; border-radius:8px; padding:12px; font-family:inherit; font-size:13px; line-height:1.5; margin:0;"></pre>
+    </div>
+
+    <div class="care-panel">
+      <div class="care-toggle-title">Retirer une cliente (réponse STOP)</div>
+      <div class="care-toggle-sub">Si une cliente répond STOP, entrez son numéro ici pour ne plus la contacter.</div>
+      <div class="care-test-row" style="margin-top:10px;">
+        <input type="tel" id="campOptoutPhone" placeholder="Numéro (ex. 0696 12 34 56)">
+        <button type="button" class="btn btn-outline" id="campOptoutBtn">Retirer</button>
+      </div>
+      <div class="care-test-msg" id="campOptoutMsg"></div>
+    </div>
   </div>
 </div>
 
@@ -1050,6 +1086,71 @@ tr:last-child td{border-bottom:none;}
     }catch(err){ alert('Impossible de renvoyer — réessayez.'); }
   });
 
+  // ---- Campagne abonnement ----
+  async function loadCampagne(){
+    const status = document.getElementById('campStatus');
+    const msg = document.getElementById('campMsg');
+    msg.textContent = '';
+    status.textContent = 'Chargement…';
+    try{
+      const r = await fetch('/api/admin/campagne-abo/apercu');
+      const d = await r.json();
+      const lancer = document.getElementById('campLancerBtn');
+      const stop = document.getElementById('campStopBtn');
+      const exP = document.getElementById('campExemplesPanel');
+      if(!d.ready){
+        status.innerHTML = '⚠️ Base pas prête : exécutez d\'abord <b>migrations/007</b> dans la console SQL de Railway.';
+        lancer.hidden = true; stop.hidden = true; exP.hidden = true; return;
+      }
+      document.getElementById('campExReg').textContent = d.exemples.reguliere;
+      document.getElementById('campExOcc').textContent = d.exemples.occasionnelle;
+      exP.hidden = false;
+      let s = '';
+      if(!d.whapiActif) s += '⚠️ WHAPI_TOKEN manquant : les envois WhatsApp sont désactivés.<br>';
+      s += '<b>' + d.total + '</b> cliente(s) à contacter — ' + d.reguliere + ' régulière(s), ' + d.occasionnelle + ' occasionnelle(s).<br>';
+      s += 'Déjà contactées : ' + d.sent + ' · Retirées (STOP) : ' + d.optout + '.';
+      if(d.active) s += '<br>🟢 Campagne <b>en cours</b> (envoi lent, en journée).';
+      else if(d.done) s += '<br>✅ Campagne <b>terminée</b>.';
+      status.innerHTML = s;
+      lancer.hidden = d.active || d.total === 0 || !d.whapiActif;
+      document.getElementById('campJoursLabel').hidden = lancer.hidden;
+      stop.hidden = !d.active;
+    }catch(e){ status.textContent = 'Erreur de chargement.'; }
+  }
+  document.getElementById('campApercuBtn').addEventListener('click', loadCampagne);
+  document.getElementById('campLancerBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('campMsg');
+    const jours = Math.min(10, Math.max(1, parseInt(document.getElementById('campJours').value, 10) || 5));
+    if(!confirm('Lancer la campagne ? Les messages partiront lentement, en journée, étalés sur environ ' + jours + ' jours.')) return;
+    msg.textContent = 'Lancement…';
+    try{
+      const r = await fetch('/api/admin/campagne-abo/lancer', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ jours: jours }) });
+      const d = await r.json();
+      if(!r.ok){ msg.textContent = '⚠️ ' + (d.error || 'échec'); return; }
+      msg.textContent = '✅ Campagne lancée : ' + d.total + ' cliente(s), environ ' + d.dailyCap + '/jour sur ~' + d.jours + ' jours.';
+      loadCampagne();
+    }catch(e){ msg.textContent = 'Erreur.'; }
+  });
+  document.getElementById('campStopBtn').addEventListener('click', async () => {
+    const msg = document.getElementById('campMsg');
+    if(!confirm('Mettre la campagne en pause ?')) return;
+    await fetch('/api/admin/campagne-abo/stop', { method:'POST' });
+    msg.textContent = '⏸️ Campagne en pause.';
+    loadCampagne();
+  });
+  document.getElementById('campOptoutBtn').addEventListener('click', async () => {
+    const phone = document.getElementById('campOptoutPhone').value.trim();
+    const msg = document.getElementById('campOptoutMsg');
+    if(!phone){ msg.textContent = 'Entrez un numéro.'; return; }
+    try{
+      const r = await fetch('/api/admin/campagne-abo/optout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone: phone }) });
+      const d = await r.json();
+      if(!r.ok){ msg.textContent = '⚠️ ' + (d.error || 'échec'); return; }
+      msg.textContent = d.count ? ('✅ Cliente retirée (' + d.count + ').') : 'Aucune cliente trouvée avec ce numéro.';
+      document.getElementById('campOptoutPhone').value = '';
+    }catch(e){ msg.textContent = 'Erreur.'; }
+  });
+
   // ---- Tabs ----
   document.querySelectorAll('.tabs button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1061,7 +1162,9 @@ tr:last-child td{border-bottom:none;}
       document.getElementById('tabCareSheets').hidden = tab !== 'caresheets';
       document.getElementById('tabReminder').hidden = tab !== 'reminder';
       document.getElementById('tabStats').hidden = tab !== 'stats';
+      document.getElementById('tabCampagne').hidden = tab !== 'campagne';
       if(tab === 'clients' && clients.length === 0) loadClients();
+      if(tab === 'campagne') loadCampagne();
       if(tab === 'planning') renderCalendar();
       if(tab === 'caresheets') loadCareSheets();
       if(tab === 'reminder') loadReminder();
