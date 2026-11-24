@@ -76,6 +76,23 @@ h2 span, h1 span { color: var(--gris-titre); }
 }
 @keyframes eb-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+/* Bandeau Black Friday (promo abonnement) — en haut, cliquable */
+.bf-bar {
+  min-height: 34px; background: var(--noir-annonce); color: var(--blanc);
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 5px 14px; text-align: center;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; line-height: 1.2;
+}
+.bf-bar:hover { color: var(--blanc); }
+.bf-bar .bf-tag { background: var(--blanc); color: var(--noir-annonce); border-radius: 9999px; padding: 3px 9px; font-weight: 600; white-space: nowrap; }
+.bf-bar .bf-txt { color: rgba(255,255,255,.92); }
+.bf-bar strong { color: var(--blanc); font-weight: 700; letter-spacing: .1em; }
+.bf-bar .bf-arrow { opacity: .75; }
+@media (max-width: 430px) {
+  .bf-bar { gap: 7px; font-size: 10px; letter-spacing: .03em; }
+  .bf-bar .bf-sm { display: none; }
+}
+
 .hdr { color: var(--blanc); border-bottom: 1px solid transparent; transition: background .25s, color .25s, border-color .25s; }
 .hdr-in { max-width: 1180px; margin: 0 auto; height: 68px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .hdr-logo img { height: 56px; width: auto; filter: brightness(0) invert(1); transition: filter .25s; }
