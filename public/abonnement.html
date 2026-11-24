@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Abonnement Regard libre — Exotic Beauty</title>
+<meta name="description" content="Regard libre : chaque mois, un remplissage de cils et un soin sourcils au choix, avec un créneau réservé. Offre Black Friday jusqu'au 30 novembre.">
+<meta name="theme-color" content="#141D21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<!-- ============================================================= -->
+<!--  Liens de paiement Stripe en place (repris sur chaque bouton « Je m'abonne »). -->
+<!--  Pour en changer un plus tard : remplace l'adresse dans le bouton correspondant. -->
+<!--  Cil à cil  (55 €/mois) : https://buy.stripe.com/28E00bdID6qk5hC1BY04800                 -->
+<!--  Mixte      (65 €/mois) : https://buy.stripe.com/dRm4gr1ZVcOIdO86Wi04803                 -->
+<!--  Volume russe (80 €/mois): https://buy.stripe.com/6oUeV57kf8ys7pK2G204804               -->
+<!-- ============================================================= -->
+
+<style>
+  .ab-hdr { height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-bottom: 1px solid var(--filet); position: sticky; top: 0; background: var(--blanc); z-index: 10; }
+  .ab-hdr a.marque { font-family: var(--sans); font-weight: 600; letter-spacing: .2em; font-size: 13px; text-transform: uppercase; color: var(--ardoise); }
+  .ab-hdr a.retour { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gris-label); }
+
+  .ab-wrap { max-width: 680px; margin: 0 auto; padding: 32px 20px 64px; }
+
+  .ab-intro .kick { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gris-label); margin-bottom: 10px; }
+  .ab-intro h1 { font-family: var(--titre); font-weight: 400; font-size: clamp(34px, 8vw, 52px); line-height: 1.02; letter-spacing: -.015em; margin: 0 0 12px; }
+  .ab-intro h1 span { color: var(--gris-titre); }
+  .ab-intro p { color: var(--texte); font-size: 16px; line-height: 1.6; margin: 0; max-width: 440px; }
+
+  /* Bandeau Black Friday */
+  .ab-bf { margin: 26px 0 0; background: var(--noir); color: var(--blanc); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .ab-bf .k { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+  .ab-bf .t { font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+  .ab-bf .code { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; border: 1px dashed rgba(255,255,255,.45); border-radius: 10px; padding: 8px 14px; font-family: var(--mono); font-size: 14px; letter-spacing: .14em; }
+  .ab-bf ul { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .ab-bf li { position: relative; padding-left: 20px; font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.9); }
+  .ab-bf li::before { content: "·"; position: absolute; left: 6px; top: -1px; font-size: 20px; line-height: 1; }
+
+  /* Ce qui est compris */
+  .ab-inc { margin: 36px 0 0; }
+  .ab-inc h2 { font-family: var(--titre); font-weight: 400; font-size: 26px; letter-spacing: -.01em; margin: 0 0 4px; }
+  .ab-inc .sub { color: var(--gris-label); font-size: 14px; margin: 0 0 16px; }
+  .ab-inc .row { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid var(--filet); }
+  .ab-inc .row:last-child { border-bottom: 1px solid var(--filet); }
+  .ab-inc .ic { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 9999px; background: var(--fond-alt); display: flex; align-items: center; justify-content: center; }
+  .ab-inc .row .t { font-weight: 600; font-size: 15.5px; }
+  .ab-inc .row .d { color: var(--texte); font-size: 14px; line-height: 1.55; margin-top: 2px; }
+
+  /* Formules */
+  .ab-formules { margin: 40px 0 0; }
+  .ab-formules h2 { font-family: var(--titre); font-weight: 400; font-size: 26px; letter-spacing: -.01em; margin: 0 0 16px; }
+  .ab-card { border: 1px solid var(--filet); border-radius: 16px; padding: 20px; margin-bottom: 14px; }
+  .ab-card.feature { border-color: var(--ardoise); border-width: 1.5px; }
+  .ab-card .top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .ab-card .nom { font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
+  .ab-card .tag { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ardoise); background: var(--brume); border-radius: 9999px; padding: 4px 10px; }
+  .ab-card .prix { margin: 8px 0 4px; }
+  .ab-card .prix strong { font-size: 30px; font-weight: 600; letter-spacing: -.02em; }
+  .ab-card .prix span { font-family: var(--mono); font-size: 12px; color: var(--gris-label); }
+  .ab-card .bf { font-size: 13px; color: var(--ok); margin: 0 0 14px; }
+  .ab-card .btn { width: 100%; }
+
+  .ab-note { margin: 28px 0 0; background: var(--fond-alt); border-radius: 14px; padding: 18px; font-size: 14px; line-height: 1.6; color: var(--texte); }
+  .ab-note strong { color: var(--ardoise); font-weight: 600; }
+  .ab-note a { color: var(--ardoise); text-decoration: underline; }
+
+  .ab-foot { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--filet); display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .ab-foot a { color: var(--gris-label); }
+</style>
+</head>
+<body>
+<div class="ab-hdr">
+  <a href="/" class="marque">Exotic Beauty</a>
+  <a href="/" class="retour">← Accueil</a>
+</div>
+
+<main class="ab-wrap">
+  <section class="ab-intro">
+    <p class="kick">Nouveau · Abonnement</p>
+    <h1>Regard libre<span>.</span></h1>
+    <p>Un rendez-vous beauté du regard chaque mois, déjà réservé pour vous. Votre remplissage de cils et un soin sourcils au choix, sans y penser.</p>
+  </section>
+
+  <!-- Offre Black Friday -->
+  <section class="ab-bf" aria-label="Offre Black Friday">
+    <div class="k">Offre Black Friday · jusqu'au 30 novembre</div>
+    <div class="t">−10 € sur votre premier mois.</div>
+    <div class="code">Code
+      <strong>BLACKFRIDAY</strong>
+    </div>
+    <ul>
+      <li>À saisir au moment du paiement, sur Stripe.</li>
+      <li>Réservé aux 10 premières abonnées.</li>
+      <li>Valable jusqu'au dimanche 30 novembre.</li>
+    </ul>
+  </section>
+
+  <!-- Ce qui est compris -->
+  <section class="ab-inc">
+    <h2>Ce qui est compris</h2>
+    <p class="sub">Chaque mois, dans votre abonnement.</p>
+
+    <div class="row">
+      <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.4"/></svg></div>
+      <div>
+        <div class="t">1 remplissage de cils</div>
+        <div class="d">Pour garder vos extensions nettes et fournies, mois après mois.</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-5 15-5 18 0"/><path d="M6 12.5l1.5-1.5M11 11l1 -1.5M16 11.5l1.5 -1"/></svg></div>
+      <div>
+        <div class="t">1 soin sourcils au choix</div>
+        <div class="d">Brow lift, teinture hybride ou épilation au fil — vous choisissez à chaque rendez-vous.</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E2B31" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></div>
+      <div>
+        <div class="t">Un créneau réservé</div>
+        <div class="d">Votre rendez-vous du mois est posé avec moi, sans courir après une place.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Les 3 formules -->
+  <section class="ab-formules">
+    <h2>Choisissez votre formule</h2>
+
+    <div class="ab-card">
+      <div class="top">
+        <div class="nom">Cil à cil</div>
+      </div>
+      <div class="prix"><strong>55 €</strong> <span>/ mois</span></div>
+      <div class="bf">Soit 45 € le 1er mois avec le code BLACKFRIDAY</div>
+      <a class="btn btn-ardoise btn-lg" href="https://buy.stripe.com/28E00bdID6qk5hC1BY04800">Je m'abonne</a>
+    </div>
+
+    <div class="ab-card feature">
+      <div class="top">
+        <div class="nom">Mixte</div>
+        <div class="tag">Le plus choisi</div>
+      </div>
+      <div class="prix"><strong>65 €</strong> <span>/ mois</span></div>
+      <div class="bf">Soit 55 € le 1er mois avec le code BLACKFRIDAY</div>
+      <a class="btn btn-ardoise btn-lg" href="https://buy.stripe.com/dRm4gr1ZVcOIdO86Wi04803">Je m'abonne</a>
+    </div>
+
+    <div class="ab-card">
+      <div class="top">
+        <div class="nom">Volume russe</div>
+      </div>
+      <div class="prix"><strong>80 €</strong> <span>/ mois</span></div>
+      <div class="bf">Soit 70 € le 1er mois avec le code BLACKFRIDAY</div>
+      <a class="btn btn-ardoise btn-lg" href="https://buy.stripe.com/6oUeV57kf8ys7pK2G204804">Je m'abonne</a>
+    </div>
+  </section>
+
+  <div class="ab-note">
+    <p style="margin:0 0 8px"><strong>À savoir.</strong> La première pose de cils se règle au tarif normal, avant de commencer l'abonnement. Le prélèvement est ensuite automatique chaque mois, par carte, via Stripe.</p>
+    <p style="margin:0">Engagement de 3 mois minimum. Toutes les règles sont détaillées dans les <a href="conditions-abonnement.html">conditions de l'abonnement</a>.</p>
+  </div>
+
+  <nav class="ab-foot">
+    <a href="/">Accueil</a>
+    <a href="prestation.html">Prestations</a>
+    <a href="conditions-abonnement.html">Conditions de l'abonnement</a>
+  </nav>
+</main>
+</body>
+</html>
